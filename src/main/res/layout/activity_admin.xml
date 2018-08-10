@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/admin_activity_main_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AdminActivity">
+
+    <TextView
+        android:id="@+id/admin_activity_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/admin_activity_text"/>
+
+    <EditText
+        android:id="@+id/admin_activity_org_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/admin_activity_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="text"
+        android:hint="@string/admin_activity_org_name_hint"/>
+
+    <TextView
+        android:id="@+id/admin_activity_minimum_characters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/admin_activity_org_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/admin_activity_minimum_characters"/>
+
+
+    <EditText
+        android:id="@+id/admin_activity_org_code"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/admin_activity_minimum_characters"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="text"
+        android:hint="@string/admin_activity_text_hint"/>
+
+    <TextView
+        android:id="@+id/admin_activity_cannot_be_changed"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/admin_activity_org_code"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/admin_activity_cannot_be_changed"/>
+
+    <TextView
+        android:id="@+id/admin_activity_channel_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/admin_activity_cannot_be_changed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/admin_activity_channel_text"/>
+
+    <Button
+        android:id="@+id/admin_activity_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/admin_activity_channel_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/submit"
+        android:textColor="@color/colorPrimary"
+        android:elevation="@dimen/fourDp"/>
+
+    <Button
+        android:id="@+id/admin_activity_query_org_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="@dimen/eightDp"
+        android:background="@drawable/clear_button"
+        android:text="@string/admin_activity_query_code"/>
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="twoDp"> 2dp </dimen>
+    <dimen name="fourDp"> 4dp </dimen>
+    <dimen name="sixDp">6dp</dimen>
+    <dimen name="eightDp"> 8dp</dimen>
+    <dimen name="sixteenDp"> 16dp </dimen>
+    <dimen name="twentyFourDp">24dp</dimen>
+
+    <dimen name="tenSP"> 10sp </dimen>
+    <dimen name="twelveSP"> 12sp </dimen>
+    <dimen name="sixteenSP"> 16sp </dimen>
+    <dimen name="eighteenSP"> 18sp </dimen>
+    <dimen name="twentyFourSP"> 24sp </dimen>
+
+    <dimen name="twentyFourPixels">24px</dimen>
+</resources>

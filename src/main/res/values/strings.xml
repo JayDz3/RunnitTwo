@@ -1,0 +1,81 @@
+<resources>
+    <string name="home_page">Home Page</string>
+    <string name="app_name">Runnit</string>
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+    <string name="clear">Clear</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="logout">Clock out</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="enable">Enable</string>
+    <string name="disable">Disable</string>
+    <string name="confirm">Confirm</string>
+
+    <string name="reply_label">reply</string>
+
+    <!-- HINTS -->
+    <string name="password_hint">Password</string>
+    <string name="email_hint">Email</string>
+
+    <!-- for Drawer view -->
+    <string name="drawer_new_account">New Account</string>
+    <string name="drawer_login">Login</string>
+    <string name="drawer_logout">Logout</string>
+    <string name="drawer_edit_info">Edit Info</string>
+    <string name="drawer_verify_sms">Verify Phone</string>
+    <string name="drawer_verify_restaurant">Edit Org Code</string>
+    <string name="drawer_create_admin_account">Admin</string>
+    <string name="drawer_create_channel">Channels</string>
+    <string name="drawer_list_active_users">Active Users</string>
+
+    <!-- HOME FRAGMENT -->
+    <string name="home_fragment_get_runners">Runners</string>
+
+    <!-- SIGNUP FRAGMENT -->
+    <string name="signup_firstname_hint">First name</string>
+    <string name="signup_lastname_hint">Last name</string>
+    <string name="signup_submit_button">Submit</string>
+    <string name="signup_reset_button">Reset</string>
+    <string name="signup_phone_hint_text">Phone Number</string>
+    <string name="signup_phone_hint_numbers">(615) 555"&#8211;"1212</string>
+    <string name="signup_restaurant_id_hint">Restaurant Id</string>
+    <string name="signup_sms_hint">Verification Code</string>
+
+    <string name="phone_number_resend_sms_text">Need another verification code?</string>
+    <string name="phone_number_resend_sms_clickable">click here</string>
+
+    <string name="restaurant_code_text_view">Please enter the code provided to you</string>
+    <string name="restaurant_code_text_view_admin">Please submit your organization code</string>
+    <string name="restaurant_code_hint">Provided Code</string>
+
+    <!-- LOGIN FRAGMENT -->
+    <string name="login_forgot_password_text">Forgot your password?</string>
+    <string name="login_forgot_password_text_clickable">get a new one</string>
+
+    <!-- RESET PASSWORD FRAGMENT -->
+    <string name="reset_fragment_welceome">We will send a link to reset your password</string>
+
+    <!-- Create Admin Account Activity -->
+    <string name="admin_activity_text">Please enter your organization name and create a code</string>
+    <string name="admin_activity_minimum_characters">Code must be at least 6 characters</string>
+    <string name="admin_activity_cannot_be_changed">This code can not be changed in the future</string>
+    <string name="admin_activity_channel_text">Your org code and channel ID will be identical</string>
+
+    <string name="admin_activity_org_name_hint">Org name</string>
+    <string name="admin_activity_text_hint">A123B45</string>
+    <string name="admin_activity_query_code">Reminder</string>
+
+    <!-- ADMIN CHANNEL ACTIVITY -->
+    <string name="channel_activity_welcome">Your org code and channel ID are identical</string>
+    <string name="channel_activity_tap_icon_text">Tap the add icon to create a new channel</string>
+    <string name="channel_activity_click_channel_to_toggle">Click any channel to activate or deactivate it</string>
+    <string name="channel_activity_add_content_description">Add a channel</string>
+
+    <string name="channel_activity_remove_channel_description">Remove this channel</string>
+    <string name="channel_activity_send_notification_description">Send notification</string>
+
+    <!-- NEW CHANNEL DIALOG -->
+    <string name="channel_dialog_title">This will be the name of your channel</string>
+    <string name="channel_dialog_hint">Servers</string>
+</resources>

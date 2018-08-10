@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_login"
+            android:icon="@drawable/ic_clock_in_primary_24dp"
+            android:title="@string/drawer_login" />
+        <item
+            android:id="@+id/nav_signup"
+            android:icon="@drawable/ic_add_circle_outline_primary_24dp"
+            android:title="@string/drawer_new_account" />
+        <item
+            android:id="@+id/nav_edit_info"
+            android:icon="@drawable/ic_edit_black_24dp"
+            android:title="@string/drawer_edit_info" />
+        <item
+            android:id="@+id/nav_verify_restaurant"
+            android:icon="@drawable/ic_account_box_primary_24dp"
+            android:title="@string/drawer_verify_restaurant" />
+        <item
+            android:id="@+id/nav_admin"
+            android:icon="@drawable/ic_add_circle_outline_primary_24dp"
+            android:title="@string/drawer_create_admin_account" />
+        <item
+            android:id="@+id/nav_active_users"
+            android:icon="@drawable/ic_people_outline_black_24dp"
+            android:title="@string/drawer_list_active_users" />
+        <item
+            android:id="@+id/nav_channel"
+            android:icon="@drawable/ic_clock_in_primary_24dp"
+            android:title="@string/drawer_create_channel" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_account_box_primary_24dp"
+            android:title="@string/drawer_logout" />
+
+    </group>
+</menu>
