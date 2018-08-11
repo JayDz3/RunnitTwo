@@ -67,13 +67,13 @@
     <string name="admin_activity_query_code">Reminder</string>
 
     <!-- ADMIN CHANNEL ACTIVITY -->
-    <string name="channel_activity_welcome">Your org code and channel ID are identical</string>
-    <string name="channel_activity_tap_icon_text">Tap the add icon to create a new channel</string>
+
     <string name="channel_activity_click_channel_to_toggle">Click any channel to activate or deactivate it</string>
-    <string name="channel_activity_add_content_description">Add a channel</string>
 
     <string name="channel_activity_remove_channel_description">Remove this channel</string>
     <string name="channel_activity_send_notification_description">Send notification</string>
+
+    <string name="channel_activity_admin_no_channels">No channels have been created </string>
 
     <!-- NEW CHANNEL DIALOG -->
     <string name="channel_dialog_title">This will be the name of your channel</string>

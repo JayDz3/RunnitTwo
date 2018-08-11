@@ -19,6 +19,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.ActiveUser;
@@ -100,13 +101,17 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   {
     final String uid = mAuth.user().getUid();
     final ActiveUser thisUser = new ActiveUser(uid);
+    final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
+
     disableButtons(viewHolder);
     mListener.disable();
-    final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
+
     activeUsersReference.get()
-    .onSuccessTask(activeUsers -> {
+    .onSuccessTask(activeUsers ->
+    {
       Task<Void> task = Tasks.forResult(null);
-      if (activeUsers == null) {
+      if (activeUsers == null)
+      {
         return task;
       }
 
@@ -123,7 +128,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       {
         final String id = ds.getId();
         final ActiveUser activeUser = new ActiveUser(id);
-        if (!id.equals(uid)) {
+        if (!id.equals(uid))
+        {
           task = ds.getReference()
           .delete()
           .onSuccessTask(ignore -> activeUsersReference.document(id).set(activeUser));
@@ -131,11 +137,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       }
       return task;
     })
-    .addOnSuccessListener(l -> {
+    .addOnSuccessListener(l ->
+    {
       enableButtons(viewHolder);
       mListener.enable();
     })
-    .addOnFailureListener(e -> {
+    .addOnFailureListener(e ->
+    {
       enableButtons(viewHolder);
       mListener.enable();
       showToast("error adding user: " + e.getMessage());
@@ -154,21 +162,21 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     final String channelId = channel.get_channelId();
 
     mFirestore.getChannelActiveUsersReference(channelRef).get()
-    .onSuccessTask(activeUsers -> deleteActiveUsersFromChannel(activeUsers))
+    .onSuccessTask(this::deleteActiveUsersFromChannelBatch)
     .onSuccessTask(ignore -> mFirestore.deleteAdminChannel(channelRef))
     .onSuccessTask(ignore -> mFirestore.getUsers().document(uid).get())
-    .onSuccessTask(userRef ->
+    .onSuccessTask(userSnapshot ->
     {
-      final User user = mFirestore.toFirestoreObject(userRef, User.class);
+      final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
       final String orgPushid = user.get_organizationPushId();
       return mFirestore.getOrgSnapshotTask(orgPushid);
     })
-    .onSuccessTask(orgRef ->
+    .onSuccessTask(orgSnapshot ->
     {
-      final FirestoreOrg org = mFirestore.toFirestoreObject(orgRef, FirestoreOrg.class);
+      final FirestoreOrg org = mFirestore.toFirestoreObject(orgSnapshot, FirestoreOrg.class);
       return mFirestore.getAllOrganizationUsersQuery(org.get_organizationCode());
     })
-    .onSuccessTask(activeUsers -> deleteChannelFromUsers(activeUsers, channelId))
+    .onSuccessTask(activeUsers -> deleteChannelFromUsersBatch(activeUsers, channelId))
     .addOnSuccessListener(l ->
     {
       deleteNotificationChannel(channelId);
@@ -183,34 +191,37 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     });
   }
 
-  private Task<Void> deleteActiveUsersFromChannel(QuerySnapshot activeUsers)
+  /*
+   *  Delete Channel Document's Collection of Active users
+   */
+  private Task<Void> deleteActiveUsersFromChannelBatch(QuerySnapshot activeUsers)
   {
-    Task<Void> task = Tasks.forResult(null);
+    final WriteBatch batch = mFirestore.batch();
     if (activeUsers == null)
     {
-      return task;
+      return batch.commit();
     }
     for (DocumentSnapshot ds : activeUsers.getDocuments())
     {
-      task = ds.getReference().delete();
+      final DocumentReference ref = ds.getReference();
+      batch.delete(ref);
     }
-    return task;
+    return batch.commit();
   }
 
-  private Task<Void> deleteChannelFromUsers(QuerySnapshot queriedUsers, String channelId)
+  private Task<Void> deleteChannelFromUsersBatch(QuerySnapshot queriedUsers, String channelId)
   {
-    Task<Void> task = Tasks.forResult(null);
-    if (queriedUsers == null)
-    {
-      return task;
+    final WriteBatch batch = mFirestore.batch();
+    if (queriedUsers == null){
+      return batch.commit();
     }
     for (DocumentSnapshot ds : queriedUsers)
     {
       final String userId = ds.getId();
       final DocumentReference ref = mFirestore.getUserChannelReference(userId, channelId);
-      task = ref.delete();
+      batch.delete(ref);
     }
-    return task;
+    return batch.commit();
   }
 
   private void disableButtons(AdminChannelViewHolder viewHolder)

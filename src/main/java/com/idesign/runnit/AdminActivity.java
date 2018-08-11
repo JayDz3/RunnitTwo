@@ -1,6 +1,5 @@
 package com.idesign.runnit;
 
-import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.FirestoreOrg;
@@ -97,7 +97,12 @@ public class AdminActivity extends AppCompatActivity
 
   public void setOrg(FirestoreOrg org)
   {
+    final String uid = mAuth.user().getUid();
+    final DocumentReference userReference = mFirestore.getUsers().document(uid);
+
     mFirestore.setOrg(org)
+    .onSuccessTask(ignore -> mFirestore.setOrganizationCodeTask(userReference, org.get_organizationCode()))
+    .onSuccessTask(ignore -> mFirestore.setUserOrgPushId(org.getPushId(), uid))
     .addOnSuccessListener(l ->
     {
       showToast("Your organization has been added!");
@@ -176,8 +181,8 @@ public class AdminActivity extends AppCompatActivity
     snackbar.show();
   }
 
-  public void logMessage(String message)
+ /* public void logMessage(String message)
   {
     Log.d("Admin ACTIVITY: ", "message: " + message);
-  }
+  } */
 }

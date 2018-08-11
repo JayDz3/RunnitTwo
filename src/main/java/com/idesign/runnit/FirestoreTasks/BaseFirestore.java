@@ -108,10 +108,8 @@ public class BaseFirestore {
 
   public Task<Void> addActiveUserToChannelTask(ActiveUser activeUser, FirestoreChannel channel)
   {
-    Map<String, Boolean> map = new HashMap<>();
-    map.put(activeUser.get_pushId(), true);
     return orgs.document(channel.get_orgPushId()).collection(COLLECTION_CHANNELS).document(channel.get_pushId())
-    .collection(COLLECTION_ACTIVE_USERS).document(activeUser.get_pushId()).set(map);
+    .collection(COLLECTION_ACTIVE_USERS).document(activeUser.get_pushId()).set(activeUser);
   }
 
   public Task<Void> removeUserFromActiveChannelTask(ActiveUser activeUser, FirestoreChannel channel)
@@ -167,11 +165,6 @@ public class BaseFirestore {
     WriteBatch batch = mFirestore.batch();
     batch.set(docRef, org);
     return batch.commit();
-  }
-
-  public Task<QuerySnapshot> getActiveUsers(DocumentSnapshot orgSnap)
-  {
-    return orgSnap.getReference().collection(COLLECTION_ACTIVE_USERS).get();
   }
   // {End Organizations] //
 

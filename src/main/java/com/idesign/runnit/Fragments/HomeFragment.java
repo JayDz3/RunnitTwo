@@ -38,8 +38,6 @@ public class HomeFragment extends Fragment
 
   private UserViewModel mUserViewModel;
 
-  private Button submitButton;
-
   public HomeFragment() { }
 
   @Override
@@ -53,7 +51,6 @@ public class HomeFragment extends Fragment
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
   {
     View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-    submitButton = rootView.findViewById(R.id.home_fragment_submit);
     return rootView;
   }
 
@@ -75,8 +72,6 @@ public class HomeFragment extends Fragment
         }
       });
     } */
-
-    submitButton.setOnClickListener(l -> sendNotification());
   }
 
   /*

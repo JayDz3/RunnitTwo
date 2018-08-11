@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
@@ -48,11 +49,12 @@ public class ChannelActivity extends AppCompatActivity implements
   private ProgressBar progressBar;
   private FloatingActionButton fab;
 
+  private TextView noChannelView;
+
   private int WHITE;
   private int DARK_GREY;
 
   private AdminChannelViewModel mAdminChannelViewModel;
-
   private ListenerRegistration channelListener;
 
   @Override
@@ -61,28 +63,31 @@ public class ChannelActivity extends AppCompatActivity implements
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_channel);
 
-   final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
-    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this);
+    mRecyclerView = findViewById(R.id.channel_activity_admin_recycler_view);
+    progressBar = findViewById(R.id.channel_activity_admin_progress_bar);
+    noChannelView = findViewById(R.id.channel_activity_admin_no_channels);
+    fab = findViewById(R.id.channel_activity_admin_fab);
 
     DARK_GREY = ContextCompat.getColor(this, R.color.colorDarkGray);
     WHITE = ContextCompat.getColor(this, R.color.colorWhite);
 
-    progressBar = findViewById(R.id.channel_activity_admin_progress_bar);
-    progressBar.setVisibility(View.GONE);
+    final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
+    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this);
 
-    fab = findViewById(R.id.channel_activity_admin_fab);
     fab.setOnClickListener(l -> showDialog());
     fab.setClickable(false);
     fab.setEnabled(false);
 
     DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
 
-    mRecyclerView = findViewById(R.id.channel_activity_admin_recycler_view);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     mRecyclerView.addItemDecoration(itemDecoration);
     mRecyclerView.setAdapter(mAdapter);
-    disableButton();
     mAdminChannelViewModel = ViewModelProviders.of(this).get(AdminChannelViewModel.class);
+
+    disableButton();
+    progressBar.setVisibility(View.GONE);
+    noChannelView.setVisibility(View.GONE);
   }
 
   private Observer<List<FirestoreChannel>> observer()
@@ -106,6 +111,7 @@ public class ChannelActivity extends AppCompatActivity implements
           if (e != null)
           {
             showToast("error getting channels from database: " + e.getMessage());
+            noChannelView.setVisibility(View.VISIBLE);
             return;
           }
           if (querySnapshot != null)
@@ -116,6 +122,7 @@ public class ChannelActivity extends AppCompatActivity implements
               final FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
               channels.add(channel);
             }
+            toggleNoChannelView(channels);
             mAdminChannelViewModel.setChannels(channels);
           }
         }));
@@ -132,6 +139,16 @@ public class ChannelActivity extends AppCompatActivity implements
     {
       channelListener.remove();
       channelListener = null;
+    }
+  }
+
+  public void toggleNoChannelView(List<FirestoreChannel> channels)
+  {
+    if (channels.size() == 0) {
+      noChannelView.setVisibility(View.VISIBLE);
+
+    } else {
+      noChannelView.setVisibility(View.GONE);
     }
   }
 
@@ -165,26 +182,25 @@ public class ChannelActivity extends AppCompatActivity implements
     .onSuccessTask(orgSnapshot ->
     {
       Task<Void> task = Tasks.forResult(null);
-      if (orgSnapshot != null)
+      if (orgSnapshot == null)
       {
-        final String orgPushid = orgSnapshot.getId();
-        final List<FirestoreChannel> channels = new ArrayList<>();
-        final String trimmed = name.trim();
-
-        for (FirestoreChannel c : mAdapter.getItems())
+        return task;
+      }
+      final String orgPushid = orgSnapshot.getId();
+      final List<FirestoreChannel> channels = new ArrayList<>();
+      final String trimmed = name.trim();
+      for (FirestoreChannel c : mAdapter.getItems())
+      {
+        if (c.get_channelId().equalsIgnoreCase(trimmed))
         {
-          if (c.get_channelId().equalsIgnoreCase(trimmed))
-          {
-            channels.add(c);
-          }
+          channels.add(c);
         }
-        if (channels.size() == 0) {
-          fillIntent(name);
-          task = mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, name);
-
-        } else {
-          showToast("A channel with that name already exists...");
-        }
+      }
+      if (channels.size() == 0) {
+        fillIntent(name);
+        task = mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, name);
+      } else {
+        showToast("A channel with that name already exists...");
       }
       return task;
     })
@@ -230,6 +246,7 @@ public class ChannelActivity extends AppCompatActivity implements
     if (name != null && !TextUtils.isEmpty(name)) {
       final String trimmed = trimmedString(name);
       addNewChannel(trimmed);
+
     } else {
       showToast("Channel name can not be empty");
     }

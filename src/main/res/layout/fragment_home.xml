@@ -7,7 +7,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragments.HomeFragment">
 
-
         <TextView
             android:id="@+id/home_fragment_signup_text"
             android:layout_width="wrap_content"
@@ -18,17 +17,4 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:text="@string/home_page"/>
-
-        <Button
-            android:id="@+id/home_fragment_submit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/eightDp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:textColor="@color/colorPrimary"
-            android:elevation="@dimen/fourDp"
-            android:text="@string/home_fragment_get_runners"/>
-
-
     </android.support.constraint.ConstraintLayout>

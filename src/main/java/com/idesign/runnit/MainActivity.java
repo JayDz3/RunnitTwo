@@ -487,22 +487,24 @@ public class MainActivity extends AppCompatActivity
       }
       final User user = mFirestore.toFirestoreObject(snapshot, User.class);
       toggleAdmin(user);
-      toggleAdminValueSet(user);
+      toggleAdminOrgSet(user);
       if (user == null) {
         return;
       }
       if (user.get_organizationCode() == null || user.get_organizationCode().equals(""))
       {
         mNavUtility.isLoggedInNoRestaurantCode(navigationView);
+        navigationView.getMenu().findItem(R.id.nav_channel).setVisible(false);
       }
       else if (user.get_organizationCode() != null && !user.get_organizationCode().equals(""))
       {
         mNavUtility.isLoggedInHasRestaurantCode(navigationView);
+        navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
       }
     });
   }
 
-  public void toggleAdminValueSet(User user)
+  public void toggleAdminOrgSet(User user)
   {
     if (user.get_organizationCode() != null && !user.get_organizationCode().equals("") || !user.get_isAdmin()) {
       navigationView.getMenu().findItem(R.id.nav_admin).setVisible(false);
