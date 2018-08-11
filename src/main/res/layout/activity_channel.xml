@@ -18,47 +18,28 @@
         app:layout_constraintStart_toStartOf="parent"/>
 
 
-    <TextView
-        android:id="@+id/channel_activity_admin_tap_icon_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_activity_admin_new_channel"
-        android:text="@string/channel_activity_tap_icon_text"/>
-
-    <TextView
-        android:id="@+id/channel_activity_admin_toggle_channel_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/channel_activity_admin_tap_icon_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_activity_admin_new_channel"
-        android:text="@string/channel_activity_click_channel_to_toggle"/>
-
-    <ImageButton
-        android:id="@+id/channel_activity_admin_new_channel"
-        android:src="@drawable/ic_add_circle_outline_primary_24dp"
-        android:contentDescription="@string/channel_activity_add_content_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/sixteenDp"
-        android:layout_marginEnd="@dimen/eightDp"
-        android:background="@drawable/clear_button"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/channel_activity_admin_recycler_view"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/channel_activity_admin_toggle_channel_text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/channel_activity_admin_fab"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
     </android.support.v7.widget.RecyclerView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/channel_activity_admin_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        android:elevation="@dimen/fourDp"
+        android:src="@drawable/ic_add_circle_outline_white_24dp"
+        app:backgroundTint="@color/colorPrimary"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 </android.support.constraint.ConstraintLayout>

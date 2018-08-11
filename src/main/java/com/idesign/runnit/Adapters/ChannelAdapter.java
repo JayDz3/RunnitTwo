@@ -119,9 +119,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       .onSuccessTask(ignore -> activeUsersReference.document(uid).set(thisUser));
       // above //
 
-      for (DocumentSnapshot ds : activeUsers) {
-        String id = ds.getId();
-        ActiveUser activeUser = new ActiveUser(id);
+      for (DocumentSnapshot ds : activeUsers)
+      {
+        final String id = ds.getId();
+        final ActiveUser activeUser = new ActiveUser(id);
         if (!id.equals(uid)) {
           task = ds.getReference()
           .delete()
@@ -170,18 +171,15 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     .onSuccessTask(activeUsers -> deleteChannelFromUsers(activeUsers, channelId))
     .addOnSuccessListener(l ->
     {
-      showToast("channel deleted");
       deleteNotificationChannel(channelId);
       enableButtons(viewHolder);
-      mChannels.remove(position);
-      setItems(mChannels);
       mListener.enable();
     })
     .addOnFailureListener(e ->
     {
-      showToast("error deleting channel: " + e.getMessage());
       enableButtons(viewHolder);
       mListener.enable();
+      showToast("error deleting channel: " + e.getMessage());
     });
   }
 
@@ -208,9 +206,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     }
     for (DocumentSnapshot ds : queriedUsers)
     {
-      final User user = mFirestore.toFirestoreObject(ds, User.class);
-      String userId = user.get_pushId();
-      DocumentReference ref = mFirestore.getUserChannelReference(userId, channelId);
+      final String userId = ds.getId();
+      final DocumentReference ref = mFirestore.getUserChannelReference(userId, channelId);
       task = ref.delete();
     }
     return task;

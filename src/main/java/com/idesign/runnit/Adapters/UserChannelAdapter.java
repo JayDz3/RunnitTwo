@@ -58,7 +58,8 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     final String channelId = channel.get_channelId();
     final DocumentReference channelRef = mFirestore.getUserChannelReference(uid, channelId);
     channelRef.get()
-    .addOnSuccessListener(snap -> {
+    .addOnSuccessListener(snap ->
+    {
       if (snap == null || !snap.exists()) {
         viewHolder.radioButton.setChecked(false);
       } else {
@@ -76,7 +77,8 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
   public void toggleChannelStatus(final DocumentReference channelRef, final FirestoreChannel channel, MyViewHolder viewHolder)
   {
     channelRef.get()
-    .onSuccessTask(snap -> {
+    .onSuccessTask(snap ->
+    {
       if (snap == null || !snap.exists()) {
         viewHolder.radioButton.setChecked(true);
         return mFirestore.addChannelToUserTask(channel);

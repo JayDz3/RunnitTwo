@@ -70,9 +70,12 @@ public class LoginFragment extends Fragment
     hideProgressBar();
   }
 
-  private Observer<LoginData> loginDataObserver() {
-    return loginData -> {
-      if (loginData == null) {
+  private Observer<LoginData> loginDataObserver()
+  {
+    return loginData ->
+    {
+      if (loginData == null)
+      {
         return;
       }
       emailView.setText(loginData.getEmail());
@@ -80,8 +83,10 @@ public class LoginFragment extends Fragment
     };
   }
 
-  public void submit() {
-    if (emailIsValid() && passwordIsValid()) {
+  public void submit()
+  {
+    if (emailIsValid() && passwordIsValid())
+    {
       setLoggingIn(true);
       setEmail(emailView.getText().toString());
       setPassword(passwordView.getText().toString());

@@ -1,6 +1,9 @@
 package com.idesign.runnit;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,22 +11,25 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
+
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
+
 import com.idesign.runnit.Adapters.ChannelAdapter;
 import com.idesign.runnit.Dialogs.NewChannelDialog;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.FirestoreChannel;
-import com.idesign.runnit.Items.FirestoreOrg;
+
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.VIewModels.AdminChannelViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +37,8 @@ import java.util.List;
 public class ChannelActivity extends AppCompatActivity implements
   ChannelAdapter.AdminChannelAdapterListener,
   NewChannelDialog.ChannelDialogListener
-{
 
+{
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
 
@@ -40,10 +46,14 @@ public class ChannelActivity extends AppCompatActivity implements
   private ChannelAdapter mAdapter;
 
   private ProgressBar progressBar;
-  private ImageButton addChannelIcon;
+  private FloatingActionButton fab;
 
-  private int PRIMARY;
+  private int WHITE;
   private int DARK_GREY;
+
+  private AdminChannelViewModel mAdminChannelViewModel;
+
+  private ListenerRegistration channelListener;
 
   @Override
   protected void onCreate(Bundle savedInstanceState)
@@ -51,19 +61,19 @@ public class ChannelActivity extends AppCompatActivity implements
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_channel);
 
-    List<FirestoreChannel> channels = new ArrayList<>();
-    mAdapter = new ChannelAdapter(channels, this, ChannelActivity.this);
+   final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
+    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this);
 
     DARK_GREY = ContextCompat.getColor(this, R.color.colorDarkGray);
-    PRIMARY = ContextCompat.getColor(this, R.color.colorPrimary);
+    WHITE = ContextCompat.getColor(this, R.color.colorWhite);
 
     progressBar = findViewById(R.id.channel_activity_admin_progress_bar);
     progressBar.setVisibility(View.GONE);
 
-    addChannelIcon = findViewById(R.id.channel_activity_admin_new_channel);
-    addChannelIcon.setOnClickListener(l -> showDialog());
-    addChannelIcon.setClickable(false);
-    addChannelIcon.setEnabled(false);
+    fab = findViewById(R.id.channel_activity_admin_fab);
+    fab.setOnClickListener(l -> showDialog());
+    fab.setClickable(false);
+    fab.setEnabled(false);
 
     DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
 
@@ -72,9 +82,61 @@ public class ChannelActivity extends AppCompatActivity implements
     mRecyclerView.addItemDecoration(itemDecoration);
     mRecyclerView.setAdapter(mAdapter);
     disableButton();
-    getItems()
-    .addOnSuccessListener(query -> loadItems(query))
-    .addOnFailureListener(e -> enableButton());
+    mAdminChannelViewModel = ViewModelProviders.of(this).get(AdminChannelViewModel.class);
+  }
+
+  private Observer<List<FirestoreChannel>> observer()
+  {
+    return channels -> mAdapter.setItems(channels);
+  }
+
+  public void setListener()
+  {
+    disableButton();
+    if (channelListener == null)
+    {
+      final String uid = mAuth.user().getUid();
+      mFirestore.getUsers().document(uid).get()
+      .onSuccessTask(userRef ->
+      {
+        final User user = mFirestore.toFirestoreObject(userRef, User.class);
+        final String orgpushId = user.get_organizationPushId();
+        return mFirestore.getOrgSnapshotTask(orgpushId);
+      })
+      .addOnSuccessListener(orgRef ->
+      {
+        final String orgPushId = orgRef.getId();
+        channelListener = mFirestore.getAdminChannelsReference(orgPushId).addSnapshotListener(((querySnapshot, e) ->
+        {
+          if (e != null)
+          {
+            showToast("error getting channels from database: " + e.getMessage());
+            return;
+          }
+          if (querySnapshot == null || querySnapshot.getDocuments().size() == 0) {
+            showToast("null or 0");
+
+          } else {
+
+            final List<FirestoreChannel> channels = new ArrayList<>();
+            for (DocumentSnapshot ds : querySnapshot.getDocuments())
+            {
+              final FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
+              channels.add(channel);
+            }
+            mAdminChannelViewModel.setChannels(channels);
+          }
+        }));
+        enableButton();
+      })
+      .addOnFailureListener(err -> showToast("error setting listener: " + err.getMessage()));
+      enableButton();
+    }
+  }
+
+  public void removeListener()
+  {
+    channelListener = null;
   }
 
   public void showDialog()
@@ -87,42 +149,10 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     final String NOTIFICATION_ACTION_FILTER = "Notification_Action";
     final String NOTIFICATION_CHANNEL_ID = "channel_id";
-    Intent intent = new Intent(this, NotificationService.class);
+    final Intent intent = new Intent(this, NotificationService.class);
     intent.setAction(NOTIFICATION_ACTION_FILTER);
     intent.putExtra(NOTIFICATION_CHANNEL_ID, name);
     sendBroadcast(intent);
-  }
-
-  public Task<QuerySnapshot> getItems()
-  {
-    final String uid = mAuth.user().getUid();
-    return mFirestore.getUsers().document(uid).get()
-    .onSuccessTask(userRef ->
-    {
-      final User user = mFirestore.toFirestoreObject(userRef, User.class);
-      final String orgpushId = user.get_organizationPushId();
-      return mFirestore.getOrgSnapshotTask(orgpushId);
-    })
-    .onSuccessTask(orgRef ->
-    {
-      /*
-       *  May / will need error handlling / alternative if orgRef is null
-       */
-      final FirestoreOrg org = mFirestore.toFirestoreObject(orgRef, FirestoreOrg.class);
-      return mFirestore.getAdminChannelsReference(org.getPushId()).get();
-    });
-  }
-
-  public void loadItems(QuerySnapshot query)
-  {
-    final List<FirestoreChannel> getChannels = new ArrayList<>();
-    for (DocumentSnapshot ds : query)
-    {
-      FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
-      getChannels.add(channel);
-    }
-    mAdapter.setItems(getChannels);
-    enableButton();
   }
 
   public void addNewChannel(String name)
@@ -141,25 +171,28 @@ public class ChannelActivity extends AppCompatActivity implements
       Task<Void> task = Tasks.forResult(null);
       if (orgSnapshot != null)
       {
-        final FirestoreOrg org = mFirestore.toFirestoreObject(orgSnapshot, FirestoreOrg.class);
-        final FirestoreChannel channel = new FirestoreChannel(name, org.getPushId(), name, true, false);
+        final String orgPushid = orgSnapshot.getId();
         final List<FirestoreChannel> channels = new ArrayList<>();
-        for (FirestoreChannel c : mAdapter.getItems()) {
-          if (c.get_channelId().equalsIgnoreCase(channel.get_channelId())) {
+        final String trimmed = name.trim();
+
+        for (FirestoreChannel c : mAdapter.getItems())
+        {
+          if (c.get_channelId().equalsIgnoreCase(trimmed))
+          {
             channels.add(c);
           }
         }
         if (channels.size() == 0) {
           fillIntent(name);
-          task = mFirestore.addChannelAdmin(orgSnapshot.getReference(), org.getPushId(), name);
+          task = mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, name);
+
         } else {
           showToast("A channel with that name already exists...");
         }
       }
       return task;
     })
-    .onSuccessTask(ignore -> getItems())
-    .addOnSuccessListener(query -> loadItems(query))
+    .addOnSuccessListener(l -> enableButton())
     .addOnFailureListener(e ->
     {
       showToast("error adding channel: " + e.getMessage());
@@ -170,17 +203,17 @@ public class ChannelActivity extends AppCompatActivity implements
   public void disableButton()
   {
     progressBar.setVisibility(View.VISIBLE);
-    addChannelIcon.getDrawable().setTint(DARK_GREY);
-    addChannelIcon.setEnabled(false);
-    addChannelIcon.setClickable(false);
+    fab.getDrawable().setTint(DARK_GREY);
+    fab.setEnabled(false);
+    fab.setClickable(false);
   }
 
   public void enableButton()
   {
     progressBar.setVisibility(View.GONE);
-    addChannelIcon.getDrawable().setTint(PRIMARY);
-    addChannelIcon.setEnabled(true);
-    addChannelIcon.setClickable(true);
+    fab.getDrawable().setTint(WHITE);
+    fab.setEnabled(true);
+    fab.setClickable(true);
   }
 
   @Override
@@ -201,8 +234,7 @@ public class ChannelActivity extends AppCompatActivity implements
     if (name != null && !TextUtils.isEmpty(name)) {
       final String trimmed = trimmedString(name);
       addNewChannel(trimmed);
-    }
-    else {
+    } else {
       showToast("Channel name can not be empty");
     }
   }
@@ -211,6 +243,28 @@ public class ChannelActivity extends AppCompatActivity implements
   public void onCancel(int which)
   {
 
+  }
+
+  @Override
+  public void onStart()
+  {
+    super.onStart();
+  }
+
+  @Override
+  public void onPause()
+  {
+    super.onPause();
+    removeListener();
+    mAdminChannelViewModel.getChannels().removeObserver(observer());
+  }
+
+  @Override
+  public void onResume()
+  {
+    super.onResume();
+    setListener();
+    mAdminChannelViewModel.getChannels().observe(this, observer());
   }
 
   public String trimmedString(String source)

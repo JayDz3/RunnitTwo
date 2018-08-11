@@ -23,7 +23,7 @@
         android:contentDescription="@string/channel_activity_remove_channel_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/sixteenDp"
+        android:layout_marginEnd="@dimen/eightDp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/channel_item_admin_send_notification_icon"/>

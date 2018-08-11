@@ -24,6 +24,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.WriteBatch;
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
     mainLayout = findViewById(R.id.main_constraint_layout);
     mDrawerLayout = findViewById(R.id.drawer_layout);
     navigationView = findViewById(R.id.nav_view);
@@ -99,8 +102,8 @@ public class MainActivity extends AppCompatActivity
     {
       getValuesFromBundle(savedInstanceState);
     }
-    addNavListener();
     addDrawerListener();
+    addNavListener();
     toggleViewOnStart();
   }
 
@@ -142,53 +145,55 @@ public class MainActivity extends AppCompatActivity
 
   public void addDrawerListener()
   {
-    mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener()
-    {
-      public void onDrawerSlide(@NonNull View drawerView, float slideOffset) { }
-      public void onDrawerOpened(@NonNull View drawerView) { }
-      public void onDrawerClosed(@NonNull View view)
-      {
-        if (selection == null)
-        {
-          return;
+      mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
         }
-        switch (selection)
-        {
-          case "Login":
-            goLogin();
-            break;
-          case "New Account":
-            mStateViewModel.setFragmentState(Constants.STATE_DETAILS_FRAGMENT);
-            break;
-          case "Logout":
-            logout();
-            break;
-          case "Edit Info":
-            mStateViewModel.setFragmentState(Constants.STATE_DETAILS_FRAGMENT);
-            break;
-          case "Edit Org Code":
-            mStateViewModel.setFragmentState(Constants.STATE_RESTAURANT_FRAGMENT);
-            break;
-          case "Admin":
-            mNavUtility.setCheckedToFalse(R.id.nav_admin, navigationView);
-            goCreateAdmin();
-            break;
-          case "Channels":
-            mNavUtility.setCheckedToFalse(R.id.nav_channel, navigationView);
-            goChannels();
-            break;
-          case "Active Users":
-            mNavUtility.setCheckedToFalse(R.id.nav_active_users, navigationView);
-            showSnackbar("selected active users");
-            break;
-          default:
-            Log.d("DRAWER LISTENER", "default");
-            break;
+
+        public void onDrawerOpened(@NonNull View drawerView) {
         }
-        selection = null;
-      }
-      public void onDrawerStateChanged(int newState) { }
-    });
+
+        public void onDrawerClosed(@NonNull View view) {
+          if (selection == null) {
+            return;
+          }
+          switch (selection) {
+            case "Login":
+              goLogin();
+              break;
+            case "New Account":
+              mStateViewModel.setFragmentState(Constants.STATE_DETAILS_FRAGMENT);
+              break;
+            case "Logout":
+              logout();
+              break;
+            case "Edit Info":
+              mStateViewModel.setFragmentState(Constants.STATE_DETAILS_FRAGMENT);
+              break;
+            case "Edit Org Code":
+              mStateViewModel.setFragmentState(Constants.STATE_RESTAURANT_FRAGMENT);
+              break;
+            case "Admin":
+              mNavUtility.setCheckedToFalse(R.id.nav_admin, navigationView);
+              goCreateAdmin();
+              break;
+            case "Channels":
+              mNavUtility.setCheckedToFalse(R.id.nav_channel, navigationView);
+              goChannels();
+              break;
+            case "Active Users":
+              mNavUtility.setCheckedToFalse(R.id.nav_active_users, navigationView);
+              showSnackbar("selected active users");
+              break;
+            default:
+              Log.d("DRAWER LISTENER", "default");
+              break;
+          }
+          selection = null;
+        }
+
+        public void onDrawerStateChanged(int newState) {
+        }
+      });
   }
 
   /*
