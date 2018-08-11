@@ -11,7 +11,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
+
 import android.view.View;
 
 import android.widget.ProgressBar;
@@ -97,27 +97,19 @@ public class ChannelActivity extends AppCompatActivity implements
     {
       final String uid = mAuth.user().getUid();
       mFirestore.getUsers().document(uid).get()
-      .onSuccessTask(userRef ->
+      .addOnSuccessListener(userSnap ->
       {
-        final User user = mFirestore.toFirestoreObject(userRef, User.class);
+        final User user = mFirestore.toFirestoreObject(userSnap, User.class);
         final String orgpushId = user.get_organizationPushId();
-        return mFirestore.getOrgSnapshotTask(orgpushId);
-      })
-      .addOnSuccessListener(orgRef ->
-      {
-        final String orgPushId = orgRef.getId();
-        channelListener = mFirestore.getAdminChannelsReference(orgPushId).addSnapshotListener(((querySnapshot, e) ->
+        channelListener = mFirestore.getAdminChannelsReference(orgpushId).addSnapshotListener(((querySnapshot, e) ->
         {
           if (e != null)
           {
             showToast("error getting channels from database: " + e.getMessage());
             return;
           }
-          if (querySnapshot == null || querySnapshot.getDocuments().size() == 0) {
-            showToast("null or 0");
-
-          } else {
-
+          if (querySnapshot != null)
+          {
             final List<FirestoreChannel> channels = new ArrayList<>();
             for (DocumentSnapshot ds : querySnapshot.getDocuments())
             {
@@ -136,7 +128,11 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void removeListener()
   {
-    channelListener = null;
+    if (channelListener != null)
+    {
+      channelListener.remove();
+      channelListener = null;
+    }
   }
 
   public void showDialog()
