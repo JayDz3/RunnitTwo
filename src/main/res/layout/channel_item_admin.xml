@@ -1,41 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:layout_margin="@dimen/eightDp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/channel_item_admin_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/sixteenDp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_item_delete_icon"
-        android:textSize="@dimen/sixteenSP"
-        android:text="@string/channel_dialog_hint"/>
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <ImageButton
-        android:id="@+id/channel_item_admin_delete_icon"
-        android:src="@drawable/ic_remove_circle_outline_black_24dp"
-        android:contentDescription="@string/channel_activity_remove_channel_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/eightDp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_item_admin_send_notification_icon"/>
+        <TextView
+            android:id="@+id/channel_item_channel_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDp"
+            android:layout_marginStart="@dimen/sixteenSP"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@string/admin_channel_item_channel_name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
-    <ImageButton
-        android:id="@+id/channel_item_admin_send_notification_icon"
-        android:src="@drawable/ic_input_blue_24dp"
-        android:contentDescription="@string/channel_activity_send_notification_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <TextView
+            android:id="@+id/channel_item_admin_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/fourDp"
+            android:layout_marginStart="@dimen/sixteenDp"
+            app:layout_constraintTop_toBottomOf="@id/channel_item_channel_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/channel_item_delete_icon"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textSize="@dimen/sixteenSP"
+            android:text="@string/channel_dialog_hint"/>
 
-</android.support.constraint.ConstraintLayout>
+        <Button
+            android:id="@+id/channel_item_admin_delete_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/twentyFourDp"
+            android:layout_marginEnd="@dimen/sixteenDp"
+            android:background="@drawable/clear_button"
+            app:layout_constraintTop_toBottomOf="@id/channel_item_admin_text_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="@string/delete"/>
+
+        <Button
+            android:id="@+id/channel_item_admin_send_notification_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/twentyFourDp"
+            android:background="@drawable/clear_button"
+            app:layout_constraintTop_toBottomOf="@id/channel_item_admin_text_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/channel_item_admin_delete_icon"
+            android:text="@string/send"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.v7.widget.CardView>

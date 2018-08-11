@@ -20,9 +20,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.Adapters.ChannelAdapter;
 import com.idesign.runnit.Dialogs.NewChannelDialog;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
@@ -97,41 +99,57 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void setListener()
   {
-    disableButton();
-    if (channelListener == null)
+    if (channelListener != null)
     {
-      final String uid = mAuth.user().getUid();
-      mFirestore.getUsers().document(uid).get()
-      .addOnSuccessListener(userSnap ->
+      return;
+    }
+
+    disableButton();
+    final String uid = mAuth.user().getUid();
+    mFirestore.getUsers().document(uid).get()
+    .addOnSuccessListener(userSnap ->
+    {
+      final User user = mFirestore.toFirestoreObject(userSnap, User.class);
+      final String orgpushId = user.get_organizationPushId();
+      channelListener = mFirestore.getAdminChannelsReference(orgpushId).addSnapshotListener(((querySnapshot, e) ->
       {
-        final User user = mFirestore.toFirestoreObject(userSnap, User.class);
-        final String orgpushId = user.get_organizationPushId();
-        channelListener = mFirestore.getAdminChannelsReference(orgpushId).addSnapshotListener(((querySnapshot, e) ->
+        if (e != null)
         {
-          if (e != null)
-          {
-            showToast("error getting channels from database: " + e.getMessage());
-            noChannelView.setVisibility(View.VISIBLE);
-            return;
-          }
-          if (querySnapshot != null)
-          {
-            final List<FirestoreChannel> channels = new ArrayList<>();
-            for (DocumentSnapshot ds : querySnapshot.getDocuments())
-            {
-              final FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
-              channels.add(channel);
-            }
-            toggleNoChannelView(channels);
-            mAdminChannelViewModel.setChannels(channels);
-          }
-        }));
-        enableButton();
-      })
-      .addOnFailureListener(err -> showToast("error setting listener: " + err.getMessage()));
+          handleSnapshotError(e);
+          return;
+        }
+        addChannelsFromListener(querySnapshot);
+      }));
       enableButton();
+    })
+    .addOnFailureListener(err -> showToast("error setting listener: " + err.getMessage()));
+    enableButton();
+  }
+
+  /*
+   *  Handle Channel Listener Actions
+   */
+  public void handleSnapshotError(FirebaseException e)
+  {
+    showToast("error getting channels from database: " + e.getMessage());
+    noChannelView.setVisibility(View.VISIBLE);
+  }
+
+  public void addChannelsFromListener(QuerySnapshot channelSnapshot)
+  {
+    if (channelSnapshot != null)
+    {
+      final List<FirestoreChannel> channels = new ArrayList<>();
+      for (DocumentSnapshot ds : channelSnapshot.getDocuments())
+      {
+        final FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
+        channels.add(channel);
+      }
+      toggleNoChannelView(channels);
+      mAdminChannelViewModel.setChannels(channels);
     }
   }
+  // {End Handle ChannelListener Actions] //
 
   public void removeListener()
   {
@@ -151,6 +169,7 @@ public class ChannelActivity extends AppCompatActivity implements
       noChannelView.setVisibility(View.GONE);
     }
   }
+  // [ End Listener ] //
 
   public void showDialog()
   {
@@ -158,6 +177,11 @@ public class ChannelActivity extends AppCompatActivity implements
     channelDialog.show(getSupportFragmentManager(), "NewChannelDialog");
   }
 
+  /*
+   *  Send Notification Intent
+   *
+   *  @param [name] Name of Channel to add
+   */
   public void fillIntent(String name)
   {
     final String NOTIFICATION_ACTION_FILTER = "Notification_Action";
@@ -199,6 +223,7 @@ public class ChannelActivity extends AppCompatActivity implements
       if (channels.size() == 0) {
         fillIntent(name);
         task = mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, name);
+
       } else {
         showToast("A channel with that name already exists...");
       }
@@ -228,6 +253,9 @@ public class ChannelActivity extends AppCompatActivity implements
     fab.setClickable(true);
   }
 
+  /*
+   *  Channel Adapter listener
+   */
   @Override
   public void disable()
   {
@@ -240,6 +268,9 @@ public class ChannelActivity extends AppCompatActivity implements
     enableButton();
   }
 
+  /*
+   * Channel Dialog listener
+   */
   @Override
   public void onConfirm(int which, String name)
   {
@@ -253,11 +284,11 @@ public class ChannelActivity extends AppCompatActivity implements
   }
 
   @Override
-  public void onCancel(int which)
-  {
+  public void onCancel(int which) { }
 
-  }
-
+  /*
+   * Top Level overrides
+   */
   @Override
   public void onStart()
   {

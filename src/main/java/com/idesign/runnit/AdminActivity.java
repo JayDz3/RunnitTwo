@@ -5,7 +5,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -24,7 +23,6 @@ public class AdminActivity extends AppCompatActivity
 
   private final String EXTRA_ORG_NAME = "org.name";
   private final String EXTRA_ORG_CODE = "org.code";
-  private final String NOTIFICATION_ACTION_FILTER = "Notification_Action";
 
   private EditText orgName;
   private EditText orgCode;
@@ -98,11 +96,13 @@ public class AdminActivity extends AppCompatActivity
   public void setOrg(FirestoreOrg org)
   {
     final String uid = mAuth.user().getUid();
+    final String orgPushid = org.getPushId();
+    final String orgCode = org.get_organizationCode();
     final DocumentReference userReference = mFirestore.getUsers().document(uid);
 
     mFirestore.setOrg(org)
-    .onSuccessTask(ignore -> mFirestore.setOrganizationCodeTask(userReference, org.get_organizationCode()))
-    .onSuccessTask(ignore -> mFirestore.setUserOrgPushId(org.getPushId(), uid))
+    .onSuccessTask(ignore -> mFirestore.setOrganizationCodeTask(userReference, orgCode))
+    .onSuccessTask(ignore -> mFirestore.setUserOrgPushId(orgPushid, uid))
     .addOnSuccessListener(l ->
     {
       showToast("Your organization has been added!");
@@ -151,7 +151,6 @@ public class AdminActivity extends AppCompatActivity
     super.onSaveInstanceState(outState);
     final String trimmedName = trimmedString(orgName.getText().toString());
     final String trimmedCode = trimmedString(orgCode.getText().toString());
-
     outState.putString(EXTRA_ORG_NAME, trimmedCode);
     outState.putString(EXTRA_ORG_NAME, trimmedName);
   }

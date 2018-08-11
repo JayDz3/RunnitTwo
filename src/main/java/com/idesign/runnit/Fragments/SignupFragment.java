@@ -9,7 +9,6 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,7 +49,6 @@ public class SignupFragment extends Fragment {
   private Button clearButton;
 
   private ProgressBar progressBar;
-  private boolean mVerificationInProgress = false;
 
   public SignupFragment() { }
 
@@ -133,7 +131,6 @@ public class SignupFragment extends Fragment {
 
       disableButtons();
       progressBar.setVisibility(View.VISIBLE);
-      mVerificationInProgress = true;
       final String email = mUserViewModel.getEmail();
       final String pw = mPasswordViewModel.getPassword().getValue();
       final String firstname = mUserViewModel.getFirstName();
@@ -145,12 +142,10 @@ public class SignupFragment extends Fragment {
       .onSuccessTask(firebaseUser ->  setFirestoreUser(firstname, lastname))
       .addOnSuccessListener(task -> {
         mStateViewModel.setFragmentState(Constants.STATE_HOME);
-        mVerificationInProgress = false;
         showToast("Registration complete!");
       })
       .addOnFailureListener(e -> {
         progressBar.setVisibility(View.GONE);
-        mVerificationInProgress = false;
         showToast("error: " + e.getMessage());
         enableButtons();
       });
@@ -287,8 +282,8 @@ public class SignupFragment extends Fragment {
     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
   }
 
-  public void logMessage(String message)
+  /* public void logMessage(String message)
   {
     Log.d("SIGNUP FRAGMENT", "MESSAGE: " + message);
-  }
+  } */
 }

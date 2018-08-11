@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,8 +44,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
     private TextView channelNameView;
-    private ImageButton deleteButton;
-    private ImageButton sendNotificationButton;
+    private Button deleteButton;
+    private Button sendNotificationButton;
 
     AdminChannelViewHolder(View view)
     {
@@ -87,8 +88,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
     viewHolder.channelNameView.setText(channel.get_channelId());
 
-    viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(channelRef, channel, position, viewHolder));
-    viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, channel, viewHolder));
+    viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(channelRef, channel, viewHolder));
+    viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
 
     // viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelRef, channel));
     // viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(channelRef, channel, position));
@@ -97,14 +98,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   /*
    * Test to add current user to this channel, should trigger notification function
    */
-  private void sendNotification(DocumentReference channelRef, final FirestoreChannel channel, AdminChannelViewHolder viewHolder)
+  private void sendNotification(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
     final String uid = mAuth.user().getUid();
     final ActiveUser thisUser = new ActiveUser(uid);
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
 
     disableButtons(viewHolder);
-    mListener.disable();
 
     activeUsersReference.get()
     .onSuccessTask(activeUsers ->
@@ -137,27 +137,18 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       }
       return task;
     })
-    .addOnSuccessListener(l ->
-    {
-      enableButtons(viewHolder);
-      mListener.enable();
-    })
+    .addOnSuccessListener(l -> enableButtons(viewHolder))
     .addOnFailureListener(e ->
     {
       enableButtons(viewHolder);
-      mListener.enable();
       showToast("error adding user: " + e.getMessage());
     });
   }
 
 
-  private void deleteChannel(final DocumentReference channelRef,
-                             final FirestoreChannel channel,
-                             final int position,
-                             AdminChannelViewHolder viewHolder)
+  private void deleteChannel(final DocumentReference channelRef, final FirestoreChannel channel, AdminChannelViewHolder viewHolder)
   {
     disableButtons(viewHolder);
-    mListener.disable();
     final String uid = mAuth.user().getUid();
     final String channelId = channel.get_channelId();
 
@@ -230,6 +221,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     viewHolder.deleteButton.setClickable(false);
     viewHolder.sendNotificationButton.setClickable(false);
     viewHolder.sendNotificationButton.setEnabled(false);
+    mListener.disable();
   }
 
   private void enableButtons(AdminChannelViewHolder viewHolder)
@@ -238,6 +230,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     viewHolder.deleteButton.setEnabled(true);
     viewHolder.sendNotificationButton.setClickable(true);
     viewHolder.sendNotificationButton.setEnabled(true);
+    mListener.enable();
   }
 
   private void deleteNotificationChannel(String chanelId)
@@ -273,6 +266,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     }
   } */
 
+  /*
+   * Called from channel activity to check for redundant channel name
+   */
   public List<FirestoreChannel> getItems()
   {
     return mChannels;

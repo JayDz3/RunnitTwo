@@ -116,9 +116,9 @@ public class RestaurantCodeFragment extends Fragment {
 
     mFirestore.setOrganizationCodeTask(documentReference, text)
     .onSuccessTask(ignore -> mFirestore.queryOrgByCodeTask(text))
-    .onSuccessTask(orgRef ->
+    .onSuccessTask(orgSnapshots ->
     {
-      final DocumentSnapshot docSnap = orgRef.getDocuments().get(0);
+      final DocumentSnapshot docSnap = orgSnapshots.getDocuments().get(0);
       final FirestoreOrg org = mFirestore.toFirestoreObject(docSnap, FirestoreOrg.class);
       final String orgPushid = org.getPushId();
       return mFirestore.setUserOrgPushId(orgPushid, uid);

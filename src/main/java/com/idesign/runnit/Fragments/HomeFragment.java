@@ -14,12 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 
@@ -32,7 +28,6 @@ import java.util.Objects;
 
 public class HomeFragment extends Fragment
 {
-
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
 
@@ -50,8 +45,7 @@ public class HomeFragment extends Fragment
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
   {
-    View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-    return rootView;
+   return inflater.inflate(R.layout.fragment_home, container, false);
   }
 
   @Override
@@ -140,10 +134,6 @@ public class HomeFragment extends Fragment
     .addOnFailureListener(e -> showToast("error: " + e.getMessage())); */
   }
 
-  public void showToast(CharSequence message)
-  {
-    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-  }
   @Override
   public void onAttach(Context context)
   {
@@ -174,5 +164,10 @@ public class HomeFragment extends Fragment
   public void onDestroy()
   {
     super.onDestroy();
+  }
+
+  public void showToast(CharSequence message)
+  {
+    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
   }
 }
