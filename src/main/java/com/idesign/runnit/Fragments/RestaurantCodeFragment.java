@@ -60,11 +60,17 @@ public class RestaurantCodeFragment extends Fragment {
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
   {
-    return inflater.inflate(R.layout.fragment_restaurant_code, container, false);
+    View rootView = inflater.inflate(R.layout.fragment_restaurant_code, container, false);
+    setViewItems(rootView);
+    return rootView;
   }
 
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
+  {
+  }
+
+  public void setViewItems(View view)
   {
     restaurantLayout = view.findViewById(R.id.restaurant_code_main_layout);
     editRestaurantCode = view.findViewById(R.id.restaurant_code_code);
@@ -110,8 +116,7 @@ public class RestaurantCodeFragment extends Fragment {
     }
     final String uid = mAuth.user().getUid();
     final String text = trimmedString(editRestaurantCode.getText().toString());
-    mFirestore.setUserReference(uid);
-    final DocumentReference documentReference = mFirestore.getUserRef();
+    final DocumentReference documentReference = mFirestore.getUsers().document(uid);
     mUserViewModel.setOrganizationCode(text);
 
     mFirestore.setOrganizationCodeTask(documentReference, text)

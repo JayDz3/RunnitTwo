@@ -38,11 +38,7 @@ public class AdminActivity extends AppCompatActivity
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_admin);
-    mainLayout = findViewById(R.id.admin_activity_main_layout);
-    orgName = findViewById(R.id.admin_activity_org_name);
-    orgCode = findViewById(R.id.admin_activity_org_code);
-    submitButton = findViewById(R.id.admin_activity_submit);
-    queryButton = findViewById(R.id.admin_activity_query_org_button);
+    setViewItems();
 
     submitButton.setOnClickListener(l -> submitOrgInfo());
     queryButton.setOnClickListener(l -> queryOrg());
@@ -51,6 +47,15 @@ public class AdminActivity extends AppCompatActivity
     {
       getValuesFromBundle(savedInstanceState);
     }
+  }
+
+  public void setViewItems()
+  {
+    mainLayout = findViewById(R.id.admin_activity_main_layout);
+    orgName = findViewById(R.id.admin_activity_org_name);
+    orgCode = findViewById(R.id.admin_activity_org_code);
+    submitButton = findViewById(R.id.admin_activity_submit);
+    queryButton = findViewById(R.id.admin_activity_query_org_button);
   }
 
   public void submitOrgInfo()

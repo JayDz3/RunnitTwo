@@ -79,9 +79,11 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     channelRef.get()
     .onSuccessTask(snap ->
     {
+      final String uid = mAuth.user().getUid();
+      final DocumentReference userRef = mFirestore.getUsers().document(uid);
       if (snap == null || !snap.exists()) {
         viewHolder.radioButton.setChecked(true);
-        return mFirestore.addChannelToUserTask(channel);
+        return mFirestore.addChannelToUserTask(channel, userRef);
       } else {
         viewHolder.radioButton.setChecked(false);
         return mFirestore.removeChannelFromUserTask(snap.getReference());

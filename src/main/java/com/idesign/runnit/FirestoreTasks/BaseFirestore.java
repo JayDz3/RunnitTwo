@@ -5,16 +5,13 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
+
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.Constants;
 import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.FirestoreOrg;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class BaseFirestore {
   private final String IS_ADMIN = "_isAdmin";
@@ -31,16 +28,9 @@ public class BaseFirestore {
 
   private final CollectionReference users = mFirestore.collection(Constants.COLLECTION_USERS);
   private final CollectionReference orgs = mFirestore.collection(Constants.COLLECTION_ORGS);
-  private CollectionReference userChannelsReference;
-  private DocumentReference userRef;
 
   public BaseFirestore() { }
 
-  public void setUserReference(String uid)
-  {
-    userRef = mFirestore.collection(Constants.COLLECTION_USERS).document(uid);
-    userChannelsReference = userRef.collection(COLLECTION_USER_CHANNELS);
-  }
 
   public CollectionReference getUsers()
   {
@@ -50,11 +40,6 @@ public class BaseFirestore {
   public CollectionReference getOrgs()
   {
     return orgs;
-  }
-
-  public DocumentReference getUserRef()
-  {
-    return userRef;
   }
 
   /*
@@ -118,9 +103,9 @@ public class BaseFirestore {
     .collection(COLLECTION_ACTIVE_USERS).document(activeUser.get_pushId()).delete();
   }
 
-  public Task<Void> addChannelToUserTask(FirestoreChannel channel)
+  public Task<Void> addChannelToUserTask(FirestoreChannel channel, DocumentReference userRef)
   {
-    return getUserRef().collection(COLLECTION_USER_CHANNELS).document(channel.get_channelId()).set(channel);
+    return userRef.collection(COLLECTION_USER_CHANNELS).document(channel.get_channelId()).set(channel);
   }
 
   public Task<Void> removeChannelFromUserTask(DocumentReference documentReference)

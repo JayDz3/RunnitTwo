@@ -22,12 +22,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -86,16 +86,11 @@ public class MainActivity extends AppCompatActivity
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
-    mainLayout = findViewById(R.id.main_constraint_layout);
-    mDrawerLayout = findViewById(R.id.drawer_layout);
-    navigationView = findViewById(R.id.nav_view);
-    toolbar = findViewById(R.id.toolbar);
+    setViewItems();
 
     mUserViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
     mStateViewModel = ViewModelProviders.of(this).get(StateViewModel.class);
     mPasswordViewModel = ViewModelProviders.of(this).get(PasswordViewModel.class);
-
     setActionBar();
 
     if (savedInstanceState != null)
@@ -105,6 +100,14 @@ public class MainActivity extends AppCompatActivity
     addDrawerListener();
     addNavListener();
     toggleViewOnStart();
+  }
+
+  public void setViewItems()
+  {
+    mainLayout = findViewById(R.id.main_constraint_layout);
+    mDrawerLayout = findViewById(R.id.drawer_layout);
+    navigationView = findViewById(R.id.nav_view);
+    toolbar = findViewById(R.id.toolbar);
   }
 
   /*
@@ -217,11 +220,13 @@ public class MainActivity extends AppCompatActivity
     {
       disabled = true;
       final String uid = mAuth.user().getUid();
-      mFirestore.getUserRef().get()
-      .onSuccessTask(userRef ->  restaurantQuery(userRef))
-      .onSuccessTask(orgRef -> clockOut(orgRef, uid))
-      .onSuccessTask(ignore -> mFirestore.updateInstanceId(mFirestore.getUserRef(), ""))
-      .onSuccessTask(ignore -> mFirestore.toggleNotifications(mFirestore.getUserRef(), false))
+      final DocumentReference userRef = mFirestore.getUsers().document(uid);
+      userRef.get()
+      .onSuccessTask(this::orgQuery)
+      .onSuccessTask(orgSnapshot -> mFirestore.getAdminChannelsReference(orgSnapshot.getId()).get())
+      .onSuccessTask(orgChannels -> clockOut(orgChannels, uid))
+      .onSuccessTask(ignore -> mFirestore.updateInstanceId(userRef, ""))
+      .onSuccessTask(ignore -> mFirestore.toggleNotifications(userRef, false))
       .addOnSuccessListener(ignore -> onLogoutSuccess())
       .addOnFailureListener(this::onLogoutFailure);
     }
@@ -232,7 +237,7 @@ public class MainActivity extends AppCompatActivity
    * mFirestore query org returns query that finds org with the user's specific orgcode, limited to 1 result
    *
    */
-  public Task<DocumentSnapshot> restaurantQuery(DocumentSnapshot userRef)
+  public Task<DocumentSnapshot> orgQuery(DocumentSnapshot userRef)
   {
     final User user = mFirestore.toFirestoreObject(userRef, User.class);
     final String orgPushid = user.get_organizationPushId();
@@ -242,12 +247,15 @@ public class MainActivity extends AppCompatActivity
   /*
    *  Removes user from specific orgs active users collection
    */
-  public Task<Void> clockOut(DocumentSnapshot orgSnapshot, String uid)
+  public Task<Void> clockOut(QuerySnapshot channelsSnapshot, String uid)
   {
-    final DocumentReference documentReference = orgSnapshot.getReference();
-    final DocumentReference activeUserRef = documentReference.collection(COLLECTION_ACTIVE_USERS).document(uid);
     WriteBatch batch = mFirestore.batch();
-    batch.delete(activeUserRef);
+    for (DocumentSnapshot ds : channelsSnapshot)
+    {
+      CollectionReference ref = ds.getReference().collection(COLLECTION_ACTIVE_USERS);
+      DocumentReference userRef = ref.document(uid);
+      batch.delete(userRef);
+    }
     return batch.commit();
   }
 
@@ -442,8 +450,8 @@ public class MainActivity extends AppCompatActivity
     {
       if (mAuth.user() != null)
       {
-        mFirestore.setUserReference(mAuth.user().getUid());
-        final DocumentReference userRef = mFirestore.getUserRef();
+        final String uid = mAuth.user().getUid();
+        final DocumentReference userRef = mFirestore.getUsers().document(uid);
 
         addUserListener(userRef);
         FirebaseInstanceId.getInstance().getInstanceId()

@@ -3,6 +3,8 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:layout_margin="@dimen/eightDp"
+    app:cardCornerRadius="@dimen/fourDp"
+    android:elevation="@dimen/twoDp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.constraint.ConstraintLayout
@@ -30,8 +32,7 @@
             app:layout_constraintTop_toBottomOf="@id/channel_item_channel_name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/channel_item_delete_icon"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textSize="@dimen/sixteenSP"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:text="@string/channel_dialog_hint"/>
 
         <Button
@@ -39,10 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/twentyFourDp"
-            android:layout_marginEnd="@dimen/sixteenDp"
             android:background="@drawable/clear_button"
             app:layout_constraintTop_toBottomOf="@id/channel_item_admin_text_view"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:text="@string/delete"/>
 
@@ -53,9 +52,32 @@
             android:layout_marginTop="@dimen/twentyFourDp"
             android:background="@drawable/clear_button"
             app:layout_constraintTop_toBottomOf="@id/channel_item_admin_text_view"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/channel_item_admin_delete_icon"
-            android:text="@string/send"/>
+            android:text="@string/send"
+            android:textColor="@drawable/clear_button_primary_text_color"/>
+
+        <Button
+            android:id="@+id/channel_item_admin_delete_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDp"
+            android:background="@drawable/clear_button"
+            app:layout_constraintTop_toBottomOf="@id/channel_item_admin_send_notification_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="@string/cancel"/>
+
+        <Button
+            android:id="@+id/channel_item_admin_delete_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDp"
+            android:background="@drawable/clear_button"
+            app:layout_constraintTop_toBottomOf="@id/channel_item_admin_send_notification_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/channel_item_admin_delete_cancel"
+            android:text="@string/confirm"
+            android:textColor="@color/colorDeleteRed"/>
 
     </android.support.constraint.ConstraintLayout>
 

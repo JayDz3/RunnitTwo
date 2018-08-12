@@ -45,13 +45,18 @@ public class ResetFragment extends Fragment
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
   {
-    return inflater.inflate(R.layout.fragment_reset, container, false);
+    View rootView = inflater.inflate(R.layout.fragment_reset, container, false);
+    setViewItems(rootView);
+    return rootView;
   }
 
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
-    super.onViewCreated(view, savedInstanceState);
+  }
+
+  public void setViewItems(View view)
+  {
     emailEditView = view.findViewById(R.id.reset_fragment_email);
     resetFragmentSubmitButton = view.findViewById(R.id.reset_submit);
     resetFragmentSubmitButton.setOnClickListener(l -> submit());

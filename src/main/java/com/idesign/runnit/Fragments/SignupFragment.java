@@ -65,14 +65,20 @@ public class SignupFragment extends Fragment {
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
   {
-    return inflater.inflate(R.layout.fragment_signup, container, false);
+    View rootView = inflater.inflate(R.layout.fragment_signup, container, false);
+    setViewItems(rootView);
+    return rootView;
   }
 
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
-    progressBar = view.findViewById(R.id.signup_progress_bar);
     progressBar.setVisibility(View.GONE);
+  }
+
+  public void setViewItems(View view)
+  {
+    progressBar = view.findViewById(R.id.signup_progress_bar);
     editFirstName = view.findViewById(R.id.signup_first_name);
     editLastName = view.findViewById(R.id.signup_last_name);
     editEmail = view.findViewById(R.id.signup_email);
