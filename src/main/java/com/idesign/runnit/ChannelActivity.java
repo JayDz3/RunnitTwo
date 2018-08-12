@@ -20,8 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -208,16 +206,17 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     disableButton();
     final String orgPushid = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
+    final String upperCaseName = upperCaseFirstLetter(name);
+
     mFirestore.getOrgSnapshotTask(orgPushid)
     .onSuccessTask(orgSnapshot ->
     {
-      Task<Void> task = Tasks.forResult(null);
       if (orgSnapshot == null)
       {
-        return task;
+       throw new RuntimeException("org snapshot was null");
       }
       final List<FirestoreChannel> channels = new ArrayList<>();
-      final String trimmed = name.trim();
+      final String trimmed = upperCaseName.trim();
       for (FirestoreChannel c : mAdapter.getItems())
       {
         if (c.get_channelId().equalsIgnoreCase(trimmed))
@@ -226,18 +225,20 @@ public class ChannelActivity extends AppCompatActivity implements
         }
       }
       if (channels.size() == 0) {
-        fillIntent(name);
-        task = mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, name);
+        return mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, upperCaseName);
 
       } else {
-        showToast("A channel with that name already exists...");
+        throw new RuntimeException("A channel with this name already exists");
       }
-      return task;
     })
-    .addOnSuccessListener(l -> enableButton())
+    .addOnSuccessListener(l ->
+    {
+      fillIntent(upperCaseName);
+      enableButton();
+    })
     .addOnFailureListener(e ->
     {
-      showToast("error adding channel: " + e.getMessage());
+      showToast(e.getMessage());
       enableButton();
     });
   }
@@ -356,6 +357,11 @@ public class ChannelActivity extends AppCompatActivity implements
   public String trimmedString(String source)
   {
     return source.trim();
+  }
+
+  public String upperCaseFirstLetter(String source)
+  {
+    return source.substring(0, 1).toUpperCase() + source.substring(1);
   }
 
   public void showToast(CharSequence message)
