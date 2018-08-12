@@ -25,7 +25,6 @@ import com.idesign.runnit.VIewModels.LoginDataViewModel;
 
 public class ResetFragment extends Fragment
 {
-
   private final MyAuth mAuth = new MyAuth();
   private LoginDataViewModel mLoginViewModel;
 

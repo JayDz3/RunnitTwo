@@ -133,28 +133,29 @@ public class SignupFragment extends Fragment {
     }
   }
 
-  public void takeAction() {
+  public void takeAction()
+  {
+    disableButtons();
+    progressBar.setVisibility(View.VISIBLE);
+    final String email = mUserViewModel.getEmail();
+    final String pw = mPasswordViewModel.getPassword().getValue();
+    final String firstname = mUserViewModel.getFirstName();
+    final String lastname = mUserViewModel.getLastName();
+    final String lowercaseEmail = lowercaseString(email);
 
-      disableButtons();
-      progressBar.setVisibility(View.VISIBLE);
-      final String email = mUserViewModel.getEmail();
-      final String pw = mPasswordViewModel.getPassword().getValue();
-      final String firstname = mUserViewModel.getFirstName();
-      final String lastname = mUserViewModel.getLastName();
-
-      final String lowercaseEmail = lowercaseString(email);
-
-      mAuth.createUser(lowercaseEmail, pw)
-      .onSuccessTask(firebaseUser ->  setFirestoreUser(firstname, lastname))
-      .addOnSuccessListener(task -> {
-        mStateViewModel.setFragmentState(Constants.STATE_HOME);
-        showToast("Registration complete!");
-      })
-      .addOnFailureListener(e -> {
-        progressBar.setVisibility(View.GONE);
-        showToast("error: " + e.getMessage());
-        enableButtons();
-      });
+    mAuth.createUser(lowercaseEmail, pw)
+    .onSuccessTask(firebaseUser ->  setFirestoreUser(firstname, lastname))
+    .addOnSuccessListener(task ->
+    {
+      mStateViewModel.setFragmentState(Constants.STATE_HOME);
+      showToast("Registration complete!");
+    })
+    .addOnFailureListener(e ->
+    {
+      progressBar.setVisibility(View.GONE);
+      showToast("error: " + e.getMessage());
+      enableButtons();
+    });
   }
   /*
    Set user in Cloud Firestore

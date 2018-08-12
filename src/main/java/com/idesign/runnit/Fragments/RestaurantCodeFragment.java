@@ -31,8 +31,8 @@ import com.idesign.runnit.Items.User;
 import com.idesign.runnit.VIewModels.StateViewModel;
 import com.idesign.runnit.VIewModels.UserViewModel;
 
-public class RestaurantCodeFragment extends Fragment {
-
+public class RestaurantCodeFragment extends Fragment
+{
   private final BaseFirestore mFirestore = new BaseFirestore();
   private final MyAuth mAuth = new MyAuth();
 
@@ -105,7 +105,8 @@ public class RestaurantCodeFragment extends Fragment {
 
   public void submit()
   {
-    if (mAuth.user() == null) {
+    if (mAuth.user() == null)
+    {
       showToast("you have not created an account...");
       return;
     }
@@ -123,13 +124,17 @@ public class RestaurantCodeFragment extends Fragment {
     .onSuccessTask(ignore -> mFirestore.queryOrgByCodeTask(text))
     .onSuccessTask(orgSnapshots ->
     {
+      if (orgSnapshots == null)
+      {
+        throw new RuntimeException("There was a problem accessing this organization");
+      }
       final DocumentSnapshot docSnap = orgSnapshots.getDocuments().get(0);
       final FirestoreOrg org = mFirestore.toFirestoreObject(docSnap, FirestoreOrg.class);
       final String orgPushid = org.getPushId();
       return mFirestore.setUserOrgPushId(orgPushid, uid);
     })
     .addOnSuccessListener(ignore -> showSnackbar("Success"))
-    .addOnFailureListener(e -> showSnackbar("error setting your code"));
+    .addOnFailureListener(e -> showSnackbar("error setting your code: " + e.getMessage()));
   }
 
   public boolean isEmptyField(EditText editText)

@@ -15,7 +15,6 @@ import com.idesign.runnit.VIewModels.LoginDataViewModel;
 
 public class LoginActivity extends AppCompatActivity
 {
-
   private Fragment mLoginFragment;
   private Fragment mResetFragment;
   private LoginDataViewModel mLoginDataViewModel;

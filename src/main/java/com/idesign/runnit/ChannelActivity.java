@@ -39,14 +39,12 @@ import java.util.List;
 public class ChannelActivity extends AppCompatActivity implements
   ChannelAdapter.AdminChannelAdapterListener,
   NewChannelDialog.ChannelDialogListener
-
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
 
   private RecyclerView mRecyclerView;
   private ChannelAdapter mAdapter;
-
   private ProgressBar progressBar;
   private FloatingActionButton fab;
 
@@ -54,7 +52,6 @@ public class ChannelActivity extends AppCompatActivity implements
 
   private int PRIMARY;
   private int DARK_GREY;
-
   private int _open = -1;
 
   private final String EXTRA_OPEN = "extra_open";
@@ -63,7 +60,6 @@ public class ChannelActivity extends AppCompatActivity implements
   private AppUserViewModel mAppUserViewModel;
 
   private ListenerRegistration channelListener;
-
   private LinearLayoutManager mLayouManager;
 
   @Override
@@ -71,25 +67,16 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_channel);
-    setViewItems();
-
     getValuesFromBundle(savedInstanceState);
+    setViewItems();
+    setAdapterAndRecyclerView();
 
     DARK_GREY = ContextCompat.getColor(this, R.color.colorDarkGray);
     PRIMARY = ContextCompat.getColor(this, R.color.colorPrimary);
 
-    final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
-    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this, _open);
-
     fab.setOnClickListener(l -> showDialog());
     fab.setClickable(false);
     fab.setEnabled(false);
-
-    DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-    mLayouManager = new LinearLayoutManager(this);
-    mRecyclerView.setLayoutManager(mLayouManager);
-    mRecyclerView.addItemDecoration(itemDecoration);
-    mRecyclerView.setAdapter(mAdapter);
 
     mAdminChannelViewModel = ViewModelProviders.of(this).get(AdminChannelViewModel.class);
     mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
@@ -104,6 +91,17 @@ public class ChannelActivity extends AppCompatActivity implements
     progressBar = findViewById(R.id.channel_activity_admin_progress_bar);
     noChannelView = findViewById(R.id.channel_activity_admin_no_channels);
     fab = findViewById(R.id.channel_activity_admin_fab);
+  }
+
+  public void setAdapterAndRecyclerView()
+  {
+    final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
+    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this, _open);
+    DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+    mLayouManager = new LinearLayoutManager(this);
+    mRecyclerView.setLayoutManager(mLayouManager);
+    mRecyclerView.addItemDecoration(itemDecoration);
+    mRecyclerView.setAdapter(mAdapter);
   }
 
   private Observer<List<FirestoreChannel>> observer()
@@ -135,7 +133,8 @@ public class ChannelActivity extends AppCompatActivity implements
       {
         if (e != null)
         {
-          handleSnapshotError(e);
+          showToast("error getting channels from database: " + e.getMessage());
+          noChannelView.setVisibility(View.VISIBLE);
           enableButton();
           return;
         }
@@ -150,16 +149,7 @@ public class ChannelActivity extends AppCompatActivity implements
     });
   }
 
-  /*
-   *  Handle Channel Listener Actions
-   */
-  public void handleSnapshotError(FirebaseException e)
-  {
-    showToast("error getting channels from database: " + e.getMessage());
-    noChannelView.setVisibility(View.VISIBLE);
-  }
-
-  // {End Handle ChannelListener Actions] //
+  // {End ChannelListener] //
 
   public void removeListener()
   {
@@ -174,7 +164,6 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     if (channels.size() == 0) {
       noChannelView.setVisibility(View.VISIBLE);
-
     } else {
       noChannelView.setVisibility(View.GONE);
     }
@@ -325,6 +314,7 @@ public class ChannelActivity extends AppCompatActivity implements
     removeListener();
     mAdminChannelViewModel.getChannels().removeObserver(observer());
     mAppUserViewModel.getmUser().removeObserver(userObserver());
+    mAppUserViewModel.clear();
   }
 
   @Override

@@ -19,9 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.Constants;
-import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.LoginData;
 import com.idesign.runnit.R;
@@ -30,7 +28,6 @@ import com.idesign.runnit.VIewModels.LoginDataViewModel;
 public class LoginFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
-  private final BaseFirestore mFirestore = new BaseFirestore();
   private LoginDataViewModel mLoginDataViewModel;
 
   private ProgressBar loginProgressBar;
@@ -223,7 +220,8 @@ public class LoginFragment extends Fragment
   {
     super.onResume();
     mLoginDataViewModel.getLoginData().observe(this, loginDataObserver());
-    if (isLoggingIn()) {
+    if (isLoggingIn())
+    {
       showProgressBar();
       disableButtons();
     }

@@ -39,9 +39,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private final BaseFirestore mFirestore = new BaseFirestore();
   private final Context mContext;
   private AdminChannelAdapterListener mListener;
-  private final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
-  private int _open = -1;
 
+  private int _open;
   private User mUser;
 
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
@@ -143,6 +142,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
 
   private void sendNotification(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
+    final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final String uid = mAuth.user().getUid();
     final ActiveUser thisUser = new ActiveUser(uid);
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
@@ -180,7 +180,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       }
       return task;
     })
-    .addOnSuccessListener(l -> {
+    .addOnSuccessListener(l ->
+    {
       enableButtons(viewHolder);
       mListener.enable();
     })
