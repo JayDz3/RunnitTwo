@@ -15,14 +15,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
-import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 
@@ -35,7 +33,6 @@ import java.util.Objects;
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminChannelViewHolder>
 {
   private List<FirestoreChannel> mChannels;
-  private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
   private final Context mContext;
   private AdminChannelAdapterListener mListener;
@@ -143,54 +140,49 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private void sendNotification(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
-    final String uid = mAuth.user().getUid();
-    final ActiveUser thisUser = new ActiveUser(uid);
+    final String COLLECTION_SUBSCRIBED_CHANNELS = "UserChannels";
+    final String orgCode = mUser.get_organizationCode();
+    final String channelId = channelRef.getId();
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
 
     disableButtons(viewHolder);
     mListener.disable();
 
-    activeUsersReference.get()
-    .onSuccessTask(activeUsers ->
-    {
-      Task<Void> task = Tasks.forResult(null);
-      if (activeUsers == null)
+    /*
+     *  Needs alot of polishing but works for now
+     */
+    mFirestore.getAllOrganizationUsersQuery(orgCode)
+    .addOnSuccessListener(allUsers -> {
+      if (allUsers == null)
       {
-        return task;
+        throw new RuntimeException("No Users Found");
       }
 
-      /*
-       *  Remove this task in production
-       *  adding admin user to active users for testing purposes
-       */
-      task = activeUsersReference.document(uid)
-      .delete()
-      .onSuccessTask(ignore -> activeUsersReference.document(uid).set(thisUser));
-      // above //
-
-      for (DocumentSnapshot ds : activeUsers)
+      for (DocumentSnapshot ds : allUsers)
       {
-        final String id = ds.getId();
-        final ActiveUser activeUser = new ActiveUser(id);
-        if (!id.equals(uid))
-        {
-          task = ds.getReference().delete()
-          .onSuccessTask(ignore -> activeUsersReference.document(id).set(activeUser));
-        }
+        final DocumentReference subscribedRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_CHANNELS).document(channelId);
+        final String userId = ds.getId();
+
+        subscribedRef.get().addOnSuccessListener(snapshot -> handleSnapshot(activeUsersReference, snapshot, userId));
       }
-      return task;
-    })
-    .addOnSuccessListener(l ->
-    {
-      enableButtons(viewHolder);
       mListener.enable();
-    })
-    .addOnFailureListener(e ->
-    {
       enableButtons(viewHolder);
+    })
+    .addOnFailureListener(e -> {
+      showToast(e.getMessage());
       mListener.enable();
-      showToast("error adding user: " + e.getMessage());
+      enableButtons(viewHolder);
     });
+  }
+
+  public void handleSnapshot(CollectionReference activeUsersReference, DocumentSnapshot snapshot, String userId)
+  {
+    if (snapshot != null && snapshot.exists())
+    {
+      final ActiveUser activeUser = new ActiveUser(userId);
+      activeUsersReference.document(userId).delete()
+      .onSuccessTask(deleted -> activeUsersReference.document(userId).set(activeUser));
+    }
   }
 
   private void confirmDeleteChannel(final DocumentReference channelRef, final FirestoreChannel channel, AdminChannelViewHolder viewHolder)

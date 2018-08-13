@@ -298,7 +298,8 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, ChannelActivity.class);
         startActivity(intent);
       } else {
-        showToast("user is not admin");
+        Intent intent = new Intent(this, UserChannelActivity.class);
+        startActivity(intent);
       }
     })
     .addOnFailureListener(e -> showToast("error getting user when going to admin channel: " + e.getMessage()));
@@ -452,7 +453,7 @@ public class MainActivity extends AppCompatActivity
         addUserListener(userRef);
         FirebaseInstanceId.getInstance().getInstanceId()
         .onSuccessTask(id ->  mFirestore.updateInstanceId(userRef, id.getToken()))
-        .addOnSuccessListener(l -> showToast("You are set to receive notifications"))
+        // .addOnSuccessListener(l -> showToast("You are set to receive notifications"))
         .addOnFailureListener(e -> showToast("error: " + e.getMessage()));
         mUserViewModel.clear();
         mPasswordViewModel.setPassword("");

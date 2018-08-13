@@ -20,7 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseException;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import com.idesign.runnit.Adapters.ChannelAdapter;

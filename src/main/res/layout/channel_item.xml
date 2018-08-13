@@ -12,17 +12,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_item_delete_icon"
-        android:drawablePadding="@dimen/sixteenDp"/>
-
-    <ImageButton
-        android:id="@+id/channel_item_delete_icon"
-        android:src="@drawable/ic_remove_circle_outline_black_24dp"
-        android:contentDescription="@string/channel_activity_remove_channel_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:paddingStart="@dimen/twentyFourDp"
+        android:paddingEnd="@dimen/twentyFourDp"/>
 
 </android.support.constraint.ConstraintLayout>

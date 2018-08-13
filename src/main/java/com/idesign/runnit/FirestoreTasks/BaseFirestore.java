@@ -163,6 +163,13 @@ public class BaseFirestore {
     return writeBatch.commit();
   }
 
+  public Task<Void> setNotAdmin(DocumentReference documentReference)
+  {
+    WriteBatch writeBatch = mFirestore.batch();
+    writeBatch.update(documentReference, IS_ADMIN, false);
+    return writeBatch.commit();
+  }
+
   public Task<Void> setUserOrgPushId(String _organizationPushId, String uid)
   {
     return getUsers().document(uid).update(ORG__PUSHID, _organizationPushId);

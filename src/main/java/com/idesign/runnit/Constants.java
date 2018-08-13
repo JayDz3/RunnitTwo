@@ -9,7 +9,6 @@ public class Constants {
   public static final int STATE_LOGGED_IN = 5;
   public static final int STATE_LOGGED_OUT = 6;
 
-  public static final String KEY_VERIFY_IN_PROGRESS = "key_verify_in_progress";
   public static final String LOGIN_IN_PROGRESS = "login_in_progress";
 
   public static final String LOGIN_FRAGMENT_BEING_VIEWED = "fragment_being_viewed";
@@ -24,5 +23,4 @@ public class Constants {
 
   public static final String COLLECTION_USERS = "Users";
   public static final String COLLECTION_ORGS = "Orgs";
-  public static final String COLLECTION_ACTIVE = "Active";
 }

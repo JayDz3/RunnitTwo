@@ -32,6 +32,7 @@
 
     <!-- HOME FRAGMENT -->
     <string name="home_fragment_get_runners">Runners</string>
+    <string name="home_fragment_toggle_admin">Toggle</string>
 
     <!-- SIGNUP FRAGMENT -->
     <string name="signup_firstname_hint">First name</string>
@@ -79,4 +80,7 @@
     <!-- NEW CHANNEL DIALOG -->
     <string name="channel_dialog_title">This will be the name of your channel</string>
     <string name="channel_dialog_hint">Servers</string>
+
+    <!-- USER CHANNEL ACTIVITY -->
+    <string name="channel_activity_user_no_channels">No channels are available</string>
 </resources>

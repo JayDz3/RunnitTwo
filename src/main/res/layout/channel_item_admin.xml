@@ -31,9 +31,7 @@
             android:layout_marginStart="@dimen/sixteenDp"
             app:layout_constraintTop_toBottomOf="@id/channel_item_channel_name"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/channel_item_delete_icon"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:text="@string/channel_dialog_hint"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
         <Button
             android:id="@+id/channel_item_admin_delete_icon"

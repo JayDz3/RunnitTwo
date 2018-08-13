@@ -1,6 +1,4 @@
-
 package com.idesign.runnit.Fragments;
-
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -14,8 +12,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 
@@ -25,13 +25,14 @@ import com.idesign.runnit.VIewModels.UserViewModel;
 
 import java.util.Objects;
 
-
 public class HomeFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
 
   private UserViewModel mUserViewModel;
+
+  private Button toggleButton;
 
   public HomeFragment() { }
 
@@ -51,6 +52,8 @@ public class HomeFragment extends Fragment
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
+    toggleButton = view.findViewById(R.id.home_fragment_toggle_admin);
+    toggleButton.setOnClickListener(l -> toggleAdmin());
     /* if (mAuth.user() == null) {
       submitButton.setVisibility(View.GONE);
     } else {
@@ -74,19 +77,49 @@ public class HomeFragment extends Fragment
    * @ error can not use same lifecycle context twice [something along those lines]
    *
    */
-  private Observer<User> getUserObserver()
+
+ /* private Observer<User> getUserObserver()
   {
     return user ->
     {
-      if (user != null)
-      {
-        if (user.get_isAdmin()) {
-          Log.d("Home frag", "not is admin");
+      final String isAdminString = "Admin";
+      final String notAdminString = "Not Admin";
+      if (user != null) {
+        isAdmin = user.get_isAdmin();
+        if (isAdmin) {
+          toggleButton.setText(isAdminString);
         } else {
-          Log.d("Home frag", "is admin");
+          toggleButton.setText(notAdminString);
         }
       }
     };
+  } */
+
+  public void toggleAdmin()
+  {
+    if (mAuth.user() == null)
+    {
+      showToast("Not logged in");
+    }
+    final String id = mAuth.user().getUid();
+    final DocumentReference docRef = mFirestore.getUsers().document(id);
+    docRef.get()
+    .onSuccessTask(userRef ->
+    {
+      final User user = mFirestore.toFirestoreObject(userRef, User.class);
+      final boolean isAdmin = user.get_isAdmin();
+      final String notAdminString = "Not Admin";
+      final String isAdminString = "Admin";
+      if (isAdmin) {
+        toggleButton.setText(notAdminString);
+        return mFirestore.setNotAdmin(docRef);
+      } else {
+        toggleButton.setText(isAdminString);
+        return mFirestore.setIsAdmin(docRef);
+      }
+    })
+    .addOnSuccessListener(l -> Log.d("HOME FRAGMENT", "USER IS NOW ADMIN"))
+    .addOnFailureListener(e -> showToast("error setting as admin: " + e.getMessage()));
   }
 
   public void sendNotification()
@@ -150,14 +183,14 @@ public class HomeFragment extends Fragment
   public void onResume()
   {
     super.onResume();
-    mUserViewModel.getUser().observe(this, getUserObserver());
+    // mUserViewModel.getUser().observe(this, getUserObserver());
   }
 
   @Override
   public void onPause()
   {
     super.onPause();
-    mUserViewModel.getUser().removeObserver(getUserObserver());
+    // mUserViewModel.getUser().removeObserver(getUserObserver());
   }
 
   @Override
