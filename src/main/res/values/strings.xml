@@ -72,10 +72,12 @@
     <string name="channel_activity_click_channel_to_toggle">Click any channel to activate or deactivate it</string>
     <string name="channel_activity_remove_channel_description">Remove this channel</string>
     <string name="channel_activity_send_notification_description">Send notification</string>
+    <string name="channel_activity_see_active_users_description">See active users</string>
     <string name="channel_activity_admin_no_channels">No channels have been created </string>
 
     <!-- Admin channel item -->
     <string name="admin_channel_item_channel_name">Channel Name</string>
+    <string name="admin_channel_item_sent_text">Last Sent</string>
 
     <!-- NEW CHANNEL DIALOG -->
     <string name="channel_dialog_title">This will be the name of your channel</string>

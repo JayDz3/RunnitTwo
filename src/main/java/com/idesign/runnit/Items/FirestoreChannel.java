@@ -12,9 +12,12 @@ public class FirestoreChannel {
   @ServerTimestamp
   private Timestamp _created;
 
+  @ServerTimestamp
+  private Timestamp _lastSent;
+
   public FirestoreChannel() {}
 
-  public FirestoreChannel(String _pushId, String _orgPushId, String _channelId, boolean _isAdmin, boolean _isActive)
+  public FirestoreChannel(String _pushId, String _orgPushId, String _channelId, boolean _isAdmin, boolean _isActive, Timestamp _lastSent)
   {
     this._pushId = _pushId;
     this._orgPushId = _orgPushId;
@@ -36,6 +39,11 @@ public class FirestoreChannel {
   public void set_isActive(boolean _isActive)
   {
     this._isActive = _isActive;
+  }
+
+  public void set_lastSent(Timestamp _lastSent)
+  {
+    this._lastSent = _lastSent;
   }
 
   public String get_pushId()
@@ -66,5 +74,9 @@ public class FirestoreChannel {
   public Timestamp get_created()
   {
     return _created;
+  }
+
+  public Timestamp get_lastSent() {
+    return _lastSent;
   }
 }

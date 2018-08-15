@@ -1,6 +1,7 @@
 package com.idesign.runnit.FirestoreTasks;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -9,15 +10,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.Constants;
-import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.FirestoreOrg;
+
+import java.util.Date;
 
 public class BaseFirestore {
   private final String IS_ADMIN = "_isAdmin";
   private final String IS_ACTIVE_ADMIN_CHANNEL = "_isActive";
   private final String ORG_CODE = "_organizationCode";
   private final String ORG__PUSHID = "_organizationPushId";
+
+  private final String LAST_SENT = "_lastSent";
 
   private final String ENABLE_NOTIFICATIONS = "_sendNotification";
   private final String INSTANCE_ID = "_instanceId";
@@ -37,7 +41,7 @@ public class BaseFirestore {
     return users;
   }
 
-  public CollectionReference getOrgs()
+  private CollectionReference getOrgs()
   {
     return orgs;
   }
@@ -48,11 +52,6 @@ public class BaseFirestore {
   public DocumentReference getAdminChannel(String orgPushId, String channelId)
   {
     return orgs.document(orgPushId).collection(COLLECTION_CHANNELS).document(channelId);
-  }
-
-  public DocumentReference getChannelActiveUserReference(DocumentReference channelRef, String uid)
-  {
-    return channelRef.collection(COLLECTION_ACTIVE_USERS).document(uid);
   }
 
   public DocumentReference getUserChannelReference(String uid, String channelId)
@@ -87,20 +86,19 @@ public class BaseFirestore {
 
   public Task<Void> addChannelAdmin(DocumentReference orgRef, String orgPushId, String newChannelId)
   {
-   final FirestoreChannel channel = new FirestoreChannel(newChannelId, orgPushId, newChannelId, true, false);
+    Date date = new Date();
+    Timestamp _lastSent = new Timestamp(date);
+   final FirestoreChannel channel = new FirestoreChannel(newChannelId, orgPushId, newChannelId, true, false, null);
    return orgRef.collection(COLLECTION_CHANNELS).document(newChannelId).set(channel);
   }
 
-  public Task<Void> addActiveUserToChannelTask(ActiveUser activeUser, FirestoreChannel channel)
+  public Task<Void> updateLastSent(DocumentReference channelRef)
   {
-    return orgs.document(channel.get_orgPushId()).collection(COLLECTION_CHANNELS).document(channel.get_pushId())
-    .collection(COLLECTION_ACTIVE_USERS).document(activeUser.get_pushId()).set(activeUser);
-  }
-
-  public Task<Void> removeUserFromActiveChannelTask(ActiveUser activeUser, FirestoreChannel channel)
-  {
-    return orgs.document(channel.get_orgPushId()).collection(COLLECTION_CHANNELS).document(channel.get_pushId())
-    .collection(COLLECTION_ACTIVE_USERS).document(activeUser.get_pushId()).delete();
+    WriteBatch batch = mFirestore.batch();
+    Date date = new Date();
+    Timestamp now = new Timestamp(date);
+    batch.update(channelRef, LAST_SENT, now);
+    return batch.commit();
   }
 
   public Task<Void> addChannelToUserTask(FirestoreChannel channel, DocumentReference userRef)
@@ -185,21 +183,6 @@ public class BaseFirestore {
   public Task<Void> toggleNotifications(DocumentReference docRef, boolean status)
   {
     return docRef.update(ENABLE_NOTIFICATIONS, status);
-  }
-
-  public Task<Void> clockIn(DocumentReference documentReference, String uid)
-  {
-    WriteBatch batch = mFirestore.batch();
-    ActiveUser activeUser = new ActiveUser(uid);
-    batch.set(documentReference, activeUser);
-    return batch.commit();
-  }
-
-  public Task<Void> clockOut(DocumentReference docRef)
-  {
-    WriteBatch batch = mFirestore.batch();
-    batch.delete(docRef);
-    return batch.commit();
   }
 
   public WriteBatch batch() {

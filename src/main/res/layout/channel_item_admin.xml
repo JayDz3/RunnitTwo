@@ -19,9 +19,32 @@
             android:layout_marginStart="@dimen/sixteenSP"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/channel_item_channel_sent_header"
             android:text="@string/admin_channel_item_channel_name"
+            app:layout_constraintHorizontal_weight="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+        <TextView
+            android:id="@+id/channel_item_channel_sent_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDp"
+            android:layout_marginEnd="@dimen/sixteenDp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@string/admin_channel_item_sent_text"
+            app:layout_constraintHorizontal_weight="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+        <TextView
+            android:id="@+id/channel_item_admin_channel_sent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/sixteenDp"
+            app:layout_constraintTop_toBottomOf="@id/channel_item_channel_sent_header"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:text="@string/confirm"/>
 
         <TextView
             android:id="@+id/channel_item_admin_text_view"
@@ -53,6 +76,17 @@
             app:layout_constraintStart_toEndOf="@id/channel_item_admin_delete_icon"
             android:text="@string/send"
             android:textColor="@drawable/clear_button_primary_text_color"/>
+
+        <ImageButton
+            android:id="@+id/channel_item_admin_see_active_users_icon"
+            android:src="@drawable/ic_people_outline_black_24dp"
+            android:contentDescription="@string/channel_activity_see_active_users_description"
+            android:layout_margin="@dimen/eightDp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/channel_item_admin_send_notification_icon"
+            app:layout_constraintBottom_toBottomOf="@id/channel_item_admin_send_notification_icon"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <Button
             android:id="@+id/channel_item_admin_delete_cancel"

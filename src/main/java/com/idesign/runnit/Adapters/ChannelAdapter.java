@@ -7,14 +7,18 @@ import android.support.annotation.NonNull;
 
 import android.support.v7.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -27,7 +31,11 @@ import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminChannelViewHolder>
@@ -43,8 +51,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
     private TextView channelNameView;
+    private TextView channelTimeView;
     private Button deleteButton;
     private Button sendNotificationButton;
+
+    private ImageButton activeUsersButton;
 
     private Button cancelDeleteButton;
     private Button confirmDeleteButton;
@@ -52,7 +63,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     AdminChannelViewHolder(View view)
     {
       super(view);
+      activeUsersButton = view.findViewById(R.id.channel_item_admin_see_active_users_icon);
       channelNameView = view.findViewById(R.id.channel_item_admin_text_view);
+      channelTimeView = view.findViewById(R.id.channel_item_admin_channel_sent);
       deleteButton = view.findViewById(R.id.channel_item_admin_delete_icon);
       sendNotificationButton = view.findViewById(R.id.channel_item_admin_send_notification_icon);
       cancelDeleteButton = view.findViewById(R.id.channel_item_admin_delete_cancel);
@@ -96,13 +109,22 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   public void onBindViewHolder(@NonNull AdminChannelViewHolder viewHolder, final int position)
   {
     final FirestoreChannel channel = mChannels.get(position);
+
     final String channelId = channel.get_channelId();
     final String orgPushId = channel.get_orgPushId();
+    final Timestamp sentAt = channel.get_lastSent();
+    if (sentAt != null) {
+      Date dateSent = sentAt.toDate();
+
+      SimpleDateFormat time = new SimpleDateFormat("h:mm a", Locale.getDefault());
+      viewHolder.channelTimeView.setText(time.format(dateSent));
+    }
+
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
 
     viewHolder.channelNameView.setText(channel.get_channelId());
-
     viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
+    viewHolder.activeUsersButton.setOnClickListener(l -> seeActiveUsers(channelRef, viewHolder));
     viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
 
     viewHolder.confirmDeleteButton.setOnClickListener(l -> confirmDeleteChannel(channelRef, channel, viewHolder));
@@ -137,6 +159,49 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     viewHolder.sendNotificationButton.setVisibility(View.INVISIBLE);
   }
 
+  private void seeActiveUsers(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
+  {
+    final List<User> users = new ArrayList<>();
+    final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
+    final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
+
+    viewHolder.activeUsersButton.setEnabled(false);
+    viewHolder.activeUsersButton.setClickable(false);
+    disableButtons(viewHolder);
+    activeUsersReference.get()
+    .continueWithTask(activeUsers ->
+    {
+      List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+      for (DocumentSnapshot ds : activeUsers.getResult())
+      {
+        tasks.add(mFirestore.getUsers().document(ds.getId()).get().addOnSuccessListener(ref ->
+        {
+          final User user = mFirestore.toFirestoreObject(ref, User.class);
+          users.add(user);
+        }));
+      }
+      return Tasks.whenAll(tasks);
+    })
+    .addOnSuccessListener(l ->
+    {
+      Log.d("Channel Adapter", "got alll active uesrs");
+      for (User user : users)
+      {
+        Log.d("CHANNEL ADAPTER", "First and last name: " + user.get_firstName() + " " + user.get_lastName());
+      }
+      viewHolder.activeUsersButton.setEnabled(true);
+      viewHolder.activeUsersButton.setClickable(true);
+      enableButtons(viewHolder);
+    })
+    .addOnFailureListener(e ->
+    {
+      showToast("error getting all users: " + e.getMessage());
+      viewHolder.activeUsersButton.setEnabled(true);
+      viewHolder.activeUsersButton.setClickable(true);
+      enableButtons(viewHolder);
+    });
+  }
+
   private void sendNotification(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
@@ -152,37 +217,42 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
      *  Needs alot of polishing but works for now
      */
     mFirestore.getAllOrganizationUsersQuery(orgCode)
-    .addOnSuccessListener(allUsers -> {
+    .onSuccessTask(allUsers ->
+    {
+      List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
       if (allUsers == null)
       {
         throw new RuntimeException("No Users Found");
       }
 
-      for (DocumentSnapshot ds : allUsers)
+      for (DocumentSnapshot ds : allUsers.getDocuments())
       {
         final DocumentReference subscribedRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_CHANNELS).document(channelId);
-        final String userId = ds.getId();
-
-        subscribedRef.get().addOnSuccessListener(snapshot -> handleSnapshot(activeUsersReference, snapshot, userId));
+        tasks.add(subscribedRef.get().addOnSuccessListener(ref ->
+        {
+          if (ref.exists())
+          {
+            final String refId = ds.getId();
+            final ActiveUser activeUser = new ActiveUser(refId);
+            activeUsersReference.document(refId).delete()
+            .onSuccessTask(ignore -> activeUsersReference.document(refId).set(activeUser));
+          }
+        }));
       }
+      return Tasks.whenAll(tasks);
+    })
+    .onSuccessTask(ignore -> mFirestore.updateLastSent(channelRef))
+    .addOnSuccessListener(l ->
+    {
       mListener.enable();
       enableButtons(viewHolder);
     })
-    .addOnFailureListener(e -> {
+    .addOnFailureListener(e ->
+    {
       showToast(e.getMessage());
       mListener.enable();
       enableButtons(viewHolder);
     });
-  }
-
-  public void handleSnapshot(CollectionReference activeUsersReference, DocumentSnapshot snapshot, String userId)
-  {
-    if (snapshot != null && snapshot.exists())
-    {
-      final ActiveUser activeUser = new ActiveUser(userId);
-      activeUsersReference.document(userId).delete()
-      .onSuccessTask(deleted -> activeUsersReference.document(userId).set(activeUser));
-    }
   }
 
   private void confirmDeleteChannel(final DocumentReference channelRef, final FirestoreChannel channel, AdminChannelViewHolder viewHolder)
@@ -319,31 +389,3 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     void setOpen(int open);
   }
 }
-
-  /* public void toggleChannelStatus(final DocumentReference channelRef, final FirestoreChannel channel)
-  {
-    mFirestore.setUserReference(mAuth.user().getUid());
-    if (channel.is_isActive()) {
-      mFirestore.deActivateAdminChannel(channelRef)
-      .addOnSuccessListener(t ->
-      {
-        channel.set_isActive(false);
-        showToast("Channel deactivated");
-        notifyDataSetChanged();
-      });
-    } else {
-      mFirestore.activateAdminChannel(channelRef)
-      .onSuccessTask(ignore -> mFirestore.addChannelToUser(channel))
-      .addOnSuccessListener(t ->
-      {
-        channel.set_isActive(true);
-        showToast("Channel activated");
-        notifyDataSetChanged();
-      })
-      .addOnFailureListener(e -> showToast("e: " + e.getMessage()));
-    }
-  } */
-
-/*
- * Called from channel activity to check for redundant channel name
- */
