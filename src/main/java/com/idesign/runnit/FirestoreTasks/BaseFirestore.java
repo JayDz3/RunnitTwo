@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class BaseFirestore {
+public class BaseFirestore
+{
   private final String IS_ADMIN = "_isAdmin";
   private final String ORG_CODE = "_organizationCode";
   private final String ORG__PUSHID = "_organizationPushId";
@@ -109,9 +110,9 @@ public class BaseFirestore {
     return channelRef.collection(COLLECTION_SUBSCRIBED_USERS);
   }
 
-  public Task<Void> addSubscribedUserTask(DocumentReference channelRef, String uid)
+  public Task<Void> addSubscribedUserTask(DocumentReference channelRef, String firstName, String lastName, String uid)
   {
-    SubscribedUser user = new SubscribedUser(uid, true);
+    SubscribedUser user = new SubscribedUser(uid, firstName, lastName, true);
     return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid).set(user);
   }
 
@@ -120,7 +121,7 @@ public class BaseFirestore {
     return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid).delete();
   }
 
-  public Task<Void> updateSubscribedUserTask(DocumentReference subscribedUserRef, boolean status, String uid)
+  public Task<Void> updateSubscribedUserTask(final DocumentReference subscribedUserRef, final boolean status)
   {
     return subscribedUserRef.update(LOGGED_IN, status);
   }
@@ -227,7 +228,7 @@ public class BaseFirestore {
         {
           final FirestoreChannel channel = toFirestoreObject(ds, FirestoreChannel.class);
           channels.add(channel);
-          updateSubscribedUserTask(subscribedUserRef, true, uid);
+          updateSubscribedUserTask(subscribedUserRef, true);
         }
       }));
     }

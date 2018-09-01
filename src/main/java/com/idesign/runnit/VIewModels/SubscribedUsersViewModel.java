@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModel;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
+import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.Items.User;
 
 import java.util.ArrayList;
@@ -14,9 +15,9 @@ import java.util.List;
 
 public class SubscribedUsersViewModel extends ViewModel {
   private final BaseFirestore mFirestore = new BaseFirestore();
-  private final MutableLiveData<List<User>> mUsers = new MutableLiveData<>();
+  private final MutableLiveData<List<SubscribedUser>> mUsers = new MutableLiveData<>();
 
-  public MutableLiveData<List<User>> getUsers()
+  public MutableLiveData<List<SubscribedUser>> getUsers()
   {
     if (mUsers.getValue() == null)
     {
@@ -25,20 +26,24 @@ public class SubscribedUsersViewModel extends ViewModel {
     return mUsers;
   }
 
-  public void setUsers(List<User> users)
+  public void setUsers(List<SubscribedUser> users)
   {
     mUsers.setValue(users);
   }
 
-  public void setUsersFromSnapshots(QuerySnapshot snapshots)
+  public int setUsersFromSnapshots(QuerySnapshot snapshots)
   {
-    final List<User> users = new ArrayList<>();
+    final List<SubscribedUser> users = new ArrayList<>();
     for (DocumentSnapshot ds : snapshots)
     {
-      final User user = mFirestore.toFirestoreObject(ds, User.class);
-      users.add(user);
+      final SubscribedUser subscribedUser = mFirestore.toFirestoreObject(ds, SubscribedUser.class);
+      if (subscribedUser.get_loggedIn())
+      {
+        users.add(subscribedUser);
+      }
     }
     setUsers(users);
+    return users.size();
   }
 
   public void clear()

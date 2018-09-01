@@ -24,6 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.Adapters.SubscribedUserAdapter;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
+import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.VIewModels.SubscribedUsersViewModel;
 import com.idesign.runnit.VIewModels.UserChannelsViewModel;
@@ -69,7 +70,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     setRecyclerView();
   }
 
-  private Observer<List<User>> usersObserver()
+  private Observer<List<SubscribedUser>> usersObserver()
   {
     return users -> mAdapter.setUsers(users);
   }
@@ -84,7 +85,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   public void setRecyclerView()
   {
-    final List<User> users = new ArrayList<>();
+    final List<SubscribedUser> users = new ArrayList<>();
     mRecyclerView = findViewById(R.id.channel_users_activity_recycler_view);
     mAdapter = new SubscribedUserAdapter(users, _channelId, _orgPushId, ChannelUsers.this, PRIMARY, DARK_GREY);
     DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
@@ -119,36 +120,22 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
         showToast("error: " + e.getMessage());
         return;
       }
-      getUsers(querySnapshot, users)
-      .addOnSuccessListener(l -> mSubscribedUsersViewModel.setUsers(users));
+      if (querySnapshot == null)
+      {
+        showToast("No users subscribed, or an error has occured");
+        noUsers.setVisibility(View.VISIBLE);
+        clickUser.setVisibility(View.GONE);
+        return;
+      }
+      final int size = mSubscribedUsersViewModel.setUsersFromSnapshots(querySnapshot);
+      if (size == 0) {
+        noUsers.setVisibility(View.VISIBLE);
+        clickUser.setVisibility(View.GONE);
+      } else {
+        noUsers.setVisibility(View.GONE);
+        clickUser.setVisibility(View.VISIBLE);
+      }
     }));
-  }
-
-  public Task<DocumentSnapshot> getUsers(QuerySnapshot snapshot, List<User> users)
-  {
-    Task<DocumentSnapshot> task = Tasks.forResult(null);
-    final List<String> userIds = new ArrayList<>();
-    if (snapshot.isEmpty()) {
-      noUsers.setVisibility(View.VISIBLE);
-      clickUser.setVisibility(View.GONE);
-    } else {
-      noUsers.setVisibility(View.GONE);
-      clickUser.setVisibility(View.VISIBLE);
-    }
-    for (DocumentSnapshot ds : snapshot)
-    {
-      final String userId = ds.getId();
-      userIds.add(userId);
-    }
-    for (String id : userIds)
-    {
-      task = task.continueWithTask(ignore -> mFirestore.getUsers().document(id).get()
-      .addOnSuccessListener(l -> {
-        final User user = mFirestore.toFirestoreObject(l, User.class);
-        users.add(user);
-      }));
-    }
-    return task;
   }
 
   public void removeListener()

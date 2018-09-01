@@ -11,13 +11,13 @@ import android.widget.TextView;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
-import com.idesign.runnit.Items.User;
+import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.R;
 
 import java.util.List;
 
 public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAdapter.UserViewHolder> {
-  private List<User> mUsers;
+  private List<SubscribedUser> mUsers;
   private final String channelId;
   private final String orgPushId;
   private final BaseFirestore mFirestore = new BaseFirestore();
@@ -41,7 +41,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     }
   }
 
-  public SubscribedUserAdapter(List<User> users,
+  public SubscribedUserAdapter(List<SubscribedUser> users,
                                final String channelId,
                                final String orgPushId,
                                SubscribedUserAdapterListener listener,
@@ -64,7 +64,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     }
   }
 
-  public void setUsers(List<User> users)
+  public void setUsers(List<SubscribedUser> users)
   {
     mUsers = users;
     notifyDataSetChanged();
@@ -81,10 +81,10 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   @Override
   public void onBindViewHolder(@NonNull SubscribedUserAdapter.UserViewHolder viewHolder, final int position)
   {
-    final User user = mUsers.get(position);
-    final String firstName = user.get_firstName();
-    final String lastName = user.get_lastName();
-    final String pushId = user.get_pushId();
+    final SubscribedUser subscribedUser = mUsers.get(position);
+    final String firstName = subscribedUser.get_firstName();
+    final String lastName = subscribedUser.get_lastName();
+    final String pushId = subscribedUser.get_pushId();
     viewHolder._firstName.setText(firstName);
     viewHolder._lastName.setText(lastName);
     viewHolder._send.setOnClickListener(l -> sendNotification(viewHolder, pushId, firstName, lastName));
