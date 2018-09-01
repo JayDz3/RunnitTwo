@@ -6,18 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
-import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
@@ -78,37 +72,39 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     final FirestoreChannel channel = mChannels.get(position);
     final String uid = mAuth.user().getUid();
     final String channelId = channel.get_channelId();
-    final DocumentReference userChannelRef = mFirestore.getUserChannelReference(uid, channelId);
+    final DocumentReference channelReference = mFirestore.getAdminChannel(channel.get_orgPushId(), channelId);
+    final DocumentReference subscribedUserRef = mFirestore.subscribedUserReference(channelReference, uid);
     viewHolder.radioButton.setText(channelId);
-    viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(userChannelRef, channel, viewHolder));
+    viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelReference, subscribedUserRef, channel, viewHolder));
 
-    userChannelRef.get()
-    .addOnSuccessListener(channelRef -> {
-      if (channelRef.exists())
-      {
+    subscribedUserRef.get()
+    .addOnSuccessListener(ref ->
+    {
+      if (ref.exists()) {
         viewHolder.radioButton.setChecked(true);
       } else {
         viewHolder.radioButton.setChecked(false);
       }
     })
-    .addOnFailureListener(e -> showToast("error: " + e.getMessage()));
-    // viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelRef, channel));
-    // viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(channelRef, channel, position));
+    .addOnFailureListener(e -> showToast(e.getMessage()));
   }
 
-  public void toggleChannelStatus(final DocumentReference userChannelRef, final FirestoreChannel channel, MyViewHolder viewHolder)
+  public void toggleChannelStatus(final DocumentReference channelRef,
+                                  final DocumentReference subscribedUserRef,
+                                  final FirestoreChannel channel,
+                                  MyViewHolder viewHolder)
   {
-    userChannelRef.get()
+    subscribedUserRef.get()
     .onSuccessTask(snap ->
     {
       final String uid = mAuth.user().getUid();
-      final DocumentReference userRef = mFirestore.getUsers().document(uid);
       if (snap == null || !snap.exists()) {
         viewHolder.radioButton.setChecked(true);
-        return mFirestore.addChannelToUserTask(channel, userRef);
+        return mFirestore.addSubscribedUserTask(channelRef, uid);
+
       } else {
         viewHolder.radioButton.setChecked(false);
-        return mFirestore.removeChannelFromUserTask(snap.getReference());
+        return mFirestore.deleteSubscribedUserTask(channelRef, uid);
       }
     })
     .addOnSuccessListener(t ->

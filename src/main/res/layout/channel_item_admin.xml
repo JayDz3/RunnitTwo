@@ -21,7 +21,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/channel_item_channel_sent_header"
             android:text="@string/admin_channel_item_channel_name"
-            app:layout_constraintHorizontal_weight="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
         <TextView
@@ -33,7 +32,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:text="@string/admin_channel_item_sent_text"
-            app:layout_constraintHorizontal_weight="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
         <TextView

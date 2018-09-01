@@ -66,6 +66,11 @@ public class UserViewModel extends ViewModel
     return Objects.requireNonNull(getUser().getValue()).get_isAdmin();
   }
 
+  public boolean getLoggedIn()
+  {
+    return Objects.requireNonNull(getUser().getValue()).get_loggedIn();
+  }
+
   public void setPushId(String _pushid)
   {
     Objects.requireNonNull(mUser.getValue()).set_pushId(_pushid);
@@ -127,5 +132,10 @@ public class UserViewModel extends ViewModel
   public void setInstanceId(String id)
   {
     Objects.requireNonNull(mUser.getValue()).set_instanceId(id);
+  }
+
+  public void setLoggedIn(boolean status)
+  {
+    Objects.requireNonNull(mUser.getValue()).set_loggedIn(status);
   }
 }

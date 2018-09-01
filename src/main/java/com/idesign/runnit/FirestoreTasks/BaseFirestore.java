@@ -1,6 +1,7 @@
 package com.idesign.runnit.FirestoreTasks;
 
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -12,29 +13,31 @@ import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.Constants;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.FirestoreOrg;
+import com.idesign.runnit.Items.SubscribedUser;
+import com.idesign.runnit.VIewModels.UserChannelsViewModel;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class BaseFirestore {
   private final String IS_ADMIN = "_isAdmin";
-  private final String IS_ACTIVE_ADMIN_CHANNEL = "_isActive";
   private final String ORG_CODE = "_organizationCode";
   private final String ORG__PUSHID = "_organizationPushId";
+  private final String LOGGED_IN = "_loggedIn";
 
   private final String LAST_SENT = "_lastSent";
 
-  private final String ENABLE_NOTIFICATIONS = "_sendNotification";
   private final String INSTANCE_ID = "_instanceId";
   private final String COLLECTION_CHANNELS = "Channels";
   private final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
-  private final String COLLECTION_USER_CHANNELS = "UserChannels";
+  private final String COLLECTION_SUBSCRIBED_USERS = "SubscribedUsers";
   private final FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
 
   private final CollectionReference users = mFirestore.collection(Constants.COLLECTION_USERS);
   private final CollectionReference orgs = mFirestore.collection(Constants.COLLECTION_ORGS);
 
   public BaseFirestore() { }
-
 
   public CollectionReference getUsers()
   {
@@ -54,11 +57,6 @@ public class BaseFirestore {
     return orgs.document(orgPushId).collection(COLLECTION_CHANNELS).document(channelId);
   }
 
-  public DocumentReference getUserChannelReference(String uid, String channelId)
-  {
-    return getUsers().document(uid).collection(COLLECTION_USER_CHANNELS).document(channelId);
-  }
-
   public CollectionReference getChannelActiveUsersReference(DocumentReference channelRef)
   {
     return channelRef.collection(COLLECTION_ACTIVE_USERS);
@@ -69,21 +67,14 @@ public class BaseFirestore {
     return orgs.document(orgPushId).collection(COLLECTION_CHANNELS);
   }
 
-  public Task<Void> activateAdminChannel(DocumentReference docRef)
-  {
-   return docRef.update(IS_ACTIVE_ADMIN_CHANNEL, true);
-  }
-
-  public Task<Void> deActivateAdminChannel(DocumentReference docRef)
-  {
-    return docRef.update(IS_ACTIVE_ADMIN_CHANNEL, false);
-  }
-
   public Task<Void> deleteAdminChannel(DocumentReference documentReference)
   {
     return documentReference.delete();
   }
 
+  /*
+   *  Error: still setting _lastSent to current timestamp
+   */
   public Task<Void> addChannelAdmin(DocumentReference orgRef, String orgPushId, String newChannelId)
   {
     Date date = new Date();
@@ -101,25 +92,36 @@ public class BaseFirestore {
     return batch.commit();
   }
 
-  public Task<Void> addChannelToUserTask(FirestoreChannel channel, DocumentReference userRef)
+  public DocumentReference subscribedUserReference(DocumentReference channelRef, String uid)
   {
-    return userRef.collection(COLLECTION_USER_CHANNELS).document(channel.get_channelId()).set(channel);
+    return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
   }
 
-  public Task<Void> removeChannelFromUserTask(DocumentReference documentReference)
+  public CollectionReference subscribedUsersReference(DocumentReference channelRef)
   {
-    return documentReference.delete();
+    return channelRef.collection(COLLECTION_SUBSCRIBED_USERS);
+  }
+
+  public Task<Void> addSubscribedUserTask(DocumentReference channelRef, String uid)
+  {
+    SubscribedUser user = new SubscribedUser(uid, true);
+    return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid).set(user);
+  }
+
+  public Task<Void> deleteSubscribedUserTask(DocumentReference channelRef, String uid)
+  {
+    return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid).delete();
+  }
+
+  public Task<Void> updateSubscribedUserTask(DocumentReference subscribedUserRef, boolean status, String uid)
+  {
+    return subscribedUserRef.update(LOGGED_IN, status);
   }
   // {End Channels] //
 
   /*
    * Organizations
    */
-  public Task<QuerySnapshot> getAllOrganizationUsersQuery(String orgCode)
-  {
-    return getUsers().whereEqualTo(ORG_CODE, orgCode).get();
-  }
-
   public Task<Void> setOrganizationCodeTask(DocumentReference docRef, String code)
   {
     WriteBatch writeBatch = mFirestore.batch();
@@ -180,11 +182,9 @@ public class BaseFirestore {
     return batch.commit();
   }
 
-  public Task<Void> toggleNotifications(DocumentReference docRef, boolean status)
-  {
-    return docRef.update(ENABLE_NOTIFICATIONS, status);
-  }
-
+  /*
+   *  Get WriteBatch
+   */
   public WriteBatch batch() {
     return mFirestore.batch();
   }
@@ -193,4 +193,84 @@ public class BaseFirestore {
   {
     return documentSnapshot.toObject(tClass);
   }
+
+  /*
+   *  Update info on user login / authListener
+   *
+   *  @param channelsSnapshot : All channels belonging to organization
+   *
+   *  @param channels : Empty list of channels populated here. Then added to userChannelsViewModel
+   *
+   *  @param uid : user uid
+   */
+  public Task<DocumentSnapshot> subscribeUserToChannels(QuerySnapshot channelsSnapshot, List<FirestoreChannel> channels, String uid)
+  {
+    if (channelsSnapshot == null)
+    {
+      throw new RuntimeException("no channels");
+    }
+
+    Task<DocumentSnapshot> task = Tasks.forResult(null);
+    for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
+    {
+      final DocumentReference subscribedUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
+      task = task.continueWithTask(ignore -> subscribedUserRef.get().addOnSuccessListener(documentSnapshot ->
+      {
+        if (documentSnapshot.exists())
+        {
+          final FirestoreChannel channel = toFirestoreObject(ds, FirestoreChannel.class);
+          channels.add(channel);
+          updateSubscribedUserTask(subscribedUserRef, true, uid);
+        }
+      }));
+    }
+    return task;
+  }
+
+  public Task<Void> updateSubscribedUserTasks(String uid, WriteBatch batch, UserChannelsViewModel mUserChannelViewModel)
+  {
+    final List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+    final List<FirestoreChannel> channels = mUserChannelViewModel.getChannels().getValue();
+    if (channels != null)
+    {
+      for (FirestoreChannel channel : channels)
+      {
+        final String orgPushId = channel.get_orgPushId();
+        final String channelPushId = channel.get_pushId();
+        final DocumentReference channelRef = getAdminChannel(orgPushId, channelPushId);
+        final DocumentReference subscribedUserReference = subscribedUserReference(channelRef, uid);
+
+        tasks.add(subscribedUserReference.get().addOnSuccessListener(ref ->
+        {
+          if (ref.exists())
+          {
+            batch.update(ref.getReference(), LOGGED_IN, false);
+          }
+        }));
+      }
+    }
+    return Tasks.whenAll(tasks);
+  }
+
+  /*
+   *  Removes user from specific orgs active users collection
+   */
+  public Task<Void> deleteActiveUserReferences(String uid, DocumentReference userRef, WriteBatch batch, UserChannelsViewModel mUserChannelViewModel)
+  {
+    final List<FirestoreChannel> channels = mUserChannelViewModel.getChannels().getValue();
+    if (channels != null)
+    {
+      for (FirestoreChannel channel : channels)
+      {
+        final String orgPushId = channel.get_orgPushId();
+        final String channelPushId = channel.get_pushId();
+        final DocumentReference channelRef = getAdminChannel(orgPushId, channelPushId);
+        final DocumentReference activeUserRef = getChannelActiveUsersReference(channelRef).document(uid);
+        batch.delete(activeUserRef);
+      }
+    }
+    batch.update(userRef, INSTANCE_ID, "");
+    return batch.commit();
+  }
+
 }

@@ -37,7 +37,8 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".UserChannelActivity"></activity>
+        <activity android:name=".UserChannelActivity" />
+        <activity android:name=".ChannelUsers"></activity>
     </application>
 
 </manifest>

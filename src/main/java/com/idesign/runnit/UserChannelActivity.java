@@ -2,7 +2,6 @@ package com.idesign.runnit;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,7 +41,6 @@ public class UserChannelActivity extends AppCompatActivity
   private LinearLayoutManager mLayouManager;
 
   private ProgressBar progressBar;
-  private FloatingActionButton fab;
 
   private TextView noChannelView;
 
@@ -65,6 +63,10 @@ public class UserChannelActivity extends AppCompatActivity
 
     progressBar.setVisibility(View.GONE);
     noChannelView.setVisibility(View.GONE);
+    if (savedInstanceState == null)
+    {
+      progressBar.setVisibility(View.VISIBLE);
+    }
   }
 
   public void setViewItems()
@@ -106,21 +108,23 @@ public class UserChannelActivity extends AppCompatActivity
     .addOnSuccessListener(userSnapshot ->
     {
       final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
-      mAppUserViewModel.setmUser(user);
+      final String mUserOrgpushid = user.get_organizationPushId();
 
-      final String mUserOrgpushid = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
+      mAppUserViewModel.setmUser(user);
       channelListener = mFirestore.getAdminChannelsReference(mUserOrgpushid).addSnapshotListener(((querySnapshot, e) ->
       {
         if (e != null)
         {
           showToast("error getting channels from database: " + e.getMessage());
-          noChannelView.setVisibility(View.VISIBLE);
+          noChannelView.setVisibility(View.GONE);
+          progressBar.setVisibility(View.GONE);
           return;
         }
         if (querySnapshot != null)
         {
           mAdminChannelViewModel.setChannelsFromSnapshot(querySnapshot);
           toggleNoChannelView(mAdapter.getItems());
+          progressBar.setVisibility(View.GONE);
         }
       }));
     });

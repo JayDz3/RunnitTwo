@@ -14,6 +14,7 @@ public class User {
   private boolean _isAdmin;
   private boolean _sendNotification;
   private String _instanceId;
+  private boolean _loggedIn;
 
   @ServerTimestamp
   private Timestamp _timestamp;
@@ -67,6 +68,11 @@ public class User {
     this._instanceId = _instanceId;
   }
 
+  public void set_loggedIn(boolean _loggedIn)
+  {
+    this._loggedIn = _loggedIn;
+  }
+
   public String get_pushId()
   {
     return _pushId;
@@ -117,5 +123,10 @@ public class User {
   public Timestamp get_timestamp()
   {
     return _timestamp;
+  }
+
+  public boolean get_loggedIn()
+  {
+    return _loggedIn;
   }
 }

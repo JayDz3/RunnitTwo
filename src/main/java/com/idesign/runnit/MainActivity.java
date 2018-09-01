@@ -18,16 +18,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
+
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
-import com.google.firebase.firestore.QuerySnapshot;
+
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -37,13 +36,20 @@ import com.idesign.runnit.Fragments.HomeFragment;
 import com.idesign.runnit.Fragments.RestaurantCodeFragment;
 import com.idesign.runnit.Fragments.SignupFragment;
 
-
+import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.StateEmitter;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.NavigationHelpers.NavigationViewUtility;
+import com.idesign.runnit.VIewModels.AppUserViewModel;
 import com.idesign.runnit.VIewModels.PasswordViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
+import com.idesign.runnit.VIewModels.UserChannelsViewModel;
 import com.idesign.runnit.VIewModels.UserViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 
 public class MainActivity extends AppCompatActivity
 {
@@ -65,6 +71,8 @@ public class MainActivity extends AppCompatActivity
   private StateViewModel mStateViewModel;
   private UserViewModel mUserViewModel;
   private PasswordViewModel mPasswordViewModel;
+  private AppUserViewModel mAppUserViewModel;
+  private UserChannelsViewModel mUserChannelViewModel;
 
   // Fragments
   private HomeFragment mHomeFragment;
@@ -79,7 +87,7 @@ public class MainActivity extends AppCompatActivity
   private int appState = 0;
   private boolean disabled = false;
 
-  private final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
+  private ProgressBar progressBar;
 
   @Override
   protected void onCreate(Bundle savedInstanceState)
@@ -89,8 +97,11 @@ public class MainActivity extends AppCompatActivity
     setViewItems();
 
     mUserViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+    mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
     mStateViewModel = ViewModelProviders.of(this).get(StateViewModel.class);
     mPasswordViewModel = ViewModelProviders.of(this).get(PasswordViewModel.class);
+    mUserChannelViewModel = ViewModelProviders.of(this).get(UserChannelsViewModel.class);
+
     setActionBar();
 
     if (savedInstanceState != null)
@@ -108,6 +119,8 @@ public class MainActivity extends AppCompatActivity
     mDrawerLayout = findViewById(R.id.drawer_layout);
     navigationView = findViewById(R.id.nav_view);
     toolbar = findViewById(R.id.toolbar);
+    progressBar = findViewById(R.id.main_activity_progress_bar);
+    progressBar.setVisibility(View.GONE);
   }
 
   /*
@@ -215,51 +228,20 @@ public class MainActivity extends AppCompatActivity
   {
     if (mAuth.user() != null)
     {
-      disabled = true;
       final String uid = mAuth.user().getUid();
       final DocumentReference userRef = mFirestore.getUsers().document(uid);
-      userRef.get()
-      .onSuccessTask(this::orgQuery)
-      .onSuccessTask(orgSnapshot -> mFirestore.getAdminChannelsReference(orgSnapshot.getId()).get())
-      .onSuccessTask(orgChannels -> clockOut(orgChannels, uid))
-      .onSuccessTask(ignore -> mFirestore.updateInstanceId(userRef, ""))
-      .onSuccessTask(ignore -> mFirestore.toggleNotifications(userRef, false))
+      final WriteBatch batch = mFirestore.batch();
+      mAuth.signOut();
+      mFirestore.updateSubscribedUserTasks(uid, batch, mUserChannelViewModel)
+      .continueWithTask(ignore -> mFirestore.deleteActiveUserReferences(uid, userRef, batch, mUserChannelViewModel))
       .addOnSuccessListener(ignore -> onLogoutSuccess())
       .addOnFailureListener(this::onLogoutFailure);
     }
   }
-
-  @NonNull
-  /*
-   * mFirestore query org returns query that finds org with the user's specific orgcode, limited to 1 result
-   *
-   */
-  public Task<DocumentSnapshot> orgQuery(DocumentSnapshot userRef)
-  {
-    final User user = mFirestore.toFirestoreObject(userRef, User.class);
-    final String orgPushid = user.get_organizationPushId();
-    return mFirestore.getOrgSnapshotTask(orgPushid);
-  }
-
-  /*
-   *  Removes user from specific orgs active users collection
-   */
-  public Task<Void> clockOut(QuerySnapshot channelsSnapshot, String uid)
-  {
-    WriteBatch batch = mFirestore.batch();
-    for (DocumentSnapshot ds : channelsSnapshot)
-    {
-      CollectionReference ref = ds.getReference().collection(COLLECTION_ACTIVE_USERS);
-      DocumentReference userRef = ref.document(uid);
-      batch.delete(userRef);
-    }
-    return batch.commit();
-  }
-
   public void onLogoutSuccess()
   {
-    mAuth.signOut();
     mNavUtility.isNotLoggedIn(navigationView);
+    progressBar.setVisibility(View.GONE);
     showToast("Clocked out!");
     mStateViewModel.setFragmentState(Constants.STATE_LOGGED_OUT);
     disabled = false;
@@ -267,8 +249,8 @@ public class MainActivity extends AppCompatActivity
 
   public void onLogoutFailure(Exception e)
   {
-    mAuth.signOut();
     mNavUtility.isNotLoggedIn(navigationView);
+    progressBar.setVisibility(View.GONE);
     showToast("error: " + e.getMessage() + " You are however, signed out");
     mStateViewModel.setFragmentState(Constants.STATE_LOGGED_OUT);
     disabled = false;
@@ -276,7 +258,7 @@ public class MainActivity extends AppCompatActivity
 
   public void goCreateAdmin()
   {
-    Intent intent = new Intent(this, AdminActivity.class);
+    final Intent intent = new Intent(this, AdminActivity.class);
     startActivity(intent);
   }
 
@@ -294,9 +276,11 @@ public class MainActivity extends AppCompatActivity
     {
       final User user = mFirestore.toFirestoreObject(userRef, User.class);
       final boolean isAdmin = user.get_isAdmin();
+
       if (isAdmin) {
         Intent intent = new Intent(this, ChannelActivity.class);
         startActivity(intent);
+
       } else {
         Intent intent = new Intent(this, UserChannelActivity.class);
         startActivity(intent);
@@ -450,13 +434,26 @@ public class MainActivity extends AppCompatActivity
       {
         final String uid = mAuth.user().getUid();
         final DocumentReference userRef = mFirestore.getUsers().document(uid);
+        final List<FirestoreChannel> channels = new ArrayList<>();
+
         addUserListener(userRef);
         FirebaseInstanceId.getInstance().getInstanceId()
-        .onSuccessTask(id ->  mFirestore.updateInstanceId(userRef, id.getToken()))
-        // .addOnSuccessListener(l -> showToast("You are set to receive notifications"))
+        .onSuccessTask(id ->  mFirestore.updateInstanceId(userRef, Objects.requireNonNull(id).getToken()))
+        .continueWithTask(ignore -> userRef.get())
+        .onSuccessTask(userSnapshot ->
+        {
+          final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
+          final String orgPushid = user.get_organizationPushId();
+          return mFirestore.getAdminChannelsReference(orgPushid).get();
+        })
+        // channelsSnapshot is all channels belonging to org
+        // if user exists on channel, they are updated as logged in to that channels collectionRef of SubscribedUsers
+        .onSuccessTask(channelsSnapshot -> mFirestore.subscribeUserToChannels(channelsSnapshot, channels, uid))
+        .addOnSuccessListener(l -> mUserChannelViewModel.setChannels(channels))
         .addOnFailureListener(e -> showToast("error: " + e.getMessage()));
         mUserViewModel.clear();
         mPasswordViewModel.setPassword("");
+
       } else {
         mNavUtility.isNotLoggedIn(navigationView);
         removeUserListener();
@@ -491,18 +488,15 @@ public class MainActivity extends AppCompatActivity
         return;
       }
       final User user = mFirestore.toFirestoreObject(snapshot, User.class);
+      mAppUserViewModel.setmUser(user);
       toggleAdmin(user);
       toggleAdminOrgSet(user);
-      if (user == null) {
-        return;
-      }
-      if (user.get_organizationCode() == null || user.get_organizationCode().equals(""))
-      {
+
+      if (user.get_organizationCode() == null || user.get_organizationCode().equals("")) {
         mNavUtility.isLoggedInNoRestaurantCode(navigationView);
         navigationView.getMenu().findItem(R.id.nav_channel).setVisible(false);
-      }
-      else if (user.get_organizationCode() != null && !user.get_organizationCode().equals(""))
-      {
+
+      } else if (user.get_organizationCode() != null && !user.get_organizationCode().equals("")) {
         mNavUtility.isLoggedInHasRestaurantCode(navigationView);
         navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
       }
@@ -513,8 +507,10 @@ public class MainActivity extends AppCompatActivity
   {
     if (user.get_organizationCode() != null && !user.get_organizationCode().equals("") || !user.get_isAdmin()) {
       navigationView.getMenu().findItem(R.id.nav_admin).setVisible(false);
+
     } else {
       navigationView.getMenu().findItem(R.id.nav_admin).setVisible(true);
+
     }
   }
 
@@ -528,6 +524,7 @@ public class MainActivity extends AppCompatActivity
 
     } else {
       mNavUtility.isNotAdmin(navigationView);
+
     }
   }
 

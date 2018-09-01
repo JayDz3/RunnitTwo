@@ -11,12 +11,15 @@ import com.idesign.runnit.Items.FirestoreChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdminChannelViewModel extends ViewModel {
+public class AdminChannelViewModel extends ViewModel
+{
   private final MutableLiveData<List<FirestoreChannel>> channels = new MutableLiveData<>();
   private final BaseFirestore mFirestore = new BaseFirestore();
 
-  public MutableLiveData<List<FirestoreChannel>> getChannels() {
-    if (channels.getValue() == null) {
+  public MutableLiveData<List<FirestoreChannel>> getChannels()
+  {
+    if (channels.getValue() == null)
+    {
       channels.setValue(new ArrayList<>());
     }
     return channels;
@@ -33,7 +36,14 @@ public class AdminChannelViewModel extends ViewModel {
     setChannels(channels);
   }
 
-  public void setChannels(List<FirestoreChannel> channels) {
+  private void setChannels(List<FirestoreChannel> channels)
+  {
     this.channels.setValue(channels);
+  }
+
+  public void clear()
+  {
+    List<FirestoreChannel> empty = new ArrayList<>();
+    setChannels(empty);
   }
 }

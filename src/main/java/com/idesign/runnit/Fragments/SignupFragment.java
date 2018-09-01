@@ -127,13 +127,13 @@ public class SignupFragment extends Fragment {
       setUserViewModelLastName(trimmedLastname);
       setUserViewModelEmail(trimmedEmail);
       setPasswordViewModelValue(trimmedPassword);
-      takeAction();
+      createUser();
     } else {
       enableButtons();
     }
   }
 
-  public void takeAction()
+  public void createUser()
   {
     disableButtons();
     progressBar.setVisibility(View.VISIBLE);
@@ -147,6 +147,7 @@ public class SignupFragment extends Fragment {
     .onSuccessTask(firebaseUser ->  setFirestoreUser(firstname, lastname))
     .addOnSuccessListener(task ->
     {
+      mUserViewModel.setLoggedIn(true);
       mStateViewModel.setFragmentState(Constants.STATE_HOME);
       showToast("Registration complete!");
     })
@@ -171,6 +172,7 @@ public class SignupFragment extends Fragment {
     mUserViewModel.setOrganizationCode("");
     mUserViewModel.setSendNotification(false);
     mUserViewModel.setInstanceId("");
+    mUserViewModel.setLoggedIn(false);
     final User user = mUserViewModel.getUser().getValue();
     Objects.requireNonNull(user).set_firstName(firstname);
     user.set_lastName(lastname);

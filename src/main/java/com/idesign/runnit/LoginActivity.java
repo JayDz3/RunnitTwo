@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.idesign.runnit.Items.LoginData;
@@ -151,14 +150,7 @@ public class LoginActivity extends AppCompatActivity
 
     } else {
       showToast("default on back pressed");
-     // mLoginDataViewModel.clear();
-     // super.onBackPressed();
     }
-  }
-
-  public void logMessage(String message)
-  {
-    Log.d("LOGIN ACTIVITY:", "Message:: " + message);
   }
 
   public void showToast(String message)

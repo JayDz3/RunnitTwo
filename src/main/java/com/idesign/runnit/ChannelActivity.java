@@ -54,6 +54,8 @@ public class ChannelActivity extends AppCompatActivity implements
   private int _open = -1;
 
   private final String EXTRA_OPEN = "extra_open";
+  private final String CHANNEL_ID = "channel_id";
+  private final String ORG_PUSHID = "org_pushid";
 
   private AdminChannelViewModel mAdminChannelViewModel;
   private AppUserViewModel mAppUserViewModel;
@@ -80,8 +82,12 @@ public class ChannelActivity extends AppCompatActivity implements
     mAdminChannelViewModel = ViewModelProviders.of(this).get(AdminChannelViewModel.class);
     mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
 
-    progressBar.setVisibility(View.GONE);
     noChannelView.setVisibility(View.GONE);
+    if (savedInstanceState == null) {
+      progressBar.setVisibility(View.VISIBLE);
+    } else {
+      progressBar.setVisibility(View.GONE);
+    }
   }
 
   public void setViewItems()
@@ -119,7 +125,7 @@ public class ChannelActivity extends AppCompatActivity implements
     {
       return;
     }
-    disableButton();
+    disableButtonHideProgressBar();
     final String uid = mAuth.user().getUid();
     mFirestore.getUsers().document(uid).get()
     .addOnSuccessListener(userSnapshot ->
@@ -239,6 +245,14 @@ public class ChannelActivity extends AppCompatActivity implements
     fab.setClickable(false);
   }
 
+  public void disableButtonHideProgressBar()
+  {
+    progressBar.setVisibility(View.GONE);
+    fab.setBackgroundTintList(ColorStateList.valueOf(DARK_GREY));
+    fab.setEnabled(false);
+    fab.setClickable(false);
+  }
+
   public void enableButton()
   {
     progressBar.setVisibility(View.GONE);
@@ -277,6 +291,14 @@ public class ChannelActivity extends AppCompatActivity implements
       mLayouManager.scrollToPositionWithOffset(_open, 20);
       mAdapter.notifyDataSetChanged();
     }
+  }
+
+  public void getUsers(final String channelId, final String orgPushId)
+  {
+    Intent intent = new Intent(this, ChannelUsers.class);
+    intent.putExtra(CHANNEL_ID, channelId);
+    intent.putExtra(ORG_PUSHID, orgPushId);
+    startActivity(intent);
   }
 
   /*

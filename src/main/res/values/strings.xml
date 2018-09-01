@@ -11,7 +11,7 @@
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
     <string name="confirm">Confirm</string>
-    <string name="send">Send</string>
+    <string name="send">SEND</string>
 
     <string name="reply_label">reply</string>
 
@@ -85,4 +85,8 @@
 
     <!-- USER CHANNEL ACTIVITY -->
     <string name="channel_activity_user_no_channels">No channels are available</string>
+
+    <!-- SUBSCRIBED USERS ACTIVITY -->
+    <string name="channel_users_activity_header">Click a user to send them a notification</string>
+    <string name="channel_users_activity_no_users">No users are subscribed to this channel</string>
 </resources>
