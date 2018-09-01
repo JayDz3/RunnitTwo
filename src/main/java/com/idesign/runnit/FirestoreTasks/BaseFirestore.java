@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.Constants;
+import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.FirestoreOrg;
 import com.idesign.runnit.Items.SubscribedUser;
@@ -90,6 +91,12 @@ public class BaseFirestore {
     Timestamp now = new Timestamp(date);
     batch.update(channelRef, LAST_SENT, now);
     return batch.commit();
+  }
+
+  public Task<Void> setActiveUser(final CollectionReference activeUsersReference, final String uid)
+  {
+    ActiveUser activeUser = new ActiveUser(uid);
+    return activeUsersReference.document(uid).set(activeUser);
   }
 
   public DocumentReference subscribedUserReference(DocumentReference channelRef, String uid)

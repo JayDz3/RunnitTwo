@@ -8,11 +8,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
-import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
 
@@ -27,7 +25,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
 
   private final int DARK_GREY;
   private final int PRIMARY;
-  private boolean enabled;
+  private boolean enabled = true;
 
   class UserViewHolder extends RecyclerView.ViewHolder {
     private TextView _firstName;
@@ -104,7 +102,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
     userRef.delete()
-    .onSuccessTask(ignore -> finalize(activeUsersReference, userId))
+    .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, userId))
     .addOnSuccessListener(ignore -> {
       mListener.onSuccess(firstname, lastname);
       enableViewHolder(viewHolder);
@@ -130,12 +128,6 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     viewHolder._send.setTextColor(PRIMARY);
     viewHolder._send.setEnabled(true);
     viewHolder._send.setClickable(true);
-  }
-
-  private Task<Void> finalize(final CollectionReference activeUsersReference, final String uid)
-  {
-    final ActiveUser activeUser = new ActiveUser(uid);
-    return activeUsersReference.document(uid).set(activeUser);
   }
 
   public int getItemCount()

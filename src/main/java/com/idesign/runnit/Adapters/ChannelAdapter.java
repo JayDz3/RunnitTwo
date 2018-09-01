@@ -2,7 +2,6 @@ package com.idesign.runnit.Adapters;
 
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
@@ -24,9 +23,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
-import com.idesign.runnit.ChannelUsers;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
-import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 
 import com.idesign.runnit.Items.SubscribedUser;
@@ -34,7 +31,6 @@ import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -49,9 +45,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
 
   private int _open;
   private User mUser;
-
-  private final String CHANNEL_ID = "channel_id";
-
 
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
@@ -114,29 +107,29 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   public void onBindViewHolder(@NonNull AdminChannelViewHolder viewHolder, final int position)
   {
     final FirestoreChannel channel = mChannels.get(position);
-
     final String channelId = channel.get_channelId();
     final String orgPushId = channel.get_orgPushId();
     final Timestamp sentAt = channel.get_lastSent();
-    if (sentAt != null) {
-      Date dateSent = sentAt.toDate();
+    final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
 
+    if (sentAt != null)
+    {
+      Date dateSent = sentAt.toDate();
       SimpleDateFormat time = new SimpleDateFormat("h:mm a", Locale.getDefault());
       viewHolder.channelTimeView.setText(time.format(dateSent));
     }
-
-    final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
-
     viewHolder.channelNameView.setText(channel.get_channelId());
-    viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
-    viewHolder.activeUsersButton.setOnClickListener(l -> seeActiveUsers(channelRef, viewHolder));
-    viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
 
+    viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
+    viewHolder.activeUsersButton.setOnClickListener(l -> seeActiveUsers(channelRef));
+    viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
     viewHolder.confirmDeleteButton.setOnClickListener(l -> confirmDeleteChannel(channelRef, channel, viewHolder));
     viewHolder.cancelDeleteButton.setOnClickListener(l -> cancelDeleteChannel(viewHolder));
-    if (_open == position) {
+
+    if (position == _open) {
       disableButtons(viewHolder);
       showDeleteOptions(viewHolder);
+
     } else {
       hideDeleteOptions(viewHolder);
       enableButtons(viewHolder);
@@ -164,48 +157,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     viewHolder.sendNotificationButton.setVisibility(View.INVISIBLE);
   }
 
-  private void seeActiveUsers(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
+  private void seeActiveUsers(DocumentReference channelRef)
   {
-    final List<User> users = new ArrayList<>();
-    final CollectionReference subscribedUsersRef = mFirestore.subscribedUsersReference(channelRef);
     final String chennelId = channelRef.getId();
     final String orgPushId = mUser.get_organizationPushId();
     mListener.getUsers(chennelId, orgPushId);
-   /* disableButtons(viewHolder);
-    subscribedUsersRef.get()
-    .continueWithTask(usersRef ->
-    {
-     // List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
-      Task<DocumentSnapshot> task = Tasks.forResult(null);
-      for (final DocumentSnapshot ds : usersRef.getResult())
-      {
-        final SubscribedUser subscribedUser = mFirestore.toFirestoreObject(ds, SubscribedUser.class);
-        if (subscribedUser.get_loggedIn())
-        {
-          final String pushId = subscribedUser.get_pushId();
-          final DocumentReference userRef = mFirestore.getUsers().document(pushId);
-          task = task.continueWithTask(ignore -> userRef.get().addOnSuccessListener(ref ->
-          {
-            final User user = mFirestore.toFirestoreObject(ref, User.class);
-            users.add(user);
-          }));
-        }
-      }
-      return task;
-    })
-    .addOnSuccessListener(l ->
-    {
-      for (final User user : users)
-      {
-        showToast("User: " + user.get_firstName() + " " + user.get_lastName());
-      }
-      enableButtons(viewHolder);
-    })
-    .addOnFailureListener(e ->
-    {
-      showToast("error getting all users: " + e.getMessage());
-      enableButtons(viewHolder);
-    }); */
   }
 
   private void sendNotification(final DocumentReference channelRef, AdminChannelViewHolder viewHolder)
@@ -233,13 +189,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
           task = task.continueWithTask(ignored -> activeUserRef.get().addOnSuccessListener(userSnapshot ->
           {
             if (userSnapshot.exists()) {
-              final ActiveUser activeUser = new ActiveUser(id);
               activeUserRef.delete()
-              .onSuccessTask(ignore -> activeUsersReference.document(id).set(activeUser));
+              .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, id));
 
             } else {
-              final ActiveUser activeUser = new ActiveUser(id);
-              activeUsersReference.document(id).set(activeUser);
+              mFirestore.setActiveUser(activeUsersReference, id);
             }
           }));
         }
