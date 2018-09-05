@@ -8,7 +8,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -213,8 +212,8 @@ public class RestaurantCodeFragment extends Fragment
     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
   }
 
-  public void logMessage(String message)
+  /* public void logMessage(String message)
   {
     Log.d("RESTAURANT FRAGMENT", "message: " + message);
-  }
+  } */
 }

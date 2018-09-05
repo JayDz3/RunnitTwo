@@ -31,6 +31,7 @@ import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -169,6 +170,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final CollectionReference subscribedUsersReference = mFirestore.subscribedUsersReference(channelRef);
+    final String _message = "Assistance needed";
 
     disableButtons(viewHolder);
     mListener.disable();
@@ -176,8 +178,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     subscribedUsersReference.get()
     .continueWithTask(usersSnapshot ->
     {
-     // List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
-      Task<DocumentSnapshot> task = Tasks.forResult(null);
+      List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+      // Task<DocumentSnapshot> task = Tasks.forResult(null);
 
       for (final DocumentSnapshot ds : usersSnapshot.getResult().getDocuments())
       {
@@ -186,19 +188,19 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
         if (subscribedUser.get_loggedIn())
         {
           final DocumentReference activeUserRef = activeUsersReference.document(id);
-          task = task.continueWithTask(ignored -> activeUserRef.get().addOnSuccessListener(userSnapshot ->
+          tasks.add(activeUserRef.get().addOnSuccessListener(userSnapshot ->
           {
             if (userSnapshot.exists()) {
               activeUserRef.delete()
-              .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, id));
+              .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, id, _message));
 
             } else {
-              mFirestore.setActiveUser(activeUsersReference, id);
+              mFirestore.setActiveUser(activeUsersReference, id, _message);
             }
           }));
         }
       }
-      return task;
+      return Tasks.whenAll(tasks);
     })
     .onSuccessTask(ignore -> mFirestore.updateLastSent(channelRef))
     .addOnSuccessListener(l ->

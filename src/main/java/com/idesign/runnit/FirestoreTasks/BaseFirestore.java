@@ -94,9 +94,9 @@ public class BaseFirestore
     return batch.commit();
   }
 
-  public Task<Void> setActiveUser(final CollectionReference activeUsersReference, final String uid)
+  public Task<Void> setActiveUser(final CollectionReference activeUsersReference, final String uid, final String _message)
   {
-    ActiveUser activeUser = new ActiveUser(uid);
+    ActiveUser activeUser = new ActiveUser(uid, _message);
     return activeUsersReference.document(uid).set(activeUser);
   }
 

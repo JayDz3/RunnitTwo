@@ -10,7 +10,7 @@ public class NotificationReceiver extends FirebaseMessagingService
 {
   private final String NOTIFICATION_ACTION_FILTER = "Notification_Action";
   private final String NOTIFICATION_CHANNEL_ID = "channel_id";
-
+  private final String MESSAGE = "message";
 
   @Override
   public void onNewToken(String token)
@@ -22,11 +22,14 @@ public class NotificationReceiver extends FirebaseMessagingService
   public void onMessageReceived(RemoteMessage remoteMessage)
   {
     super.onMessageReceived(remoteMessage);
-    if (remoteMessage.getData().size() > 0) {
+    if (remoteMessage.getData().size() > 0)
+    {
       String channelId = remoteMessage.getData().get("body");
+      String message = remoteMessage.getData().get("title");
       Intent intent = new Intent(this, NotificationService.class);
       intent.setAction(NOTIFICATION_ACTION_FILTER);
       intent.putExtra(NOTIFICATION_CHANNEL_ID, channelId);
+      intent.putExtra(MESSAGE, message);
       sendBroadcast(intent);
     }
   }

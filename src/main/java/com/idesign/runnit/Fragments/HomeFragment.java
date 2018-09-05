@@ -83,9 +83,11 @@ public class HomeFragment extends Fragment
   {
     if (!mAuth.doesHaveListener())
     {
-      authStateListener = firebaseAuth -> {
+      authStateListener = firebaseAuth ->
+      {
         if (mAuth.user() != null) {
           toggleButton.setVisibility(View.VISIBLE);
+
         } else {
           toggleButton.setVisibility(View.GONE);
         }

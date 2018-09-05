@@ -3,31 +3,23 @@ package com.idesign.runnit;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.Adapters.SubscribedUserAdapter;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
-import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.SubscribedUser;
-import com.idesign.runnit.Items.User;
 import com.idesign.runnit.VIewModels.SubscribedUsersViewModel;
-import com.idesign.runnit.VIewModels.UserChannelsViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,23 +43,22 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   private SubscribedUsersViewModel mSubscribedUsersViewModel;
 
   private ListenerRegistration userListener;
-  private int PRIMARY;
-  private int DARK_GREY;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_channel_users);
-
-   final Intent intent = getIntent();
-    _channelId = intent.getStringExtra(CHANNEL_ID);
-    _orgPushId = intent.getStringExtra(ORG_PUSHID);
+    getValuesFromIntent();
     mSubscribedUsersViewModel = ViewModelProviders.of(this).get(SubscribedUsersViewModel.class);
-    DARK_GREY = ContextCompat.getColor(this, R.color.colorDarkGray);
-    PRIMARY = ContextCompat.getColor(this, R.color.colorPrimary);
-
     setView(_channelId);
     setRecyclerView();
+  }
+
+  public void getValuesFromIntent()
+  {
+    final Intent intent = getIntent();
+    _channelId = intent.getStringExtra(CHANNEL_ID);
+    _orgPushId = intent.getStringExtra(ORG_PUSHID);
   }
 
   private Observer<List<SubscribedUser>> usersObserver()
@@ -87,7 +78,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   {
     final List<SubscribedUser> users = new ArrayList<>();
     mRecyclerView = findViewById(R.id.channel_users_activity_recycler_view);
-    mAdapter = new SubscribedUserAdapter(users, _channelId, _orgPushId, ChannelUsers.this, PRIMARY, DARK_GREY);
+    mAdapter = new SubscribedUserAdapter(users, _channelId, _orgPushId, ChannelUsers.this);
     DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     mRecyclerView.addItemDecoration(itemDecoration);
@@ -104,7 +95,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     showToast("Error: " + errorMessage);
   }
 
-  public void getSubscribedUsers(final String orgPushId, final String channelId, final List<User> users)
+  public void setUsersListener(final String orgPushId, final String channelId)
   {
     final DocumentReference channelRef = mFirestore.getAdminChannelsReference(orgPushId).document(channelId);
     final CollectionReference subscribedUsersRef = mFirestore.subscribedUsersReference(channelRef);
@@ -127,15 +118,22 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
         clickUser.setVisibility(View.GONE);
         return;
       }
-      final int size = mSubscribedUsersViewModel.setUsersFromSnapshots(querySnapshot);
-      if (size == 0) {
-        noUsers.setVisibility(View.VISIBLE);
-        clickUser.setVisibility(View.GONE);
-      } else {
-        noUsers.setVisibility(View.GONE);
-        clickUser.setVisibility(View.VISIBLE);
-      }
+      setSubscribedUsersViewModel(querySnapshot);
     }));
+  }
+
+  public void setSubscribedUsersViewModel(QuerySnapshot querySnapshot)
+  {
+    final int size = mSubscribedUsersViewModel.setUsersFromSnapshots(querySnapshot);
+
+    if (size == 0) {
+      noUsers.setVisibility(View.VISIBLE);
+      clickUser.setVisibility(View.GONE);
+
+    } else {
+      noUsers.setVisibility(View.GONE);
+      clickUser.setVisibility(View.VISIBLE);
+    }
   }
 
   public void removeListener()
@@ -153,11 +151,6 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
   }
 
-   public void logMessage(String message)
-  {
-    Log.d("Admin ACTIVITY: ", "message: " + message);
-  }
-
   @Override
   public void onStart()
   {
@@ -168,9 +161,8 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   public void onResume()
   {
     super.onResume();
-    final List<User> users = new ArrayList<>();
-    getSubscribedUsers(_orgPushId, _channelId, users);
     mSubscribedUsersViewModel.getUsers().observe(this, usersObserver());
+    setUsersListener(_orgPushId, _channelId);
   }
 
   @Override

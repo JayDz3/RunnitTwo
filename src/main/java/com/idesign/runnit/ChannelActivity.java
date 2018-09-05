@@ -284,6 +284,7 @@ public class ChannelActivity extends AppCompatActivity implements
     scrollToOpenPosition();
   }
 
+
   public void scrollToOpenPosition()
   {
     if (_open > -1)
@@ -342,8 +343,8 @@ public class ChannelActivity extends AppCompatActivity implements
   public void onResume()
   {
     super.onResume();
-    setListener();
     mAdminChannelViewModel.getChannels().observe(this, observer());
+    setListener();
     mAppUserViewModel.getmUser().observe(this, userObserver());
   }
 

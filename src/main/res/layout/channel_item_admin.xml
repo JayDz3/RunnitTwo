@@ -82,6 +82,8 @@
             android:layout_margin="@dimen/eightDp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/round_icon"
+            android:elevation="@dimen/fourDp"
             app:layout_constraintTop_toTopOf="@id/channel_item_admin_send_notification_icon"
             app:layout_constraintBottom_toBottomOf="@id/channel_item_admin_send_notification_icon"
             app:layout_constraintEnd_toEndOf="parent"/>

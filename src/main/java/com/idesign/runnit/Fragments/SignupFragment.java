@@ -31,7 +31,8 @@ import com.idesign.runnit.VIewModels.UserViewModel;
 
 import java.util.Objects;
 
-public class SignupFragment extends Fragment {
+public class SignupFragment extends Fragment
+{
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
 

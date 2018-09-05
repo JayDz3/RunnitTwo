@@ -74,14 +74,16 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     final String channelId = channel.get_channelId();
     final DocumentReference channelReference = mFirestore.getAdminChannel(channel.get_orgPushId(), channelId);
     final DocumentReference subscribedUserRef = mFirestore.subscribedUserReference(channelReference, uid);
+
     viewHolder.radioButton.setText(channelId);
-    viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelReference, subscribedUserRef, channel, viewHolder));
+    viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelReference, subscribedUserRef, viewHolder));
 
     subscribedUserRef.get()
     .addOnSuccessListener(ref ->
     {
       if (ref.exists()) {
         viewHolder.radioButton.setChecked(true);
+
       } else {
         viewHolder.radioButton.setChecked(false);
       }
@@ -89,9 +91,8 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     .addOnFailureListener(e -> showToast(e.getMessage()));
   }
 
-  public void toggleChannelStatus(final DocumentReference channelRef,
+  private void toggleChannelStatus(final DocumentReference channelRef,
                                   final DocumentReference subscribedUserRef,
-                                  final FirestoreChannel channel,
                                   MyViewHolder viewHolder)
   {
     subscribedUserRef.get()
@@ -108,15 +109,19 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
       } else {
         viewHolder.radioButton.setChecked(false);
         return mFirestore.deleteSubscribedUserTask(channelRef, uid);
+
       }
     })
     .addOnSuccessListener(t ->
     {
       final boolean isChecked = viewHolder.radioButton.isChecked();
+
       if (isChecked) {
         showToast("Subscribed to channel");
+
       } else {
         showToast("Unsubscribed from channel");
+
       }
       notifyDataSetChanged();
     })

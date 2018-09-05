@@ -22,9 +22,6 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private final String orgPushId;
   private final BaseFirestore mFirestore = new BaseFirestore();
   private SubscribedUserAdapterListener mListener;
-
-  private final int DARK_GREY;
-  private final int PRIMARY;
   private boolean enabled = true;
 
   class UserViewHolder extends RecyclerView.ViewHolder {
@@ -41,18 +38,11 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     }
   }
 
-  public SubscribedUserAdapter(List<SubscribedUser> users,
-                               final String channelId,
-                               final String orgPushId,
-                               SubscribedUserAdapterListener listener,
-                               final int PRIMARY,
-                               final int DARK_GREY)
+  public SubscribedUserAdapter(List<SubscribedUser> users, final String channelId, final String orgPushId, SubscribedUserAdapterListener listener)
   {
     mUsers = users;
     this.channelId = channelId;
     this.orgPushId = orgPushId;
-    this.PRIMARY = PRIMARY;
-    this.DARK_GREY = DARK_GREY;
     setListener(listener);
   }
 
@@ -101,8 +91,10 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
+    final String _message = firstname + " " + lastname;
+
     userRef.delete()
-    .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, userId))
+    .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, userId, _message))
     .addOnSuccessListener(ignore -> {
       mListener.onSuccess(firstname, lastname);
       enableViewHolder(viewHolder);
@@ -117,7 +109,6 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private void disableViewHolder(UserViewHolder viewHolder)
   {
     enabled = false;
-    viewHolder._send.setTextColor(DARK_GREY);
     viewHolder._send.setEnabled(false);
     viewHolder._send.setClickable(false);
   }
@@ -125,7 +116,6 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private void enableViewHolder(UserViewHolder viewHolder)
   {
     enabled = true;
-    viewHolder._send.setTextColor(PRIMARY);
     viewHolder._send.setEnabled(true);
     viewHolder._send.setClickable(true);
   }

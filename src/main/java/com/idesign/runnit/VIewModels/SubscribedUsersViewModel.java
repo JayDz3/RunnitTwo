@@ -1,6 +1,5 @@
 package com.idesign.runnit.VIewModels;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
@@ -8,7 +7,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.SubscribedUser;
-import com.idesign.runnit.Items.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +24,7 @@ public class SubscribedUsersViewModel extends ViewModel {
     return mUsers;
   }
 
-  public void setUsers(List<SubscribedUser> users)
+  private void setUsers(List<SubscribedUser> users)
   {
     mUsers.setValue(users);
   }

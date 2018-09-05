@@ -378,10 +378,10 @@ public class MainActivity extends AppCompatActivity
       mHomeFragment = new HomeFragment();
     }
     addDrawerListener();
-    getSupportFragmentManager()
-     .beginTransaction()
-     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-     .replace(R.id.main_frame_layout, mHomeFragment).commit();
+    getSupportFragmentManager().beginTransaction()
+    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+    .replace(R.id.main_frame_layout, mHomeFragment)
+    .commit();
     setActionBar();
   }
 
@@ -430,8 +430,7 @@ public class MainActivity extends AppCompatActivity
     }
     authStateListener = firebaseAuth ->
     {
-      if (mAuth.user() != null)
-      {
+      if (mAuth.user() != null) {
         final String uid = mAuth.user().getUid();
         final DocumentReference userRef = mFirestore.getUsers().document(uid);
         final List<FirestoreChannel> channels = new ArrayList<>();
@@ -457,6 +456,7 @@ public class MainActivity extends AppCompatActivity
       } else {
         mNavUtility.isNotLoggedIn(navigationView);
         removeUserListener();
+
       }
     };
     mAuth.setAuthListener(authStateListener);
@@ -499,6 +499,7 @@ public class MainActivity extends AppCompatActivity
       } else if (user.get_organizationCode() != null && !user.get_organizationCode().equals("")) {
         mNavUtility.isLoggedInHasRestaurantCode(navigationView);
         navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
+
       }
     });
   }

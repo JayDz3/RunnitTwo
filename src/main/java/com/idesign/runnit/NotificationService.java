@@ -15,6 +15,7 @@ public class NotificationService extends BroadcastReceiver
 {
   private final String NOTIFICATION_ACTION_FILTER = "Notification_Action";
   private final String NOTIFICATION_CHANNEL_ID = "channel_id";
+  private final String MESSAGE = "message";
 
   public NotificationService() { }
 
@@ -28,11 +29,13 @@ public class NotificationService extends BroadcastReceiver
     if (intent.getAction() != null && intent.getAction().equals(NOTIFICATION_ACTION_FILTER))
     {
         final String channelId = intent.getStringExtra(NOTIFICATION_CHANNEL_ID);
+        final String message = intent.getStringExtra(MESSAGE);
         final int id = channelId.hashCode();
         final long[] v = {1000, 300, 150, 300, 150, 300, 150, 300};
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
           final NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+
           if (notificationManager.getNotificationChannel(channelId) == null) {
               final NotificationChannel channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_DEFAULT);
               channel.enableVibration(true);
@@ -46,15 +49,11 @@ public class NotificationService extends BroadcastReceiver
               createNotification(_title, _content, channelId, id, notificationManagerCompat, context, pendingIntent);
 
             } else {
-
-              final String _title = "Hello";
-              createNotification(_title, channelId, channelId, id, notificationManagerCompat, context, pendingIntent);
+              createNotification(channelId, message, channelId, id, notificationManagerCompat, context, pendingIntent);
             }
 
           } else {
-
-          final String _title = "Hello";
-          createNotification(_title, channelId, channelId, id, notificationManagerCompat, context, pendingIntent);
+          createNotification(channelId, message, channelId, id, notificationManagerCompat, context, pendingIntent);
         }
     }
   }
