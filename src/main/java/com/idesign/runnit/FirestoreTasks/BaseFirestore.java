@@ -27,13 +27,13 @@ public class BaseFirestore
   private final String ORG_CODE = "_organizationCode";
   private final String ORG__PUSHID = "_organizationPushId";
   private final String LOGGED_IN = "_loggedIn";
-
   private final String LAST_SENT = "_lastSent";
-
   private final String INSTANCE_ID = "_instanceId";
+
   private final String COLLECTION_CHANNELS = "Channels";
   private final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
   private final String COLLECTION_SUBSCRIBED_USERS = "SubscribedUsers";
+
   private final FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
 
   private final CollectionReference users = mFirestore.collection(Constants.COLLECTION_USERS);
@@ -79,8 +79,6 @@ public class BaseFirestore
    */
   public Task<Void> addChannelAdmin(DocumentReference orgRef, String orgPushId, String newChannelId)
   {
-    Date date = new Date();
-    Timestamp _lastSent = new Timestamp(date);
    final FirestoreChannel channel = new FirestoreChannel(newChannelId, orgPushId, newChannelId, true, false, null);
    return orgRef.collection(COLLECTION_CHANNELS).document(newChannelId).set(channel);
   }
@@ -121,7 +119,7 @@ public class BaseFirestore
     return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid).delete();
   }
 
-  public Task<Void> updateSubscribedUserTask(final DocumentReference subscribedUserRef, final boolean status)
+  private Task<Void> updateSubscribedUserTask(final DocumentReference subscribedUserRef, final boolean status)
   {
     return subscribedUserRef.update(LOGGED_IN, status);
   }

@@ -42,11 +42,11 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   private SubscribedUserAdapter mAdapter;
 
   private SubscribedUsersViewModel mSubscribedUsersViewModel;
-
   private ListenerRegistration userListener;
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(Bundle savedInstanceState)
+  {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_channel_users);
     getValuesFromIntent();
@@ -64,7 +64,11 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   private Observer<List<SubscribedUser>> usersObserver()
   {
-    return users -> mAdapter.setUsers(users);
+    return users ->
+    {
+      Collections.sort(users, (a, b) -> a.get_lastName().compareToIgnoreCase(b.get_lastName()));
+      mAdapter.setUsers(users);
+    };
   }
 
   public void setView(String channelId)
@@ -104,7 +108,8 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     {
       return;
     }
-    userListener = subscribedUsersRef.addSnapshotListener(((querySnapshot, e) -> {
+    userListener = subscribedUsersRef.addSnapshotListener(((querySnapshot, e) ->
+    {
       if (e != null)
       {
         noUsers.setVisibility(View.VISIBLE);

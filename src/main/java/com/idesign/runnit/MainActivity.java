@@ -171,7 +171,8 @@ public class MainActivity extends AppCompatActivity
         {
           return;
         }
-        switch (selection) {
+        switch (selection)
+        {
           case "Login":
             goLogin();
             break;
@@ -269,24 +270,16 @@ public class MainActivity extends AppCompatActivity
       showToast("Must log in to continue");
       return;
     }
+    final boolean mIsAdmin = mAppUserViewModel.getmUser().getValue().get_isAdmin();
 
-    final String uid = mAuth.user().getUid();
-    mFirestore.getUsers().document(uid).get()
-    .addOnSuccessListener(userRef ->
-    {
-      final User user = mFirestore.toFirestoreObject(userRef, User.class);
-      final boolean isAdmin = user.get_isAdmin();
+    if (mIsAdmin) {
+      Intent intent = new Intent(this, ChannelActivity.class);
+      startActivity(intent);
 
-      if (isAdmin) {
-        Intent intent = new Intent(this, ChannelActivity.class);
-        startActivity(intent);
-
-      } else {
-        Intent intent = new Intent(this, UserChannelActivity.class);
-        startActivity(intent);
-      }
-    })
-    .addOnFailureListener(e -> showToast("error getting user when going to admin channel: " + e.getMessage()));
+    } else {
+      Intent intent = new Intent(this, UserChannelActivity.class);
+      startActivity(intent);
+    }
   }
 
   // END NAV ACTIONS //

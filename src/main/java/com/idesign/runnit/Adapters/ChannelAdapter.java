@@ -120,7 +120,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       viewHolder.channelTimeView.setText(time.format(dateSent));
     }
     viewHolder.channelNameView.setText(channel.get_channelId());
-
     viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
     viewHolder.activeUsersButton.setOnClickListener(l -> seeActiveUsers(channelRef));
     viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
@@ -179,8 +178,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     .continueWithTask(usersSnapshot ->
     {
       List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
-      // Task<DocumentSnapshot> task = Tasks.forResult(null);
-
       for (final DocumentSnapshot ds : usersSnapshot.getResult().getDocuments())
       {
         final SubscribedUser subscribedUser = mFirestore.toFirestoreObject(ds, SubscribedUser.class);

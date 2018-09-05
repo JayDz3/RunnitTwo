@@ -1,6 +1,5 @@
 package com.idesign.runnit.VIewModels;
 
-import android.annotation.TargetApi;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 

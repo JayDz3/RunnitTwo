@@ -14,6 +14,7 @@ import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.R;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAdapter.UserViewHolder>
@@ -98,7 +99,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
     final String _message =  firstname + " " + lastname;
-    
+
     userRef.delete()
     .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, userId, _message))
     .addOnSuccessListener(ignore ->

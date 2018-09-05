@@ -38,7 +38,7 @@
         </service>
 
         <activity android:name=".UserChannelActivity" />
-        <activity android:name=".ChannelUsers"></activity>
+        <activity android:name=".ChannelUsers"/>
     </application>
 
 </manifest>

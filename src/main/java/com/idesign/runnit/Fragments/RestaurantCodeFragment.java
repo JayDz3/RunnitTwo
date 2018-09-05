@@ -93,9 +93,10 @@ public class RestaurantCodeFragment extends Fragment
       }
       final User user = mFirestore.toFirestoreObject(documentSnapshot, User.class);
       mUserViewModel.setIsAdmin(user.get_isAdmin());
-      if (user.get_isAdmin())
-      {
+
+      if (user.get_isAdmin()) {
         restaurantView.setText(getResources().getString(R.string.restaurant_code_text_view_admin));
+
       } else {
         restaurantView.setText(getResources().getString(R.string.restaurant_code_text_view));
       }

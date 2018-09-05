@@ -79,6 +79,7 @@ public class AdminActivity extends AppCompatActivity
     {
       if (orgQuery.getDocuments().size() > 0) {
         showToast("this code is taken. Please enter another");
+
       } else {
         setOrg(org);
       }
