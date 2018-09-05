@@ -28,13 +28,32 @@
         android:textSize="@dimen/sixteenSP"
         android:textAlignment="center"/>
 
+    <EditText
+        android:id="@+id/channel_activity_admin_custom_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toTopOf="@id/channel_activity_admin_no_channels"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:hint="@string/admin_channel_custom_notification_hint"
+        android:inputType="text"/>
+
+    <Button
+        android:id="@+id/channel_activity_admin_clear_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toBottomOf="@id/channel_activity_admin_custom_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/clear"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/channel_activity_admin_recycler_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/channel_activity_admin_clear_message"
         app:layout_constraintBottom_toTopOf="@id/channel_activity_admin_fab"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">

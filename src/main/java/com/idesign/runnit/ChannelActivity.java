@@ -16,6 +16,8 @@ import android.text.TextUtils;
 
 import android.view.View;
 
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,17 +45,20 @@ public class ChannelActivity extends AppCompatActivity implements
   private final BaseFirestore mFirestore = new BaseFirestore();
 
   private RecyclerView mRecyclerView;
+  private EditText customMessageEditText;
   private ChannelAdapter mAdapter;
   private ProgressBar progressBar;
   private FloatingActionButton fab;
 
   private TextView noChannelView;
+  private Button clearButton;
 
   private int PRIMARY;
   private int DARK_GREY;
   private int _open = -1;
 
   private final String EXTRA_OPEN = "extra_open";
+  private final String EXTRA_MESSAGE = "extra_message";
   private final String CHANNEL_ID = "channel_id";
   private final String ORG_PUSHID = "org_pushid";
 
@@ -68,8 +73,8 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_channel);
-    getValuesFromBundle(savedInstanceState);
     setViewItems();
+    getValuesFromBundle(savedInstanceState);
     setAdapterAndRecyclerView();
 
     DARK_GREY = ContextCompat.getColor(this, R.color.colorDarkGray);
@@ -85,6 +90,8 @@ public class ChannelActivity extends AppCompatActivity implements
     noChannelView.setVisibility(View.GONE);
     if (savedInstanceState == null) {
       progressBar.setVisibility(View.VISIBLE);
+      customMessageEditText.setVisibility(View.GONE);
+      clearButton.setVisibility(View.GONE);
     } else {
       progressBar.setVisibility(View.GONE);
     }
@@ -96,12 +103,36 @@ public class ChannelActivity extends AppCompatActivity implements
     progressBar = findViewById(R.id.channel_activity_admin_progress_bar);
     noChannelView = findViewById(R.id.channel_activity_admin_no_channels);
     fab = findViewById(R.id.channel_activity_admin_fab);
+    customMessageEditText = findViewById(R.id.channel_activity_admin_custom_message);
+    clearButton = findViewById(R.id.channel_activity_admin_clear_message);
+    clearButton.setOnClickListener(l -> clearMessage());
+  }
+
+  public void clearMessage()
+  {
+    customMessageEditText.setText("");
+    mAdapter.setMessage("");
+  }
+
+  public String getMessage()
+  {
+    if (TextUtils.isEmpty(customMessageEditText.getText())) {
+      return "";
+    } else {
+      return customMessageEditText.getText().toString();
+    }
+  }
+
+  public void setMessage()
+  {
+    final String message = getMessage();
+    mAdapter.setMessage(message);
   }
 
   public void setAdapterAndRecyclerView()
   {
     final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
-    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this, _open);
+    mAdapter = new ChannelAdapter(channelsOnCreate, this, ChannelActivity.this, _open, getMessage());
     DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
     mLayouManager = new LinearLayoutManager(this);
     mRecyclerView.setLayoutManager(mLayouManager);
@@ -140,6 +171,8 @@ public class ChannelActivity extends AppCompatActivity implements
         {
           showToast("error getting channels from database: " + e.getMessage());
           noChannelView.setVisibility(View.VISIBLE);
+          customMessageEditText.setVisibility(View.GONE);
+          clearButton.setVisibility(View.GONE);
           enableButton();
           return;
         }
@@ -147,6 +180,8 @@ public class ChannelActivity extends AppCompatActivity implements
         {
           mAdminChannelViewModel.setChannelsFromSnapshot(querySnapshot);
           enableButton();
+          customMessageEditText.setVisibility(View.VISIBLE);
+          clearButton.setVisibility(View.VISIBLE);
           toggleNoChannelView(mAdapter.getItems());
           scrollToOpenPosition();
         }
@@ -169,8 +204,10 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     if (channels.size() == 0) {
       noChannelView.setVisibility(View.VISIBLE);
+      customMessageEditText.setVisibility(View.GONE);
     } else {
       noChannelView.setVisibility(View.GONE);
+      customMessageEditText.setVisibility(View.VISIBLE);
     }
   }
   // [ End Listener ] //
@@ -353,6 +390,7 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     super.onSaveInstanceState(outState);
     outState.putInt(EXTRA_OPEN, _open);
+    outState.putString(EXTRA_MESSAGE, getMessage());
   }
 
   public void getValuesFromBundle(Bundle inState)
@@ -362,6 +400,14 @@ public class ChannelActivity extends AppCompatActivity implements
       if (inState.keySet().contains(EXTRA_OPEN))
       {
         _open = inState.getInt(EXTRA_OPEN);
+      }
+
+      if (inState.keySet().contains(EXTRA_MESSAGE)) {
+        final String message = inState.getString(EXTRA_MESSAGE);
+        customMessageEditText.setText(message);
+
+      } else {
+        customMessageEditText.setText("");
       }
     }
   }

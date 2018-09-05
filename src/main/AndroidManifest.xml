@@ -21,7 +21,7 @@
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".AdminActivity" />
-        <activity android:name=".ChannelActivity" />
+        <activity android:name=".ChannelActivity" android:windowSoftInputMode="stateHidden" />
 
         <receiver
             android:name=".NotificationService"

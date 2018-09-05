@@ -46,6 +46,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
 
   private int _open;
   private User mUser;
+  private String customMessage;
 
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
@@ -72,12 +73,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     }
   }
 
-  public ChannelAdapter(List<FirestoreChannel> channels, Context context, AdminChannelAdapterListener listener, int _open)
+  public ChannelAdapter(List<FirestoreChannel> channels, Context context, AdminChannelAdapterListener listener, int _open, String customMessage)
   {
     mChannels = channels;
     mContext = context;
     setListener(listener);
     this._open = _open;
+    this.customMessage = customMessage;
   }
 
   /*
@@ -164,12 +166,24 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     mListener.getUsers(chennelId, orgPushId);
   }
 
+  public void setMessage(String message)
+  {
+    customMessage = message;
+  }
+
   private void sendNotification(final DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final CollectionReference subscribedUsersReference = mFirestore.subscribedUsersReference(channelRef);
-    final String _message = "Assistance needed";
+    String text = "";
+    mListener.setMessage();
+    if (!customMessage.equals("")) {
+      text = customMessage;
+    } else {
+      text = "Assistance Needed";
+    }
+    final String _message = text;
 
     disableButtons(viewHolder);
     mListener.disable();
@@ -351,6 +365,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     void disable();
     void enable();
     void setOpen(int open);
+    void setMessage();
     void getUsers(final String channelId, final String orgPushId);
   }
 }
