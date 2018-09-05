@@ -152,8 +152,8 @@ public class UserChannelActivity extends AppCompatActivity
   {
     super.onResume();
     mAdminChannelViewModel.getChannels().observe(this, observer());
-    setListener();
     mAppUserViewModel.getmUser().observe(this, userObserver());
+    setListener();
   }
 
   @Override

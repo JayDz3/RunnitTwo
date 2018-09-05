@@ -22,6 +22,7 @@ import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.VIewModels.SubscribedUsersViewModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ChannelUsers extends AppCompatActivity implements SubscribedUserAdapter.SubscribedUserAdapterListener

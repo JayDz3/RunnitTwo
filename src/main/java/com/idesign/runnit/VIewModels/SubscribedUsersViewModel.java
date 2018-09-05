@@ -1,5 +1,6 @@
 package com.idesign.runnit.VIewModels;
 
+import android.annotation.TargetApi;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
@@ -28,6 +29,7 @@ public class SubscribedUsersViewModel extends ViewModel {
   {
     mUsers.setValue(users);
   }
+
 
   public int setUsersFromSnapshots(QuerySnapshot snapshots)
   {

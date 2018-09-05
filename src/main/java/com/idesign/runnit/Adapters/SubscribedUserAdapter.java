@@ -16,7 +16,8 @@ import com.idesign.runnit.R;
 
 import java.util.List;
 
-public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAdapter.UserViewHolder> {
+public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAdapter.UserViewHolder>
+{
   private List<SubscribedUser> mUsers;
   private final String channelId;
   private final String orgPushId;
@@ -60,6 +61,11 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     notifyDataSetChanged();
   }
 
+  public List<SubscribedUser> getUsers()
+  {
+    return mUsers;
+  }
+
   @Override
   @NonNull
   public SubscribedUserAdapter.UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
@@ -91,15 +97,17 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
-    final String _message = firstname + " " + lastname;
-
+    final String _message =  firstname + " " + lastname;
+    
     userRef.delete()
     .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, userId, _message))
-    .addOnSuccessListener(ignore -> {
+    .addOnSuccessListener(ignore ->
+    {
       mListener.onSuccess(firstname, lastname);
       enableViewHolder(viewHolder);
     })
-    .addOnFailureListener(e -> {
+    .addOnFailureListener(e ->
+    {
       final String errString = e.getMessage();
       mListener.onFailure(errString);
       enableViewHolder(viewHolder);
