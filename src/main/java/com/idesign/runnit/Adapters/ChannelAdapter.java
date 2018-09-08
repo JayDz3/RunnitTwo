@@ -123,7 +123,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     }
     viewHolder.channelNameView.setText(channel.get_channelId());
     viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
-    viewHolder.activeUsersButton.setOnClickListener(l -> seeActiveUsers(channelRef));
+    viewHolder.activeUsersButton.setOnClickListener(l -> showActiveUsers(channelRef));
     viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
     viewHolder.confirmDeleteButton.setOnClickListener(l -> confirmDeleteChannel(channelRef, channel, viewHolder));
     viewHolder.cancelDeleteButton.setOnClickListener(l -> cancelDeleteChannel(viewHolder));
@@ -159,7 +159,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     viewHolder.sendNotificationButton.setVisibility(View.INVISIBLE);
   }
 
-  private void seeActiveUsers(DocumentReference channelRef)
+  private void showActiveUsers(DocumentReference channelRef)
   {
     final String chennelId = channelRef.getId();
     final String orgPushId = mUser.get_organizationPushId();
@@ -176,13 +176,17 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final CollectionReference subscribedUsersReference = mFirestore.subscribedUsersReference(channelRef);
-    String text = "";
+    final String text;
+
     mListener.setMessage();
+
     if (!customMessage.equals("")) {
       text = customMessage;
+
     } else {
       text = "Assistance Needed";
     }
+
     final String _message = text;
 
     disableButtons(viewHolder);
@@ -208,6 +212,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
             } else {
               mFirestore.setActiveUser(activeUsersReference, id, _message);
             }
+
           }));
         }
       }

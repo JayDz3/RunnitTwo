@@ -14,7 +14,6 @@ import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.R;
 
-import java.util.Collections;
 import java.util.List;
 
 public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAdapter.UserViewHolder>
@@ -25,6 +24,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private final BaseFirestore mFirestore = new BaseFirestore();
   private SubscribedUserAdapterListener mListener;
   private boolean enabled = true;
+  private String message;
 
   class UserViewHolder extends RecyclerView.ViewHolder {
     private TextView _firstName;
@@ -67,6 +67,11 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     return mUsers;
   }
 
+  public void setUserMessage(String message)
+  {
+    this.message = message;
+  }
+
   @Override
   @NonNull
   public SubscribedUserAdapter.UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
@@ -94,11 +99,17 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
       return;
     }
     disableViewHolder(viewHolder);
+    mListener.setMessage();
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
-    final String _message =  firstname + " " + lastname;
+    final String _message;
+    if (message.equals("")) {
+      _message = firstname + " " + lastname;
+    } else {
+      _message = firstname + "," + " " + message;
+    }
 
     userRef.delete()
     .onSuccessTask(ignore -> mFirestore.setActiveUser(activeUsersReference, userId, _message))
@@ -137,5 +148,6 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   public interface SubscribedUserAdapterListener {
     void onSuccess(final String firstname, final String lastname);
     void onFailure(final String errorMessage);
+    void setMessage();
   }
 }

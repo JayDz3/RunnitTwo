@@ -156,23 +156,26 @@ public class ChannelActivity extends AppCompatActivity implements
     {
       return;
     }
-    disableButtonHideProgressBar();
+
+    fab.setBackgroundTintList(ColorStateList.valueOf(DARK_GREY));
+    fab.setEnabled(false);
+    fab.setClickable(false);
+
     final String uid = mAuth.user().getUid();
+
     mFirestore.getUsers().document(uid).get()
     .addOnSuccessListener(userSnapshot ->
     {
       final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
       mAppUserViewModel.setmUser(user);
 
-      final String mUserOrgpushid = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
+      final String mUserOrgpushid = user.get_organizationPushId();
       channelListener = mFirestore.getAdminChannelsReference(mUserOrgpushid).addSnapshotListener(((querySnapshot, e) ->
       {
         if (e != null)
         {
           showToast("error getting channels from database: " + e.getMessage());
           noChannelView.setVisibility(View.VISIBLE);
-          customMessageEditText.setVisibility(View.GONE);
-          clearButton.setVisibility(View.GONE);
           enableButton();
           return;
         }
@@ -180,8 +183,6 @@ public class ChannelActivity extends AppCompatActivity implements
         {
           mAdminChannelViewModel.setChannelsFromSnapshot(querySnapshot);
           enableButton();
-          customMessageEditText.setVisibility(View.VISIBLE);
-          clearButton.setVisibility(View.VISIBLE);
           toggleNoChannelView(mAdapter.getItems());
           scrollToOpenPosition();
         }
@@ -205,9 +206,11 @@ public class ChannelActivity extends AppCompatActivity implements
     if (channels.size() == 0) {
       noChannelView.setVisibility(View.VISIBLE);
       customMessageEditText.setVisibility(View.GONE);
+      clearButton.setVisibility(View.GONE);
     } else {
       noChannelView.setVisibility(View.GONE);
       customMessageEditText.setVisibility(View.VISIBLE);
+      clearButton.setVisibility(View.VISIBLE);
     }
   }
   // [ End Listener ] //
@@ -282,13 +285,6 @@ public class ChannelActivity extends AppCompatActivity implements
     fab.setClickable(false);
   }
 
-  public void disableButtonHideProgressBar()
-  {
-    progressBar.setVisibility(View.GONE);
-    fab.setBackgroundTintList(ColorStateList.valueOf(DARK_GREY));
-    fab.setEnabled(false);
-    fab.setClickable(false);
-  }
 
   public void enableButton()
   {

@@ -8,7 +8,10 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +35,10 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   private TextView groupName;
   private TextView clickUser;
   private TextView noUsers;
+  private EditText customMessageUsers;
+  private Button clearMessageButton;
 
+  private final String EXTRA_MESSAGE = "extra_message";
   private final String CHANNEL_ID = "channel_id";
   private final String ORG_PUSHID = "org_pushid";
   private String _channelId;
@@ -53,6 +59,10 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     mSubscribedUsersViewModel = ViewModelProviders.of(this).get(SubscribedUsersViewModel.class);
     setView(_channelId);
     setRecyclerView();
+    if (savedInstanceState != null)
+    {
+      getValuesFromBundle(savedInstanceState);
+    }
   }
 
   public void getValuesFromIntent()
@@ -77,6 +87,9 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     groupName.setText(channelId);
     noUsers = findViewById(R.id.channel_users_activity_no_users);
     clickUser = findViewById(R.id.channel_users_activity_header);
+    customMessageUsers = findViewById(R.id.channel_users_activity_custom_message);
+    clearMessageButton = findViewById(R.id.channel_users_activity_clear_message);
+    clearMessageButton.setOnClickListener(l -> clearMessage());
   }
 
   public void setRecyclerView()
@@ -112,20 +125,34 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     {
       if (e != null)
       {
-        noUsers.setVisibility(View.VISIBLE);
-        clickUser.setVisibility(View.GONE);
+        noUsers();
         showToast("error: " + e.getMessage());
         return;
       }
-      if (querySnapshot == null)
+      if (querySnapshot == null || querySnapshot.getDocuments().size() == 0)
       {
         showToast("No users subscribed, or an error has occured");
-        noUsers.setVisibility(View.VISIBLE);
-        clickUser.setVisibility(View.GONE);
+        areUsers();
         return;
       }
       setSubscribedUsersViewModel(querySnapshot);
     }));
+  }
+
+  public void noUsers()
+  {
+    noUsers.setVisibility(View.VISIBLE);
+    clickUser.setVisibility(View.GONE);
+    customMessageUsers.setVisibility(View.GONE);
+    clearMessageButton.setVisibility(View.GONE);
+  }
+
+  public void areUsers()
+  {
+    noUsers.setVisibility(View.GONE);
+    clickUser.setVisibility(View.VISIBLE);
+    customMessageUsers.setVisibility(View.VISIBLE);
+    clearMessageButton.setVisibility(View.VISIBLE);
   }
 
   public void setSubscribedUsersViewModel(QuerySnapshot querySnapshot)
@@ -133,12 +160,11 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     final int size = mSubscribedUsersViewModel.setUsersFromSnapshots(querySnapshot);
 
     if (size == 0) {
-      noUsers.setVisibility(View.VISIBLE);
-      clickUser.setVisibility(View.GONE);
+      noUsers();
 
     } else {
-      noUsers.setVisibility(View.GONE);
-      clickUser.setVisibility(View.VISIBLE);
+      areUsers();
+
     }
   }
 
@@ -151,11 +177,47 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     }
   }
 
+  public String getMessage()
+  {
+    if (TextUtils.isEmpty(customMessageUsers.getText())) {
+      return "";
+
+    } else {
+      return customMessageUsers.getText().toString();
+    }
+  }
+
+  public void clearMessage()
+  {
+    customMessageUsers.setText("");
+  }
+
+  public void setMessage()
+  {
+    final String message = getMessage();
+    mAdapter.setUserMessage(message);
+  }
 
   public void showToast(String message)
   {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
   }
+
+  public void getValuesFromBundle(Bundle savedInstanceState)
+  {
+    if (savedInstanceState.keySet().contains(EXTRA_MESSAGE))
+    {
+      final String message = savedInstanceState.getString(EXTRA_MESSAGE);
+      customMessageUsers.setText(message);
+    }
+  }
+
+  public void onSaveInstanceState(Bundle outState)
+  {
+    super.onSaveInstanceState(outState);
+    outState.putString(EXTRA_MESSAGE, getMessage());
+  }
+
 
   @Override
   public void onStart()
