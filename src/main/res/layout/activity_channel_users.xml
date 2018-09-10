@@ -16,15 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <TextView
-        android:id="@+id/channel_users_activity_header"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/channel_users_group_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/channel_users_activity_header"/>
 
     <TextView
         android:id="@+id/channel_users_activity_no_users"
@@ -36,34 +27,39 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:text="@string/channel_users_activity_no_users"/>
 
-    <EditText
-        android:id="@+id/channel_users_activity_custom_message"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/channel_users_activity_header"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:hint="@string/admin_channel_custom_notification_hint"
-        android:inputType="text"/>
-
-    <Button
-        android:id="@+id/channel_users_activity_clear_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/channel_users_activity_custom_message"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/clear"/>
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/channel_users_activity_recycler_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/channel_users_activity_clear_message"
+        app:layout_constraintTop_toBottomOf="@id/channel_users_activity_no_users"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
     </android.support.v7.widget.RecyclerView>
+
+    <EditText
+        android:id="@+id/channel_users_activity_custom_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/channel_users_activity_clear_message"
+        android:hint="@string/admin_channel_custom_notification_hint"
+        android:inputType="text"/>
+
+    <ImageButton
+        android:contentDescription="@string/clear"
+        android:src="@drawable/ic_remove_circle_outline_black_24dp"
+        android:id="@+id/channel_users_activity_clear_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        app:layout_constraintTop_toTopOf="@id/channel_users_activity_custom_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/clear_button"
+        android:text="@string/clear"/>
+
 </android.support.constraint.ConstraintLayout>

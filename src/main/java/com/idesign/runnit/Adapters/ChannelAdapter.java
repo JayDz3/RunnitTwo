@@ -203,6 +203,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
         if (subscribedUser.get_loggedIn())
         {
           final DocumentReference activeUserRef = activeUsersReference.document(id);
+          /*
+           *   Add Task
+           */
           tasks.add(activeUserRef.get().addOnSuccessListener(userSnapshot ->
           {
             if (userSnapshot.exists()) {
@@ -212,8 +215,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
             } else {
               mFirestore.setActiveUser(activeUsersReference, id, _message);
             }
-
           }));
+          // End Add Task //
         }
       }
       return Tasks.whenAll(tasks);
@@ -245,7 +248,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     activeUsersReference.get()
     .onSuccessTask(this::deleteActiveUsersFromChannelBatch)
     .continueWithTask(ignore -> subscribedUsersReference.get())
-    .onSuccessTask(this::deleteSubscribedUsersBatch)
+    .onSuccessTask(usersSnapshot -> deleteSubscribedUsersBatch(usersSnapshot, channelId))
     .continueWithTask(ignore -> mFirestore.deleteAdminChannel(channelRef))
     .addOnSuccessListener(l ->
     {
@@ -300,9 +303,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
    *  Delete Subscribed Users returned from query of channel SubscribedUsers Collection Reference
    *  @param subscribedUsers : list of documents returned from query
    */
-  private Task<Void> deleteSubscribedUsersBatch(QuerySnapshot subscribedUsers)
+  private Task<Void> deleteSubscribedUsersBatch(QuerySnapshot subscribedUsers, String channelId)
   {
     final WriteBatch batch = mFirestore.batch();
+    final String COLLECTION_CHANNELS  = "Channels";
+
     if (subscribedUsers == null)
     {
       return batch.commit();
@@ -310,6 +315,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     for (DocumentSnapshot ds : subscribedUsers.getDocuments())
     {
       final DocumentReference ref = ds.getReference();
+      final DocumentReference userChannelRef = mFirestore.getUsers().document(ds.getId()).collection(COLLECTION_CHANNELS).document(channelId);
+
+      batch.delete(userChannelRef);
       batch.delete(ref);
     }
     return batch.commit();

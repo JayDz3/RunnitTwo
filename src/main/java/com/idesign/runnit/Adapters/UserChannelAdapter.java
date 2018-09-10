@@ -14,13 +14,16 @@ import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.Items.UserChannel;
 import com.idesign.runnit.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.MyViewHolder>
 {
   private List<FirestoreChannel> mChannels;
+  private List<UserChannel> mUserChannels;
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
   private final Context mContext;
@@ -46,6 +49,11 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
   {
     mChannels = channels;
     notifyDataSetChanged();
+  }
+
+  public void setUserChannels(List<UserChannel> mUserChannels)
+  {
+    this.mUserChannels = mUserChannels;
   }
 
   public List<FirestoreChannel> getItems()
@@ -78,30 +86,34 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     viewHolder.radioButton.setText(channelId);
     viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelReference, subscribedUserRef, viewHolder));
 
-    subscribedUserRef.get()
-    .addOnSuccessListener(ref ->
-    {
-      if (ref.exists()) {
-        viewHolder.radioButton.setChecked(true);
+    final UserChannel compareTo = new UserChannel(channelId);
+    final List<UserChannel> exists = new ArrayList<>();
 
-      } else {
-        viewHolder.radioButton.setChecked(false);
-      }
-    })
-    .addOnFailureListener(e -> showToast(e.getMessage()));
+    for (UserChannel c : mUserChannels) {
+      if (c.get_pushId().equals(compareTo.get_pushId()))
+        exists.add(compareTo);
+    }
+
+    if (exists.size() > 0) {
+      viewHolder.radioButton.setChecked(true);
+
+    } else {
+      viewHolder.radioButton.setChecked(false);
+    }
   }
 
   private void toggleChannelStatus(final DocumentReference channelRef,
                                   final DocumentReference subscribedUserRef,
                                   MyViewHolder viewHolder)
   {
+    final String uid = mAuth.user().getUid();
+    final String firstName = mUser.get_firstName();
+    final String lastName = mUser.get_lastName();
+    final String channelPushId = channelRef.getId();
+
     subscribedUserRef.get()
     .onSuccessTask(snap ->
     {
-      final String uid = mAuth.user().getUid();
-      final String firstName = mUser.get_firstName();
-      final String lastName = mUser.get_lastName();
-
       if (snap == null || !snap.exists()) {
         viewHolder.radioButton.setChecked(true);
         return mFirestore.addSubscribedUserTask(channelRef, firstName, lastName, uid);
@@ -110,6 +122,16 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
         viewHolder.radioButton.setChecked(false);
         return mFirestore.deleteSubscribedUserTask(channelRef, uid);
 
+      }
+    })
+    .onSuccessTask(ignore -> {
+      final boolean checked = viewHolder.radioButton.isChecked();
+
+      if (checked) {
+        return mFirestore.addUserChannel(uid, channelPushId);
+
+      } else {
+        return mFirestore.deleteUserChannel(uid, channelPushId);
       }
     })
     .addOnSuccessListener(t ->

@@ -21,12 +21,16 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
 
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -88,6 +92,8 @@ public class MainActivity extends AppCompatActivity
   private boolean disabled = false;
 
   private ProgressBar progressBar;
+
+  private final String COLLECTION_SUBSCRIBED_USERS = "SubscribedUsers";
 
   @Override
   protected void onCreate(Bundle savedInstanceState)
@@ -440,7 +446,7 @@ public class MainActivity extends AppCompatActivity
         })
         // channelsSnapshot is all channels belonging to org
         // if user exists on channel, they are updated as logged in to that channels collectionRef of SubscribedUsers
-        .onSuccessTask(channelsSnapshot -> mFirestore.subscribeUserToChannels(channelsSnapshot, channels, uid))
+        .onSuccessTask(channelsSnapshot -> subscribeUserToChannels(channelsSnapshot, channels, uid))
         .addOnSuccessListener(l -> mUserChannelViewModel.setChannels(channels))
         .addOnFailureListener(e -> showToast("error: " + e.getMessage()));
         mUserViewModel.clear();
@@ -454,6 +460,39 @@ public class MainActivity extends AppCompatActivity
     };
     mAuth.setAuthListener(authStateListener);
     mAuth.setHasListener(true);
+  }
+
+  /*
+   *  Update info on user login / authListener
+   *
+   *  @param channelsSnapshot : All channels belonging to organization
+   *
+   *  @param channels : Empty list of channels populated here. Then added to userChannelsViewModel
+   *
+   *  @param uid : user uid
+   */
+  public Task<DocumentSnapshot> subscribeUserToChannels(QuerySnapshot channelsSnapshot, List<FirestoreChannel> channels, String uid)
+  {
+    if (channelsSnapshot == null)
+    {
+      throw new RuntimeException("no channels");
+    }
+
+    Task<DocumentSnapshot> task = Tasks.forResult(null);
+    for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
+    {
+      final DocumentReference subscribedUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
+      task = task.continueWithTask(ignore -> subscribedUserRef.get().addOnSuccessListener(documentSnapshot ->
+      {
+        if (documentSnapshot.exists())
+        {
+          final FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
+          channels.add(channel);
+          mFirestore.updateSubscribedUserTask(subscribedUserRef, true);
+        }
+      }));
+    }
+    return task;
   }
 
   public void removeAuthListener()

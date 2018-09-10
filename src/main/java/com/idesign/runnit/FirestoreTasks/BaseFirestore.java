@@ -15,6 +15,7 @@ import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.FirestoreOrg;
 import com.idesign.runnit.Items.SubscribedUser;
+import com.idesign.runnit.Items.UserChannel;
 import com.idesign.runnit.VIewModels.UserChannelsViewModel;
 
 import java.util.ArrayList;
@@ -83,6 +84,22 @@ public class BaseFirestore
    return orgRef.collection(COLLECTION_CHANNELS).document(newChannelId).set(channel);
   }
 
+  public Task<Void> addUserChannel(String uid, String channelId)
+  {
+    final UserChannel userChannel = new UserChannel(channelId);
+    return getUsers().document(uid).collection(COLLECTION_CHANNELS).document(channelId).set(userChannel);
+  }
+
+  public Task<Void> deleteUserChannel(String uid, String channelId)
+  {
+    return getUsers().document(uid).collection(COLLECTION_CHANNELS).document(channelId).delete();
+  }
+
+  public CollectionReference getUserChannels(String uid)
+  {
+    return getUsers().document(uid).collection(COLLECTION_CHANNELS);
+  }
+
   public Task<Void> updateLastSent(DocumentReference channelRef)
   {
     WriteBatch batch = mFirestore.batch();
@@ -119,7 +136,7 @@ public class BaseFirestore
     return channelRef.collection(COLLECTION_SUBSCRIBED_USERS).document(uid).delete();
   }
 
-  private Task<Void> updateSubscribedUserTask(final DocumentReference subscribedUserRef, final boolean status)
+  public Task<Void> updateSubscribedUserTask(final DocumentReference subscribedUserRef, final boolean status)
   {
     return subscribedUserRef.update(LOGGED_IN, status);
   }
@@ -198,39 +215,6 @@ public class BaseFirestore
   public <T> T toFirestoreObject(DocumentSnapshot documentSnapshot, Class<T> tClass)
   {
     return documentSnapshot.toObject(tClass);
-  }
-
-  /*
-   *  Update info on user login / authListener
-   *
-   *  @param channelsSnapshot : All channels belonging to organization
-   *
-   *  @param channels : Empty list of channels populated here. Then added to userChannelsViewModel
-   *
-   *  @param uid : user uid
-   */
-  public Task<DocumentSnapshot> subscribeUserToChannels(QuerySnapshot channelsSnapshot, List<FirestoreChannel> channels, String uid)
-  {
-    if (channelsSnapshot == null)
-    {
-      throw new RuntimeException("no channels");
-    }
-
-    Task<DocumentSnapshot> task = Tasks.forResult(null);
-    for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
-    {
-      final DocumentReference subscribedUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
-      task = task.continueWithTask(ignore -> subscribedUserRef.get().addOnSuccessListener(documentSnapshot ->
-      {
-        if (documentSnapshot.exists())
-        {
-          final FirestoreChannel channel = toFirestoreObject(ds, FirestoreChannel.class);
-          channels.add(channel);
-          updateSubscribedUserTask(subscribedUserRef, true);
-        }
-      }));
-    }
-    return task;
   }
 
   public Task<Void> updateSubscribedUserTasks(String uid, WriteBatch batch, UserChannelsViewModel mUserChannelViewModel)

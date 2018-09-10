@@ -26,7 +26,8 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private boolean enabled = true;
   private String message;
 
-  class UserViewHolder extends RecyclerView.ViewHolder {
+  class UserViewHolder extends RecyclerView.ViewHolder
+  {
     private TextView _firstName;
     private TextView _lastName;
     private Button _send;
@@ -105,8 +106,10 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
     final String _message;
+
     if (message.equals("")) {
       _message = firstname + " " + lastname;
+
     } else {
       _message = firstname + "," + " " + message;
     }

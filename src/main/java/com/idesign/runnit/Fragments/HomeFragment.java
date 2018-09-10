@@ -55,6 +55,7 @@ public class HomeFragment extends Fragment
     if (mAuth.user() == null)
     {
       showToast("Not logged in");
+      return;
     }
     final String id = mAuth.user().getUid();
     final DocumentReference docRef = mFirestore.getUsers().document(id);
@@ -79,7 +80,7 @@ public class HomeFragment extends Fragment
     .addOnFailureListener(e -> showToast("error setting as admin: " + e.getMessage()));
   }
 
-  public void setAuthStateListener()
+  public void addAuthStateListener()
   {
     if (!mAuth.doesHaveListener())
     {
@@ -97,7 +98,7 @@ public class HomeFragment extends Fragment
     }
   }
 
-  public void removeAuthListener()
+  public void removeAuthStateListener()
   {
     if (mAuth.doesHaveListener())
     {
@@ -122,7 +123,7 @@ public class HomeFragment extends Fragment
   public void onResume()
   {
     super.onResume();
-    setAuthStateListener();
+    addAuthStateListener();
     // mUserViewModel.getUser().observe(this, getUserObserver());
   }
 
@@ -130,7 +131,7 @@ public class HomeFragment extends Fragment
   public void onPause()
   {
     super.onPause();
-    removeAuthListener();
+    removeAuthStateListener();
     // mUserViewModel.getUser().removeObserver(getUserObserver());
   }
 

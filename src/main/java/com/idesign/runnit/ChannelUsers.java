@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,10 +34,9 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   private final BaseFirestore mFirestore = new BaseFirestore();
 
   private TextView groupName;
-  private TextView clickUser;
   private TextView noUsers;
   private EditText customMessageUsers;
-  private Button clearMessageButton;
+  private ImageButton clearMessageButton;
 
   private final String EXTRA_MESSAGE = "extra_message";
   private final String CHANNEL_ID = "channel_id";
@@ -86,7 +86,6 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     groupName = findViewById(R.id.channel_users_group_name);
     groupName.setText(channelId);
     noUsers = findViewById(R.id.channel_users_activity_no_users);
-    clickUser = findViewById(R.id.channel_users_activity_header);
     customMessageUsers = findViewById(R.id.channel_users_activity_custom_message);
     clearMessageButton = findViewById(R.id.channel_users_activity_clear_message);
     clearMessageButton.setOnClickListener(l -> clearMessage());
@@ -131,8 +130,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
       }
       if (querySnapshot == null || querySnapshot.getDocuments().size() == 0)
       {
-        showToast("No users subscribed, or an error has occured");
-        areUsers();
+        noUsers();
         return;
       }
       setSubscribedUsersViewModel(querySnapshot);
@@ -142,7 +140,6 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   public void noUsers()
   {
     noUsers.setVisibility(View.VISIBLE);
-    clickUser.setVisibility(View.GONE);
     customMessageUsers.setVisibility(View.GONE);
     clearMessageButton.setVisibility(View.GONE);
   }
@@ -150,7 +147,6 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   public void areUsers()
   {
     noUsers.setVisibility(View.GONE);
-    clickUser.setVisibility(View.VISIBLE);
     customMessageUsers.setVisibility(View.VISIBLE);
     clearMessageButton.setVisibility(View.VISIBLE);
   }

@@ -2,9 +2,11 @@ package com.idesign.runnit;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 
+import android.inputmethodservice.Keyboard;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,8 +18,11 @@ import android.text.TextUtils;
 
 import android.view.View;
 
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +45,7 @@ import java.util.List;
 public class ChannelActivity extends AppCompatActivity implements
   ChannelAdapter.AdminChannelAdapterListener,
   NewChannelDialog.ChannelDialogListener
+
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
@@ -51,7 +57,7 @@ public class ChannelActivity extends AppCompatActivity implements
   private FloatingActionButton fab;
 
   private TextView noChannelView;
-  private Button clearButton;
+  private ImageButton clearButton;
 
   private int PRIMARY;
   private int DARK_GREY;
@@ -118,6 +124,7 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     if (TextUtils.isEmpty(customMessageEditText.getText())) {
       return "";
+
     } else {
       return customMessageEditText.getText().toString();
     }
@@ -207,6 +214,7 @@ public class ChannelActivity extends AppCompatActivity implements
       noChannelView.setVisibility(View.VISIBLE);
       customMessageEditText.setVisibility(View.GONE);
       clearButton.setVisibility(View.GONE);
+
     } else {
       noChannelView.setVisibility(View.GONE);
       customMessageEditText.setVisibility(View.VISIBLE);
@@ -251,6 +259,7 @@ public class ChannelActivity extends AppCompatActivity implements
       }
       final List<FirestoreChannel> channels = new ArrayList<>();
       final String trimmed = upperCaseName.trim();
+
       for (FirestoreChannel c : mAdapter.getItems())
       {
         if (c.get_channelId().equalsIgnoreCase(trimmed))
@@ -344,7 +353,6 @@ public class ChannelActivity extends AppCompatActivity implements
     if (name != null && !TextUtils.isEmpty(name)) {
       final String trimmed = trimmedString(name);
       addNewChannel(trimmed);
-
     } else {
       showToast("Channel name can not be empty");
     }

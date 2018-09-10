@@ -14,4 +14,6 @@
     <dimen name="twentyFourSP"> 24sp </dimen>
 
     <dimen name="twentyFourPixels">24px</dimen>
+
+    <dimen name="twoPx">2px</dimen>
 </resources>

@@ -18,8 +18,10 @@ import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.Items.UserChannel;
 import com.idesign.runnit.VIewModels.AdminChannelViewModel;
 import com.idesign.runnit.VIewModels.AppUserViewModel;
+import com.idesign.runnit.VIewModels.SimpleUserChannelsViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +34,11 @@ public class UserChannelActivity extends AppCompatActivity
   private UserChannelAdapter mAdapter;
 
   private AdminChannelViewModel mAdminChannelViewModel;
+  private SimpleUserChannelsViewModel mUserChannelsViewModel;
   private AppUserViewModel mAppUserViewModel;
 
   private ListenerRegistration channelListener;
+  private ListenerRegistration userChannelListener;
 
   private RecyclerView mRecyclerView;
   private ProgressBar progressBar;
@@ -51,6 +55,7 @@ public class UserChannelActivity extends AppCompatActivity
     setAdapterAndRecyclerView();
 
     mAdminChannelViewModel = ViewModelProviders.of(this).get(AdminChannelViewModel.class);
+    mUserChannelsViewModel = ViewModelProviders.of(this).get(SimpleUserChannelsViewModel.class);
     mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
 
     progressBar.setVisibility(View.GONE);
@@ -70,8 +75,8 @@ public class UserChannelActivity extends AppCompatActivity
 
   public void setAdapterAndRecyclerView()
   {
-    final List<FirestoreChannel> channelsOnCreate = new ArrayList<>();
-    mAdapter = new UserChannelAdapter(channelsOnCreate, this);
+    final List<FirestoreChannel> empty = new ArrayList<>();
+    mAdapter = new UserChannelAdapter(empty,this);
     DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     mRecyclerView.addItemDecoration(itemDecoration);
@@ -88,9 +93,14 @@ public class UserChannelActivity extends AppCompatActivity
     return  user -> mAdapter.setUser(user);
   }
 
+  private Observer<List<UserChannel>> userChannelObserver()
+  {
+    return userchannels -> mAdapter.setUserChannels(userchannels);
+  }
+
   public void setListener()
   {
-    if (channelListener != null)
+    if (channelListener != null || userChannelListener != null)
     {
       return;
     }
@@ -102,6 +112,17 @@ public class UserChannelActivity extends AppCompatActivity
       final String orgPushId = user.get_organizationPushId();
 
       mAppUserViewModel.setmUser(user);
+      userChannelListener = mFirestore.getUserChannels(uid).addSnapshotListener((((querySnapshot, e) -> {
+        if (e != null)
+        {
+          showToast("error getting channels from database: " + e.getMessage());
+          return;
+        }
+        if (querySnapshot != null)
+        {
+          mUserChannelsViewModel.setUserChannelsFromSnapshot(querySnapshot);
+        }
+      })));
       channelListener = mFirestore.getAdminChannelsReference(orgPushId).addSnapshotListener(((querySnapshot, e) ->
       {
         if (e != null)
@@ -128,6 +149,11 @@ public class UserChannelActivity extends AppCompatActivity
       channelListener.remove();
       channelListener = null;
     }
+    if (userChannelListener != null)
+    {
+      userChannelListener.remove();
+      userChannelListener = null;
+    }
   }
 
   public void toggleNoChannelView(List<FirestoreChannel> channels)
@@ -152,6 +178,7 @@ public class UserChannelActivity extends AppCompatActivity
   {
     super.onResume();
     mAdminChannelViewModel.getChannels().observe(this, observer());
+    mUserChannelsViewModel.getChannels().observe(this, userChannelObserver());
     mAppUserViewModel.getmUser().observe(this, userObserver());
     setListener();
   }
@@ -162,6 +189,7 @@ public class UserChannelActivity extends AppCompatActivity
     super.onPause();
     removeListener();
     mAdminChannelViewModel.getChannels().removeObserver(observer());
+    mUserChannelsViewModel.getChannels().removeObserver(userChannelObserver());
     mAppUserViewModel.getmUser().removeObserver(userObserver());
     mAppUserViewModel.clear();
   }
