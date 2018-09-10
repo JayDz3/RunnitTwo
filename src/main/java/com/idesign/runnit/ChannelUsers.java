@@ -35,8 +35,8 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   private TextView groupName;
   private TextView noUsers;
+  private TextView leaveBlankText;
   private EditText customMessageUsers;
-  private ImageButton clearMessageButton;
 
   private final String EXTRA_MESSAGE = "extra_message";
   private final String CHANNEL_ID = "channel_id";
@@ -87,8 +87,11 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     groupName.setText(channelId);
     noUsers = findViewById(R.id.channel_users_activity_no_users);
     customMessageUsers = findViewById(R.id.channel_users_activity_custom_message);
-    clearMessageButton = findViewById(R.id.channel_users_activity_clear_message);
-    clearMessageButton.setOnClickListener(l -> clearMessage());
+    leaveBlankText = findViewById(R.id.channel_users_activity_leave_blank);
+    leaveBlankText.setOnClickListener(l -> clearMessage());
+
+    customMessageUsers.setVisibility(View.GONE);
+    leaveBlankText.setVisibility(View.GONE);
   }
 
   public void setRecyclerView()
@@ -141,14 +144,14 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   {
     noUsers.setVisibility(View.VISIBLE);
     customMessageUsers.setVisibility(View.GONE);
-    clearMessageButton.setVisibility(View.GONE);
+    leaveBlankText.setVisibility(View.GONE);
   }
 
   public void areUsers()
   {
     noUsers.setVisibility(View.GONE);
     customMessageUsers.setVisibility(View.VISIBLE);
-    clearMessageButton.setVisibility(View.VISIBLE);
+    leaveBlankText.setVisibility(View.VISIBLE);
   }
 
   public void setSubscribedUsersViewModel(QuerySnapshot querySnapshot)

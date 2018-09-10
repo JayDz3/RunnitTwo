@@ -34,7 +34,7 @@
         android:layout_height="0dp"
         android:layout_margin="@dimen/eightDp"
         app:layout_constraintTop_toBottomOf="@id/channel_activity_admin_no_channels"
-        app:layout_constraintBottom_toTopOf="@id/channel_activity_admin_fab"
+        app:layout_constraintBottom_toTopOf="@id/channel_activity_admin_custom_message"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -45,31 +45,34 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/channel_activity_admin_leave_blank"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_activity_admin_clear_message"
+        app:layout_constraintEnd_toStartOf="@id/channel_activity_admin_fab"
         android:hint="@string/admin_channel_custom_notification_hint"
         android:inputType="text"/>
 
-    <ImageButton
-        android:contentDescription="@string/clear"
-        android:src="@drawable/ic_remove_circle_outline_black_24dp"
-        android:id="@+id/channel_activity_admin_clear_message"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/channel_activity_admin_leave_blank"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/eightDp"
+        android:layout_marginStart="@dimen/sixteenDp"
         android:layout_marginEnd="@dimen/eightDp"
-        app:layout_constraintTop_toTopOf="@id/channel_activity_admin_custom_message"
+        android:layout_marginBottom="@dimen/sixteenDp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/channel_activity_admin_fab"
-        android:background="@drawable/clear_button"
-        android:text="@string/clear"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/leave_blank_for_basic_message"
+        android:textColor="@color/colorPrimaryDark"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/channel_activity_admin_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/sixteenDp"
-        android:layout_marginEnd="@dimen/sixteenDp"
+        android:layout_marginBottom="@dimen/twentyFourDp"
+        android:layout_marginEnd="@dimen/eightDp"
         android:elevation="@dimen/fourDp"
         android:src="@drawable/ic_add_circle_outline_white_24dp"
         app:backgroundTint="@color/colorPrimary"

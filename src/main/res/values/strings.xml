@@ -12,6 +12,7 @@
     <string name="disable">Disable</string>
     <string name="confirm">Confirm</string>
     <string name="send">SEND</string>
+    <string name="leave_blank_for_basic_message">Leave empty to send a basic message</string>
 
     <string name="reply_label">reply</string>
 
@@ -79,10 +80,10 @@
     <!-- Admin channel item -->
     <string name="admin_channel_item_channel_name">Channel Name</string>
     <string name="admin_channel_item_sent_text">Last Sent</string>
-    <string name="admin_channel_custom_notification_hint">Message here</string>
+    <string name="admin_channel_custom_notification_hint">Empty</string>
 
     <!-- NEW CHANNEL DIALOG -->
-    <string name="channel_dialog_title">This will be the name of your channel</string>
+    <string name="channel_dialog_title">Enter the name of your channel</string>
     <string name="channel_dialog_hint">Servers</string>
 
     <!-- USER CHANNEL ACTIVITY -->

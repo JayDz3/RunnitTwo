@@ -8,6 +8,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.idesign.runnit.R;
@@ -30,15 +31,30 @@ public class NewChannelDialog extends DialogFragment
 
     builder.setView(view)
     .setPositiveButton(R.string.confirm, (dialog, which) -> confirm(which))
-    .setNegativeButton(R.string.cancel, (dialog, which) -> mListener.onCancel(which));
+    .setNegativeButton(R.string.cancel, (dialog, which) -> cancel(which));
     return builder.create();
   }
 
   public void confirm(int which)
   {
+    hideKeyBoard();
     String name = editText.getText().toString();
     mListener.onConfirm(which, name);
   }
+
+  public void cancel(final int which)
+  {
+    hideKeyBoard();
+    mListener.onCancel(which);
+  }
+
+
+  public void hideKeyBoard()
+  {
+    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+    inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+  }
+
 
   @Override
   public void onAttach(Context context)

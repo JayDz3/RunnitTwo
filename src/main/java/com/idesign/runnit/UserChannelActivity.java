@@ -112,49 +112,67 @@ public class UserChannelActivity extends AppCompatActivity
       final String orgPushId = user.get_organizationPushId();
 
       mAppUserViewModel.setmUser(user);
-      userChannelListener = mFirestore.getUserChannels(uid).addSnapshotListener((((querySnapshot, e) -> {
-        if (e != null)
-        {
-          showToast("error getting channels from database: " + e.getMessage());
-          return;
-        }
-        if (querySnapshot != null)
-        {
-          mUserChannelsViewModel.setUserChannelsFromSnapshot(querySnapshot);
-        }
-      })));
-      channelListener = mFirestore.getAdminChannelsReference(orgPushId).addSnapshotListener(((querySnapshot, e) ->
-      {
-        if (e != null)
-        {
-          showToast("error getting channels from database: " + e.getMessage());
-          noChannelView.setVisibility(View.GONE);
-          progressBar.setVisibility(View.GONE);
-          return;
-        }
-        if (querySnapshot != null)
-        {
-          mAdminChannelViewModel.setChannelsFromSnapshot(querySnapshot);
-          toggleNoChannelView(mAdapter.getItems());
-          progressBar.setVisibility(View.GONE);
-        }
-      }));
+      doUserChannelListener(uid);
+      doAdminChannelListener(orgPushId);
     });
   }
 
-  public void removeListener()
+  /*
+   *  Channel Listeners
+   */
+  public void doAdminChannelListener(String orgPushId)
+  {
+    channelListener = mFirestore.getAdminChannelsReference(orgPushId).addSnapshotListener(((querySnapshot, e) ->
+    {
+      if (e != null)
+      {
+        showToast("error getting channels from database: " + e.getMessage());
+        noChannelView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        return;
+      }
+      if (querySnapshot != null)
+      {
+        mAdminChannelViewModel.setChannelsFromSnapshot(querySnapshot);
+        toggleNoChannelView(mAdapter.getItems());
+        progressBar.setVisibility(View.GONE);
+      }
+    }));
+  }
+
+  public void doUserChannelListener(String uid)
+  {
+    userChannelListener = mFirestore.getUserChannels(uid).addSnapshotListener((((querySnapshot, e) -> {
+      if (e != null)
+      {
+        showToast("error getting channels from database: " + e.getMessage());
+        return;
+      }
+      if (querySnapshot != null)
+      {
+        mUserChannelsViewModel.setUserChannelsFromSnapshot(querySnapshot);
+      }
+    })));
+  }
+
+  public void removeAdminChannelListener()
   {
     if (channelListener != null)
     {
       channelListener.remove();
       channelListener = null;
     }
+  }
+
+  public void removeUserChannelListener()
+  {
     if (userChannelListener != null)
     {
       userChannelListener.remove();
       userChannelListener = null;
     }
   }
+  // End Channel Listener //
 
   public void toggleNoChannelView(List<FirestoreChannel> channels)
   {
@@ -187,7 +205,8 @@ public class UserChannelActivity extends AppCompatActivity
   public void onPause()
   {
     super.onPause();
-    removeListener();
+    removeAdminChannelListener();
+    removeUserChannelListener();
     mAdminChannelViewModel.getChannels().removeObserver(observer());
     mUserChannelsViewModel.getChannels().removeObserver(userChannelObserver());
     mAppUserViewModel.getmUser().removeObserver(userObserver());

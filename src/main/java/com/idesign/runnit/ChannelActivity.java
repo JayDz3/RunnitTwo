@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 
-import android.inputmethodservice.Keyboard;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,10 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 
 import android.view.View;
-
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -57,7 +53,7 @@ public class ChannelActivity extends AppCompatActivity implements
   private FloatingActionButton fab;
 
   private TextView noChannelView;
-  private ImageButton clearButton;
+  private TextView leaveBlankText;
 
   private int PRIMARY;
   private int DARK_GREY;
@@ -97,7 +93,6 @@ public class ChannelActivity extends AppCompatActivity implements
     if (savedInstanceState == null) {
       progressBar.setVisibility(View.VISIBLE);
       customMessageEditText.setVisibility(View.GONE);
-      clearButton.setVisibility(View.GONE);
     } else {
       progressBar.setVisibility(View.GONE);
     }
@@ -110,8 +105,11 @@ public class ChannelActivity extends AppCompatActivity implements
     noChannelView = findViewById(R.id.channel_activity_admin_no_channels);
     fab = findViewById(R.id.channel_activity_admin_fab);
     customMessageEditText = findViewById(R.id.channel_activity_admin_custom_message);
-    clearButton = findViewById(R.id.channel_activity_admin_clear_message);
-    clearButton.setOnClickListener(l -> clearMessage());
+    leaveBlankText = findViewById(R.id.channel_activity_admin_leave_blank);
+    leaveBlankText.setOnClickListener(l -> clearMessage());
+
+    customMessageEditText.setVisibility(View.GONE);
+    leaveBlankText.setVisibility(View.GONE);
   }
 
   public void clearMessage()
@@ -213,12 +211,11 @@ public class ChannelActivity extends AppCompatActivity implements
     if (channels.size() == 0) {
       noChannelView.setVisibility(View.VISIBLE);
       customMessageEditText.setVisibility(View.GONE);
-      clearButton.setVisibility(View.GONE);
-
+      leaveBlankText.setVisibility(View.GONE);
     } else {
       noChannelView.setVisibility(View.GONE);
       customMessageEditText.setVisibility(View.VISIBLE);
-      clearButton.setVisibility(View.VISIBLE);
+      leaveBlankText.setVisibility(View.VISIBLE);
     }
   }
   // [ End Listener ] //
@@ -353,6 +350,7 @@ public class ChannelActivity extends AppCompatActivity implements
     if (name != null && !TextUtils.isEmpty(name)) {
       final String trimmed = trimmedString(name);
       addNewChannel(trimmed);
+      
     } else {
       showToast("Channel name can not be empty");
     }
