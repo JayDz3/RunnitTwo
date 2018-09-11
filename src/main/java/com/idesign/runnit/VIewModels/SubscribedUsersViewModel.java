@@ -30,7 +30,7 @@ public class SubscribedUsersViewModel extends ViewModel {
   }
 
 
-  public int setUsersFromSnapshots(QuerySnapshot snapshots)
+  public void setUsersFromSnapshots(QuerySnapshot snapshots)
   {
     final List<SubscribedUser> users = new ArrayList<>();
     for (DocumentSnapshot ds : snapshots)
@@ -42,7 +42,14 @@ public class SubscribedUsersViewModel extends ViewModel {
       }
     }
     setUsers(users);
-    return users.size();
+  }
+
+  public int size()
+  {
+    if (mUsers.getValue() == null) {
+      return 0;
+    }
+    return mUsers.getValue().size();
   }
 
   public void clear()

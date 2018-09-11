@@ -3,6 +3,8 @@ package com.idesign.runnit;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -10,9 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +63,16 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     {
       getValuesFromBundle(savedInstanceState);
     }
+    changeIconTint();
+  }
+
+  public void changeIconTint()
+  {
+    if (Build.VERSION.SDK_INT >= 23)
+    {
+      View decor = getWindow().getDecorView();
+      decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    }
   }
 
   public void getValuesFromIntent()
@@ -76,7 +86,10 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   {
     return users ->
     {
-      Collections.sort(users, (a, b) -> a.get_lastName().compareToIgnoreCase(b.get_lastName()));
+      if (users != null)
+      {
+        Collections.sort(users, (a, b) -> a.get_lastName().compareToIgnoreCase(b.get_lastName()));
+      }
       mAdapter.setUsers(users);
     };
   }
@@ -97,9 +110,9 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   public void setRecyclerView()
   {
     final List<SubscribedUser> users = new ArrayList<>();
+    DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
     mRecyclerView = findViewById(R.id.channel_users_activity_recycler_view);
     mAdapter = new SubscribedUserAdapter(users, _channelId, _orgPushId, ChannelUsers.this);
-    DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     mRecyclerView.addItemDecoration(itemDecoration);
     mRecyclerView.setAdapter(mAdapter);
@@ -117,6 +130,12 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   public void setUsersListener(final String orgPushId, final String channelId)
   {
+    if (orgPushId == null || channelId == null)
+    {
+      showToast("An error occured. Please dismiss and reopen this page");
+      noUsers();
+      return;
+    }
     final DocumentReference channelRef = mFirestore.getAdminChannelsReference(orgPushId).document(channelId);
     final CollectionReference subscribedUsersRef = mFirestore.subscribedUsersReference(channelRef);
     if (userListener != null)
@@ -156,14 +175,13 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   public void setSubscribedUsersViewModel(QuerySnapshot querySnapshot)
   {
-    final int size = mSubscribedUsersViewModel.setUsersFromSnapshots(querySnapshot);
-
+    mSubscribedUsersViewModel.setUsersFromSnapshots(querySnapshot);
+    final int size = mSubscribedUsersViewModel.size();
     if (size == 0) {
       noUsers();
 
     } else {
       areUsers();
-
     }
   }
 
@@ -216,7 +234,6 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     super.onSaveInstanceState(outState);
     outState.putString(EXTRA_MESSAGE, getMessage());
   }
-
 
   @Override
   public void onStart()

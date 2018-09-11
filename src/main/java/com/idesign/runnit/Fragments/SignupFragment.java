@@ -113,6 +113,7 @@ public class SignupFragment extends Fragment
   public void submit()
   {
     disableButtons();
+
     if (fieldNotEmpty(editFirstName)
       && fieldNotEmpty(editLastName)
       && fieldNotEmpty(editEmail)
@@ -129,6 +130,7 @@ public class SignupFragment extends Fragment
       setUserViewModelEmail(trimmedEmail);
       setPasswordViewModelValue(trimmedPassword);
       createUser();
+
     } else {
       enableButtons();
     }
@@ -174,10 +176,13 @@ public class SignupFragment extends Fragment
     mUserViewModel.setSendNotification(false);
     mUserViewModel.setInstanceId("");
     mUserViewModel.setLoggedIn(false);
+
     final User user = mUserViewModel.getUser().getValue();
+
     Objects.requireNonNull(user).set_firstName(firstname);
     user.set_lastName(lastname);
     user.set_email(mAuth.user().getEmail());
+
     return documentReference.set(user);
   }
 

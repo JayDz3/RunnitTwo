@@ -22,6 +22,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private final String channelId;
   private final String orgPushId;
   private final BaseFirestore mFirestore = new BaseFirestore();
+
   private SubscribedUserAdapterListener mListener;
   private boolean enabled = true;
   private String message;
@@ -99,13 +100,15 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
     {
       return;
     }
-    disableViewHolder(viewHolder);
-    mListener.setMessage();
+
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
     final CollectionReference activeUsersReference = channelRef.collection(COLLECTION_ACTIVE_USERS);
     final DocumentReference userRef = activeUsersReference.document(userId);
     final String _message;
+
+    disableViewHolder(viewHolder);
+    mListener.setMessage();
 
     if (message.equals("")) {
       _message = firstname + " " + lastname;

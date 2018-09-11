@@ -2,7 +2,6 @@ package com.idesign.runnit;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 
@@ -16,9 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,16 +80,17 @@ public class ChannelActivity extends AppCompatActivity implements
     PRIMARY = ContextCompat.getColor(this, R.color.colorPrimary);
 
     fab.setOnClickListener(l -> showDialog());
-    fab.setClickable(false);
-    fab.setEnabled(false);
+    disableFab();
 
     mAdminChannelViewModel = ViewModelProviders.of(this).get(AdminChannelViewModel.class);
     mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
 
     noChannelView.setVisibility(View.GONE);
+
     if (savedInstanceState == null) {
       progressBar.setVisibility(View.VISIBLE);
       customMessageEditText.setVisibility(View.GONE);
+
     } else {
       progressBar.setVisibility(View.GONE);
     }
@@ -161,11 +159,7 @@ public class ChannelActivity extends AppCompatActivity implements
     {
       return;
     }
-
-    fab.setBackgroundTintList(ColorStateList.valueOf(DARK_GREY));
-    fab.setEnabled(false);
-    fab.setClickable(false);
-
+    disableFab();
     final String uid = mAuth.user().getUid();
 
     mFirestore.getUsers().document(uid).get()
@@ -181,6 +175,9 @@ public class ChannelActivity extends AppCompatActivity implements
         {
           showToast("error getting channels from database: " + e.getMessage());
           noChannelView.setVisibility(View.VISIBLE);
+          /*
+           *  enableButton() enable's fab as well
+           */
           enableButton();
           return;
         }
@@ -212,6 +209,7 @@ public class ChannelActivity extends AppCompatActivity implements
       noChannelView.setVisibility(View.VISIBLE);
       customMessageEditText.setVisibility(View.GONE);
       leaveBlankText.setVisibility(View.GONE);
+
     } else {
       noChannelView.setVisibility(View.GONE);
       customMessageEditText.setVisibility(View.VISIBLE);
@@ -222,6 +220,7 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void showDialog()
   {
+    customMessageEditText.clearFocus();
     NewChannelDialog channelDialog = new NewChannelDialog();
     channelDialog.show(getSupportFragmentManager(), "NewChannelDialog");
   }
@@ -243,9 +242,13 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void addNewChannel(String name)
   {
+    /*
+     * disableButton() disable's fab as well
+     */
     disableButton();
     final String orgPushid = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
     final String upperCaseName = upperCaseFirstLetter(name);
+    final String trimmed = upperCaseName.trim();
 
     mFirestore.getOrgSnapshotTask(orgPushid)
     .onSuccessTask(orgSnapshot ->
@@ -255,7 +258,6 @@ public class ChannelActivity extends AppCompatActivity implements
        throw new RuntimeException("org snapshot was null");
       }
       final List<FirestoreChannel> channels = new ArrayList<>();
-      final String trimmed = upperCaseName.trim();
 
       for (FirestoreChannel c : mAdapter.getItems())
       {
@@ -283,21 +285,31 @@ public class ChannelActivity extends AppCompatActivity implements
     });
   }
 
-  public void disableButton()
+  public void disableFab()
   {
-    progressBar.setVisibility(View.VISIBLE);
     fab.setBackgroundTintList(ColorStateList.valueOf(DARK_GREY));
     fab.setEnabled(false);
     fab.setClickable(false);
+  }
+
+  public void enableFab()
+  {
+    fab.setBackgroundTintList(ColorStateList.valueOf(PRIMARY));
+    fab.setEnabled(true);
+    fab.setClickable(true);
+  }
+
+  public void disableButton()
+  {
+    progressBar.setVisibility(View.VISIBLE);
+    disableFab();
   }
 
 
   public void enableButton()
   {
     progressBar.setVisibility(View.GONE);
-    fab.setBackgroundTintList(ColorStateList.valueOf(PRIMARY));
-    fab.setEnabled(true);
-    fab.setClickable(true);
+    enableFab();
   }
 
   /*
@@ -339,6 +351,7 @@ public class ChannelActivity extends AppCompatActivity implements
     intent.putExtra(CHANNEL_ID, channelId);
     intent.putExtra(ORG_PUSHID, orgPushId);
     startActivity(intent);
+    overridePendingTransition(R.transition.slide_up, R.transition.stay);
   }
 
   /*
@@ -350,7 +363,7 @@ public class ChannelActivity extends AppCompatActivity implements
     if (name != null && !TextUtils.isEmpty(name)) {
       final String trimmed = trimmedString(name);
       addNewChannel(trimmed);
-      
+
     } else {
       showToast("Channel name can not be empty");
     }

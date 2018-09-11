@@ -2,11 +2,14 @@ package com.idesign.runnit;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -100,20 +103,10 @@ public class MainActivity extends AppCompatActivity
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    getValuesFromBundle(savedInstanceState);
     setViewItems();
-
-    mUserViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
-    mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
-    mStateViewModel = ViewModelProviders.of(this).get(StateViewModel.class);
-    mPasswordViewModel = ViewModelProviders.of(this).get(PasswordViewModel.class);
-    mUserChannelViewModel = ViewModelProviders.of(this).get(UserChannelsViewModel.class);
-
+    setViewModels();
     setActionBar();
-
-    if (savedInstanceState != null)
-    {
-      getValuesFromBundle(savedInstanceState);
-    }
     addDrawerListener();
     addNavListener();
     toggleViewOnStart();
@@ -127,6 +120,15 @@ public class MainActivity extends AppCompatActivity
     toolbar = findViewById(R.id.toolbar);
     progressBar = findViewById(R.id.main_activity_progress_bar);
     progressBar.setVisibility(View.GONE);
+  }
+
+  public void setViewModels()
+  {
+    mUserViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+    mAppUserViewModel = ViewModelProviders.of(this).get(AppUserViewModel.class);
+    mStateViewModel = ViewModelProviders.of(this).get(StateViewModel.class);
+    mPasswordViewModel = ViewModelProviders.of(this).get(PasswordViewModel.class);
+    mUserChannelViewModel = ViewModelProviders.of(this).get(UserChannelsViewModel.class);
   }
 
   /*
@@ -245,6 +247,7 @@ public class MainActivity extends AppCompatActivity
       .addOnFailureListener(this::onLogoutFailure);
     }
   }
+
   public void onLogoutSuccess()
   {
     mNavUtility.isNotLoggedIn(navigationView);
@@ -261,6 +264,24 @@ public class MainActivity extends AppCompatActivity
     showToast("error: " + e.getMessage() + " You are however, signed out");
     mStateViewModel.setFragmentState(Constants.STATE_LOGGED_OUT);
     disabled = false;
+  }
+
+  public void disableNotifications()
+  {
+    ComponentName notificationService = new ComponentName(this, NotificationService.class);
+    ComponentName notificationReceiver = new ComponentName(this, NotificationReceiver.class);
+    PackageManager packageManager = this.getPackageManager();
+    packageManager.setComponentEnabledSetting(notificationService, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    packageManager.setComponentEnabledSetting(notificationReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+  }
+
+  public void enableNotifications()
+  {
+    ComponentName notificationService = new ComponentName(this, NotificationService.class);
+    ComponentName notificationReceiver = new ComponentName(this, NotificationReceiver.class);
+    PackageManager packageManager = this.getPackageManager();
+    packageManager.setComponentEnabledSetting(notificationService, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+    packageManager.setComponentEnabledSetting(notificationReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
   }
 
   public void goCreateAdmin()
@@ -346,7 +367,7 @@ public class MainActivity extends AppCompatActivity
     }
   }
 
-  public void setActionBarToReturnHome()
+  public void setActionBarForFragment()
   {
     toolbar.setNavigationOnClickListener(l -> setState(Constants.STATE_HOME));
     actionBar.setDisplayShowTitleEnabled(false);
@@ -368,7 +389,7 @@ public class MainActivity extends AppCompatActivity
   public void buildHomeFrag(int state)
   {
     appState = state;
-    if (mHomeFragment != null && mHomeFragment.isVisible())
+    if (fragmentVisible(mHomeFragment))
     {
       return;
     }
@@ -377,17 +398,15 @@ public class MainActivity extends AppCompatActivity
       mHomeFragment = new HomeFragment();
     }
     addDrawerListener();
-    getSupportFragmentManager().beginTransaction()
-    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-    .replace(R.id.main_frame_layout, mHomeFragment)
-    .commit();
+    final int transition = FragmentTransaction.TRANSIT_FRAGMENT_FADE;
+    replaceFragment(mHomeFragment, transition);
     setActionBar();
   }
 
   public void buildRestaurantFrag(int state)
   {
     appState = state;
-    if (mRestaurantFragment != null && mRestaurantFragment.isVisible())
+    if (fragmentVisible(mRestaurantFragment))
     {
       return;
     }
@@ -396,22 +415,26 @@ public class MainActivity extends AppCompatActivity
       mRestaurantFragment = new RestaurantCodeFragment();
     }
     replaceFragment(mRestaurantFragment);
-    setActionBarToReturnHome();
+    setActionBarForFragment();
   }
 
   public void buildSignupFrag(int state)
   {
     appState = state;
-    if (mSignupFragment != null && mSignupFragment.isVisible())
+    if (fragmentVisible(mSignupFragment))
     {
       return;
     }
-    if (mSignupFragment == null)
-    {
+    if (mSignupFragment == null) {
       mSignupFragment = new SignupFragment();
     }
     replaceFragment(mSignupFragment);
-    setActionBarToReturnHome();
+    setActionBarForFragment();
+  }
+
+  public boolean fragmentVisible(Fragment fragment)
+  {
+    return fragment != null && fragment.isVisible();
   }
 
   public void replaceFragment(Fragment fragment)
@@ -421,6 +444,13 @@ public class MainActivity extends AppCompatActivity
     .replace(R.id.main_frame_layout, fragment).commit();
   }
 
+  public void replaceFragment(Fragment fragment, int transition)
+  {
+    getSupportFragmentManager()
+    .beginTransaction()
+    .setTransition(transition)
+    .replace(R.id.main_frame_layout, fragment).commit();
+  }
   public void addAuthListener()
   {
     if (mAuth.doesHaveListener())
@@ -430,6 +460,7 @@ public class MainActivity extends AppCompatActivity
     authStateListener = firebaseAuth ->
     {
       if (mAuth.user() != null) {
+        enableNotifications();
         final String uid = mAuth.user().getUid();
         final DocumentReference userRef = mFirestore.getUsers().document(uid);
         final List<FirestoreChannel> channels = new ArrayList<>();
@@ -455,6 +486,7 @@ public class MainActivity extends AppCompatActivity
       } else {
         mNavUtility.isNotLoggedIn(navigationView);
         removeUserListener();
+        disableNotifications();
 
       }
     };
@@ -603,6 +635,10 @@ public class MainActivity extends AppCompatActivity
 
   public void getValuesFromBundle(Bundle inState)
   {
+    if (inState == null)
+    {
+      return;
+    }
     if (inState.keySet().contains(Constants.EXTRA_APP_STATE))
     {
       appState = inState.getInt(Constants.EXTRA_APP_STATE);

@@ -16,4 +16,8 @@
     <dimen name="twentyFourPixels">24px</dimen>
 
     <dimen name="twoPx">2px</dimen>
+
+    <integer name="transition_duration">200</integer>
+    <integer name="delay_duration">50</integer>
+
 </resources>

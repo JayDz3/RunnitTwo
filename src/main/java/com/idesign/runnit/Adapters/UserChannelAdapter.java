@@ -102,9 +102,7 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     }
   }
 
-  private void toggleChannelStatus(final DocumentReference channelRef,
-                                  final DocumentReference subscribedUserRef,
-                                  MyViewHolder viewHolder)
+  private void toggleChannelStatus(final DocumentReference channelRef, final DocumentReference subscribedUserRef, MyViewHolder viewHolder)
   {
     final String uid = mAuth.user().getUid();
     final String firstName = mUser.get_firstName();
@@ -126,7 +124,6 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     })
     .onSuccessTask(ignore -> {
       final boolean checked = viewHolder.radioButton.isChecked();
-
       if (checked) {
         return mFirestore.addUserChannel(uid, channelPushId);
 
@@ -137,7 +134,6 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     .addOnSuccessListener(t ->
     {
       final boolean isChecked = viewHolder.radioButton.isChecked();
-
       if (isChecked) {
         showToast("Subscribed to channel");
 
