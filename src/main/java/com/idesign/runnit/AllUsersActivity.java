@@ -1,33 +1,22 @@
 package com.idesign.runnit;
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.ListenerRegistration;
 import com.idesign.runnit.AllUsersFragments.AllUsers;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
-import com.idesign.runnit.FirestoreTasks.MyAuth;
-import com.idesign.runnit.Items.User;
 import com.idesign.runnit.VIewModels.AllUsersViewModel;
-
-import java.util.List;
 
 public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllUsersFragmentListener
 {
-  private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
 
   private AllUsersViewModel mUsersViewModel;
   private AllUsers mAllUsersFragment;
-
-  private ListenerRegistration mUsersListener;
 
   private String uid;
   private String orgPushId;
@@ -108,7 +97,6 @@ public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllU
   public void enable()
   {
     progressBar.setVisibility(View.GONE);
-    getUsers();
   }
 
   public void getValuesFromIntent()

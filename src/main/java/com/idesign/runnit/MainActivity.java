@@ -322,6 +322,7 @@ public class MainActivity extends AppCompatActivity
     final boolean mIsAdmin = mAppUserViewModel.getmUser().getValue().get_isAdmin();
     final String uid = mAppUserViewModel.getmUser().getValue().get_pushId();
     final String orgPushId = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
+
     if (uid == null || orgPushId == null || orgPushId.equals(""))
     {
       showToast("An error occured. Have you set up your organization id yet?");

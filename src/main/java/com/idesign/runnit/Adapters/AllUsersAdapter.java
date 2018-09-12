@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.AllUsersFragments.AllUsers;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.User;
@@ -85,9 +86,12 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
     disableViewHolder(viewHolder);
     setEnabled(false);
     mListener.disable();
+
     mFirestore.setUserOrganizationPushIdEmpty(orgPushId, uid)
-    .addOnSuccessListener(l -> {
+    .onSuccessTask(ignore -> mFirestore.getOrganizationUsers(orgPushId))
+    .addOnSuccessListener(snapshot -> {
       mListener.enable();
+      mListener.onSnapshot(snapshot);
       enableViewHolder(viewHolder);
     })
     .addOnFailureListener(e -> {
@@ -97,13 +101,13 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
     });
   }
 
-  public void enableViewHolder(AllUsersViewHolder viewHolder)
+  private void enableViewHolder(AllUsersViewHolder viewHolder)
   {
     viewHolder.deleteButton.setClickable(true);
     viewHolder.deleteButton.setEnabled(true);
   }
 
-  public void disableViewHolder(AllUsersViewHolder viewHolder)
+  private void disableViewHolder(AllUsersViewHolder viewHolder)
   {
     viewHolder.deleteButton.setClickable(false);
     viewHolder.deleteButton.setEnabled(false);
@@ -124,5 +128,6 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
     void enable();
     void disable();
     void toast(String message);
+    void onSnapshot(QuerySnapshot snapshot);
   }
 }
