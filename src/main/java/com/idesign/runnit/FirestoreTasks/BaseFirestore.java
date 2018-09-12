@@ -174,6 +174,11 @@ public class BaseFirestore
     batch.set(docRef, org);
     return batch.commit();
   }
+
+  public Task<QuerySnapshot> getOrganizationUsers(String orgPushId)
+  {
+    return getUsers().whereEqualTo(ORG__PUSHID, orgPushId).get();
+  }
   // {End Organizations] //
 
   /*
@@ -196,6 +201,11 @@ public class BaseFirestore
   public Task<Void> setUserOrgPushId(String _organizationPushId, String uid)
   {
     return getUsers().document(uid).update(ORG__PUSHID, _organizationPushId);
+  }
+
+  public Task<Void> setUserOrganizationPushIdEmpty(String _organizationPushId, String uid)
+  {
+    return getUsers().document(uid).update(ORG__PUSHID, "");
   }
 
   public Task<Void> updateInstanceId(DocumentReference docRef, String _instanceId)

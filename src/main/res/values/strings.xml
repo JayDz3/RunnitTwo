@@ -29,7 +29,7 @@
     <string name="drawer_verify_restaurant">Edit Org Code</string>
     <string name="drawer_create_admin_account">Admin</string>
     <string name="drawer_create_channel">Channels</string>
-    <string name="drawer_list_active_users">Active Users</string>
+    <string name="drawer_list_all_users">Users</string>
 
     <!-- HOME FRAGMENT -->
     <string name="home_fragment_get_runners">Runners</string>
@@ -92,4 +92,7 @@
     <!-- SUBSCRIBED USERS ACTIVITY -->
     <string name="channel_users_activity_header">Click a user to send them a notification</string>
     <string name="channel_users_activity_no_users">No users are subscribed to this channel</string>
+
+    <!-- ALL USERS FRAGMENT -->
+    <string name="all_users_fragment_header">Users</string>
 </resources>

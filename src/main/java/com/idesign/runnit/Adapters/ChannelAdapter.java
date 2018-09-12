@@ -47,6 +47,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private int _open;
   private User mUser;
   private String customMessage;
+  private boolean enabled = true;
 
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
@@ -123,7 +124,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     }
     viewHolder.channelNameView.setText(channel.get_channelId());
     viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
-    viewHolder.activeUsersButton.setOnClickListener(l -> showActiveUsers(channelRef));
+    viewHolder.activeUsersButton.setOnClickListener(l -> showActiveUsers(channelRef, viewHolder));
     viewHolder.sendNotificationButton.setOnClickListener(l -> sendNotification(channelRef, viewHolder));
     viewHolder.confirmDeleteButton.setOnClickListener(l -> confirmDeleteChannel(channelRef, channel, viewHolder));
     viewHolder.cancelDeleteButton.setOnClickListener(l -> cancelDeleteChannel(viewHolder));
@@ -159,16 +160,28 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     viewHolder.sendNotificationButton.setVisibility(View.INVISIBLE);
   }
 
-  private void showActiveUsers(DocumentReference channelRef)
+  private void showActiveUsers(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
+    if (!enabled)
+    {
+      return;
+    }
+    setEnabled(false);
+    disableButtons(viewHolder);
     final String chennelId = channelRef.getId();
     final String orgPushId = mUser.get_organizationPushId();
     mListener.getUsers(chennelId, orgPushId);
+    enableButtons(viewHolder);
   }
 
   public void setMessage(String message)
   {
     customMessage = message;
+  }
+
+  public void setEnabled(boolean status)
+  {
+    enabled = status;
   }
 
   private void sendNotification(final DocumentReference channelRef, AdminChannelViewHolder viewHolder)

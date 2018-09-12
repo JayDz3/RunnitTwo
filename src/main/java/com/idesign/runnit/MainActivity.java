@@ -98,6 +98,9 @@ public class MainActivity extends AppCompatActivity
 
   private final String COLLECTION_SUBSCRIBED_USERS = "SubscribedUsers";
 
+  private final String ORG_PUSHID = "org_pushid";
+  private final String USER_UID = "user_uid";
+
   @Override
   protected void onCreate(Bundle savedInstanceState)
   {
@@ -204,9 +207,9 @@ public class MainActivity extends AppCompatActivity
             mNavUtility.setCheckedToFalse(R.id.nav_channel, navigationView);
             goChannels();
             break;
-          case "Active Users":
-            mNavUtility.setCheckedToFalse(R.id.nav_active_users, navigationView);
-            showSnackbar("selected active users");
+          case "Users":
+            mNavUtility.setCheckedToFalse(R.id.nav_all_users, navigationView);
+            goAllUsers();
             break;
           default:
             Log.d("DRAWER LISTENER", "default");
@@ -305,6 +308,31 @@ public class MainActivity extends AppCompatActivity
 
     } else {
       Intent intent = new Intent(this, UserChannelActivity.class);
+      startActivity(intent);
+    }
+  }
+
+  public void goAllUsers()
+  {
+    if (mAuth.user() == null)
+    {
+      showToast("Must log in to continue");
+      return;
+    }
+    final boolean mIsAdmin = mAppUserViewModel.getmUser().getValue().get_isAdmin();
+    final String uid = mAppUserViewModel.getmUser().getValue().get_pushId();
+    final String orgPushId = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
+    if (uid == null || orgPushId == null || orgPushId.equals(""))
+    {
+      showToast("An error occured. Have you set up your organization id yet?");
+      return;
+    }
+
+    if (mIsAdmin)
+    {
+      final Intent intent = new Intent(this, AllUsersActivity.class);
+      intent.putExtra(USER_UID, uid);
+      intent.putExtra(ORG_PUSHID, orgPushId);
       startActivity(intent);
     }
   }
@@ -473,13 +501,17 @@ public class MainActivity extends AppCompatActivity
         {
           final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
           final String orgPushid = user.get_organizationPushId();
+          if (orgPushid.equals(""))
+          {
+            throw new RuntimeException("Please set your organization code");
+          }
           return mFirestore.getAdminChannelsReference(orgPushid).get();
         })
         // channelsSnapshot is all channels belonging to org
         // if user exists on channel, they are updated as logged in to that channels collectionRef of SubscribedUsers
         .onSuccessTask(channelsSnapshot -> subscribeUserToChannels(channelsSnapshot, channels, uid))
         .addOnSuccessListener(l -> mUserChannelViewModel.setChannels(channels))
-        .addOnFailureListener(e -> showToast("error: " + e.getMessage()));
+        .addOnFailureListener(e -> showToast("error: 510 " + e.getMessage()));
         mUserViewModel.clear();
         mPasswordViewModel.setPassword("");
 
@@ -555,17 +587,23 @@ public class MainActivity extends AppCompatActivity
       mAppUserViewModel.setmUser(user);
       toggleAdmin(user);
       toggleAdminOrgSet(user);
-
-      if (user.get_organizationCode() == null || user.get_organizationCode().equals("")) {
-        mNavUtility.isLoggedInNoRestaurantCode(navigationView);
-        navigationView.getMenu().findItem(R.id.nav_channel).setVisible(false);
-
-      } else if (user.get_organizationCode() != null && !user.get_organizationCode().equals("")) {
-        mNavUtility.isLoggedInHasRestaurantCode(navigationView);
-        navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
-
-      }
+      toggleOrgIsSet(user);
     });
+  }
+
+  public void toggleOrgIsSet(User user)
+  {
+    if (user.get_organizationPushId() == null || user.get_organizationPushId().equals("")) {
+      mNavUtility.isLoggedInNoRestaurantCode(navigationView);
+      navigationView.getMenu().findItem(R.id.nav_channel).setVisible(false);
+      navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(true);
+
+    } else if (user.get_organizationPushId() != null && !user.get_organizationPushId().equals("")) {
+      mNavUtility.isLoggedInHasRestaurantCode(navigationView);
+      navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
+      navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(false);
+
+    }
   }
 
   public void toggleAdminOrgSet(User user)
@@ -591,6 +629,7 @@ public class MainActivity extends AppCompatActivity
       mNavUtility.isNotAdmin(navigationView);
 
     }
+    toggleOrgIsSet(user);
   }
 
   public void removeUserListener()

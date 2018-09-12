@@ -257,4 +257,11 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     mSubscribedUsersViewModel.getUsers().removeObserver(usersObserver());
   }
 
+  @Override
+  public void onBackPressed()
+  {
+    finish();
+    overridePendingTransition(R.transition.stay, R.transition.slide_down);
+    super.onBackPressed();
+  }
 }

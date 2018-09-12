@@ -55,7 +55,7 @@ public class NavigationViewUtility
     navigationView.getMenu().findItem(R.id.nav_edit_info).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_admin).setVisible(false);
-    navigationView.getMenu().findItem(R.id.nav_active_users).setVisible(false);
+    navigationView.getMenu().findItem(R.id.nav_all_users).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_channel).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
@@ -63,13 +63,13 @@ public class NavigationViewUtility
 
   public void isAdmin(NavigationView navigationView)
   {
-    navigationView.getMenu().findItem(R.id.nav_active_users).setVisible(true);
+    navigationView.getMenu().findItem(R.id.nav_all_users).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(false);
   }
 
   public void isNotAdmin(NavigationView navigationView)
   {
-    navigationView.getMenu().findItem(R.id.nav_active_users).setVisible(false);
+    navigationView.getMenu().findItem(R.id.nav_all_users).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(true);
   }
 }

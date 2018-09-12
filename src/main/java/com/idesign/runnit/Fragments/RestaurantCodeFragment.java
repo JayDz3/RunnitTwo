@@ -128,13 +128,17 @@ public class RestaurantCodeFragment extends Fragment
       {
         throw new RuntimeException("There was a problem accessing this organization");
       }
+      if (orgSnapshots.getDocuments().size() == 0)
+      {
+        throw new RuntimeException("The code entered does not belong to any organization...");
+      }
       final DocumentSnapshot docSnap = orgSnapshots.getDocuments().get(0);
       final FirestoreOrg org = mFirestore.toFirestoreObject(docSnap, FirestoreOrg.class);
       final String orgPushid = org.getPushId();
       return mFirestore.setUserOrgPushId(orgPushid, uid);
     })
     .addOnSuccessListener(ignore -> showSnackbar("Success"))
-    .addOnFailureListener(e -> showSnackbar("error setting your code: " + e.getMessage()));
+    .addOnFailureListener(e -> showToast("error setting your code: " + e.getMessage()));
   }
 
   public boolean isEmptyField(EditText editText)

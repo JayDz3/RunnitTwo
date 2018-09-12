@@ -22,9 +22,9 @@
             android:icon="@drawable/ic_add_circle_outline_primary_24dp"
             android:title="@string/drawer_create_admin_account" />
         <item
-            android:id="@+id/nav_active_users"
+            android:id="@+id/nav_all_users"
             android:icon="@drawable/ic_people_outline_black_24dp"
-            android:title="@string/drawer_list_active_users" />
+            android:title="@string/drawer_list_all_users" />
         <item
             android:id="@+id/nav_channel"
             android:icon="@drawable/ic_clock_in_primary_24dp"

@@ -335,7 +335,6 @@ public class ChannelActivity extends AppCompatActivity implements
     scrollToOpenPosition();
   }
 
-
   public void scrollToOpenPosition()
   {
     if (_open > -1)
@@ -347,11 +346,23 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void getUsers(final String channelId, final String orgPushId)
   {
-    Intent intent = new Intent(this, ChannelUsers.class);
-    intent.putExtra(CHANNEL_ID, channelId);
-    intent.putExtra(ORG_PUSHID, orgPushId);
-    startActivity(intent);
-    overridePendingTransition(R.transition.slide_up, R.transition.stay);
+    final String uid = mAuth.user().getUid();
+    mFirestore.getUsers().document(uid).get()
+    .addOnSuccessListener(snapshot -> {
+      final User user = mFirestore.toFirestoreObject(snapshot, User.class);
+      final String orgId = user.get_organizationPushId();
+
+      Intent intent = new Intent(this, ChannelUsers.class);
+      intent.putExtra(CHANNEL_ID, channelId);
+      intent.putExtra(ORG_PUSHID, orgId);
+      startActivity(intent);
+      overridePendingTransition(R.transition.slide_up, R.transition.stay);
+      mAdapter.setEnabled(true);
+    })
+    .addOnFailureListener(e -> {
+      mAdapter.setEnabled(true);
+      showToast("Error: " + e.getMessage());
+    });
   }
 
   /*
