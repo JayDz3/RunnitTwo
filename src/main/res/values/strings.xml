@@ -53,7 +53,7 @@
 
     <string name="restaurant_code_text_view">Please enter the code provided to you in each field</string>
     <string name="restaurant_code_text_view_admin">Please submit your organization code</string>
-    <string name="restaurant_code_hint">Provided Code</string>
+    <string name="restaurant_code_hint">123abc</string>
 
     <!-- LOGIN FRAGMENT -->
     <string name="login_forgot_password_text">Forgot your password?</string>

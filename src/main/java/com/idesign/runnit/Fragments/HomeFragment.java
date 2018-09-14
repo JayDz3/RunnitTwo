@@ -123,6 +123,7 @@ public class HomeFragment extends Fragment
         if (mAuth.user() != null) {
           final String uid = mAuth.user().getUid();
           final DocumentReference userRef = mFirestore.getUsers().document(uid);
+          toggleButton.setVisibility(View.VISIBLE);
           addUserListener(userRef);
 
         } else {
@@ -153,11 +154,9 @@ public class HomeFragment extends Fragment
   public void toggleButtonVisibility(boolean isAdmin)
   {
     if (isAdmin) {
-      toggleButton.setVisibility(View.VISIBLE);
       reminderButton.setVisibility(View.VISIBLE);
 
     } else {
-      toggleButton.setVisibility(View.GONE);
       reminderButton.setVisibility(View.GONE);
     }
   }

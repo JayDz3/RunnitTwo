@@ -95,7 +95,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
         android:background="@drawable/clear_button"
-        android:textColor="@drawable/clear_button_primary_text_color"
         android:text="@string/clear"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/signup_submit"/>
@@ -106,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
         android:background="@drawable/clear_button"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@drawable/clear_button_primary_text_color"
         android:text="@string/submit"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

@@ -48,5 +48,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@drawable/clear_button"
         android:text="@string/submit"
-        android:textColor="@color/colorPrimary"/>
+        android:textColor="@drawable/clear_button_primary_text_color"/>
 </android.support.constraint.ConstraintLayout>

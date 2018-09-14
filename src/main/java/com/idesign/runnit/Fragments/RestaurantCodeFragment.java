@@ -122,8 +122,8 @@ public class RestaurantCodeFragment extends Fragment
       showToast("Codes must match to continue");
       return;
     }
+    disableButton();
     mUserViewModel.setOrganizationCode(text);
-
     mFirestore.setOrganizationCodeTask(documentReference, text)
     .onSuccessTask(ignore -> mFirestore.queryOrgByCodeTask(text))
     .onSuccessTask(orgSnapshots ->
@@ -148,8 +148,24 @@ public class RestaurantCodeFragment extends Fragment
       editRestaurantCode.setText("");
       editRestaurantCodeTwo.setText("");
       mStateViewModel.setFragmentState(Constants.STATE_HOME);
+      enableButton();
     })
-    .addOnFailureListener(e -> showToast("error setting your code: " + e.getMessage()));
+    .addOnFailureListener(e -> {
+      showToast("error setting your code: " + e.getMessage());
+      enableButton();
+    });
+  }
+
+  public void enableButton()
+  {
+    submitButton.setClickable(true);
+    submitButton.setEnabled(true);
+  }
+
+  public void disableButton()
+  {
+    submitButton.setClickable(false);
+    submitButton.setEnabled(false);
   }
 
   public boolean isEmptyField(EditText editText)
