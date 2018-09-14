@@ -9,14 +9,14 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.firestore.QuerySnapshot;
-import com.idesign.runnit.AllUsersFragments.AllUsers;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
 
 import java.util.List;
 
-public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUsersViewHolder> {
+public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUsersViewHolder>
+{
   private List<User> mUsers;
   private AllUsersAdapterListener mListener;
 
@@ -25,7 +25,8 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
   private boolean enabled = true;
   private final String orgPushId;
 
-  class AllUsersViewHolder extends RecyclerView.ViewHolder {
+  class AllUsersViewHolder extends RecyclerView.ViewHolder
+  {
     private TextView firstNameView;
     private TextView lastNameView;
     private Button deleteButton;
@@ -89,12 +90,14 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
 
     mFirestore.setUserOrganizationPushIdEmpty(orgPushId, uid)
     .onSuccessTask(ignore -> mFirestore.getOrganizationUsers(orgPushId))
-    .addOnSuccessListener(snapshot -> {
+    .addOnSuccessListener(snapshot ->
+    {
       mListener.enable();
       mListener.onSnapshot(snapshot);
       enableViewHolder(viewHolder);
     })
-    .addOnFailureListener(e -> {
+    .addOnFailureListener(e ->
+    {
       mListener.enable();
       enableViewHolder(viewHolder);
       mListener.toast(e.getMessage());

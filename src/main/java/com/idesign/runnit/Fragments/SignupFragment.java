@@ -152,7 +152,7 @@ public class SignupFragment extends Fragment
     {
       mUserViewModel.setLoggedIn(true);
       mStateViewModel.setFragmentState(Constants.STATE_HOME);
-      showToast("Registration complete!");
+      showToast("Navigate to Edit Org Code to complete registration!");
     })
     .addOnFailureListener(e ->
     {

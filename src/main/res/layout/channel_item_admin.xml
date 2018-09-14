@@ -41,8 +41,7 @@
             android:layout_marginEnd="@dimen/sixteenDp"
             app:layout_constraintTop_toBottomOf="@id/channel_item_channel_sent_header"
             app:layout_constraintEnd_toEndOf="parent"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:text="@string/confirm"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
         <TextView
             android:id="@+id/channel_item_admin_text_view"

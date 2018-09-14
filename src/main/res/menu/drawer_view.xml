@@ -30,6 +30,10 @@
             android:icon="@drawable/ic_clock_in_primary_24dp"
             android:title="@string/drawer_create_channel" />
         <item
+            android:id="@+id/nav_delete_account"
+            android:icon="@drawable/ic_remove_circle_outline_black_24dp"
+            android:title="@string/drawer_delete_account" />
+        <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_account_box_primary_24dp"
             android:title="@string/drawer_logout" />

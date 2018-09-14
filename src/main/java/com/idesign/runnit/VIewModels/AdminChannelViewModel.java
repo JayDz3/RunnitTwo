@@ -36,7 +36,7 @@ public class AdminChannelViewModel extends ViewModel
     setChannels(channels);
   }
 
-  private void setChannels(List<FirestoreChannel> channels)
+  public void setChannels(List<FirestoreChannel> channels)
   {
     this.channels.setValue(channels);
   }

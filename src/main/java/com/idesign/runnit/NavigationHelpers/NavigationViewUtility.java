@@ -34,6 +34,7 @@ public class NavigationViewUtility
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_logout).setVisible(true);
+    navigationView.getMenu().findItem(R.id.nav_delete_account).setVisible(true);
   }
 
   public void isLoggedInNoRestaurantCode(NavigationView navigationView)
@@ -45,6 +46,7 @@ public class NavigationViewUtility
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_logout).setVisible(true);
+    navigationView.getMenu().findItem(R.id.nav_delete_account).setVisible(true);
   }
 
   public void isNotLoggedIn(NavigationView navigationView)
@@ -59,6 +61,7 @@ public class NavigationViewUtility
     navigationView.getMenu().findItem(R.id.nav_channel).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_logout).setVisible(false);
+    navigationView.getMenu().findItem(R.id.nav_delete_account).setVisible(false);
   }
 
   public void isAdmin(NavigationView navigationView)

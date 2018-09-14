@@ -34,6 +34,10 @@ import com.idesign.runnit.VIewModels.AppUserViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 public class ChannelActivity extends AppCompatActivity implements
   ChannelAdapter.AdminChannelAdapterListener,
@@ -66,6 +70,8 @@ public class ChannelActivity extends AppCompatActivity implements
 
   private ListenerRegistration channelListener;
   private LinearLayoutManager mLayouManager;
+
+  private Disposable disposable;
 
   @Override
   protected void onCreate(Bundle savedInstanceState)
@@ -192,8 +198,22 @@ public class ChannelActivity extends AppCompatActivity implements
     });
   }
 
-  // {End ChannelListener] //
+  public void observeChannels()
+  {
+    if (disposable == null || disposable.isDisposed())
+    {
+      disposable = io.reactivex.Observable.interval(1, TimeUnit.MINUTES, AndroidSchedulers.mainThread())
+      .subscribe(r -> updateChannels());
+    }
+  }
 
+  public void updateChannels()
+  {
+    final List<FirestoreChannel> channels = mAdminChannelViewModel.getChannels().getValue();
+    mAdminChannelViewModel.setChannels(channels);
+  }
+
+  // {End ChannelListener] //
   public void removeListener()
   {
     if (channelListener != null)
@@ -387,6 +407,10 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     super.onPause();
     removeListener();
+    if (disposable != null && !disposable.isDisposed())
+    {
+      disposable.dispose();
+    }
     mAdminChannelViewModel.getChannels().removeObserver(observer());
     mAppUserViewModel.getmUser().removeObserver(userObserver());
     mAppUserViewModel.clear();
@@ -399,6 +423,7 @@ public class ChannelActivity extends AppCompatActivity implements
     mAdminChannelViewModel.getChannels().observe(this, observer());
     mAppUserViewModel.getmUser().observe(this, userObserver());
     setListener();
+    observeChannels();
   }
 
   @Override

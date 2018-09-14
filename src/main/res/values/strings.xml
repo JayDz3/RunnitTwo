@@ -1,7 +1,7 @@
 <resources>
     <string name="home_page">Home Page</string>
     <string name="app_name">Runnit</string>
-    <string name="submit">Submit</string>
+    <string name="submit">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="clear">Clear</string>
     <string name="save">Save</string>
@@ -29,11 +29,14 @@
     <string name="drawer_verify_restaurant">Edit Org Code</string>
     <string name="drawer_create_admin_account">Admin</string>
     <string name="drawer_create_channel">Channels</string>
+    <string name="drawer_delete_account">Delete Account</string>
     <string name="drawer_list_all_users">Users</string>
+
 
     <!-- HOME FRAGMENT -->
     <string name="home_fragment_get_runners">Runners</string>
     <string name="home_fragment_toggle_admin">Toggle</string>
+    <string name="home_fragment_reminder">Code</string>
 
     <!-- SIGNUP FRAGMENT -->
     <string name="signup_firstname_hint">First name</string>
@@ -48,7 +51,7 @@
     <string name="phone_number_resend_sms_text">Need another verification code?</string>
     <string name="phone_number_resend_sms_clickable">click here</string>
 
-    <string name="restaurant_code_text_view">Please enter the code provided to you</string>
+    <string name="restaurant_code_text_view">Please enter the code provided to you in each field</string>
     <string name="restaurant_code_text_view_admin">Please submit your organization code</string>
     <string name="restaurant_code_hint">Provided Code</string>
 
@@ -95,4 +98,7 @@
 
     <!-- ALL USERS FRAGMENT -->
     <string name="all_users_fragment_header">Users</string>
+
+    <!-- DELETE ACCOUNT ACTIVITY -->
+    <string name="delete_account_activity_header">Enter your password in both fields to continue</string>
 </resources>

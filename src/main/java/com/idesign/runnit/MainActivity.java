@@ -211,6 +211,10 @@ public class MainActivity extends AppCompatActivity
             mNavUtility.setCheckedToFalse(R.id.nav_all_users, navigationView);
             goAllUsers();
             break;
+          case "Delete Account":
+            mNavUtility.setCheckedToFalse(R.id.nav_delete_account, navigationView);
+            goDeleteAccount();
+            break;
           default:
             Log.d("DRAWER LISTENER", "default");
             break;
@@ -219,6 +223,12 @@ public class MainActivity extends AppCompatActivity
       }
       public void onDrawerStateChanged(int newState) { }
     });
+  }
+
+  public void goDeleteAccount()
+  {
+    Intent intent = new Intent(this, DeleteAccountActivity.class);
+    startActivity(intent);
   }
 
   /*
@@ -512,7 +522,7 @@ public class MainActivity extends AppCompatActivity
         // if user exists on channel, they are updated as logged in to that channels collectionRef of SubscribedUsers
         .onSuccessTask(channelsSnapshot -> subscribeUserToChannels(channelsSnapshot, channels, uid))
         .addOnSuccessListener(l -> mUserChannelViewModel.setChannels(channels))
-        .addOnFailureListener(e -> showToast("error: 510 " + e.getMessage()));
+        .addOnFailureListener(e -> logMessage(e.getMessage()));
         mUserViewModel.clear();
         mPasswordViewModel.setPassword("");
 

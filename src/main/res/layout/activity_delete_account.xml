@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/restaurant_code_main_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Fragments.RestaurantCodeFragment">
+    tools:context=".DeleteAccountActivity">
 
     <TextView
-        android:id="@+id/restaurant_code_text_view"
+        android:id="@+id/delete_account_activity_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/restaurant_code_text_view"/>
+        android:text="@string/delete_account_activity_header"/>
 
     <EditText
-        android:id="@+id/restaurant_code_code"
+        android:id="@+id/delete_account_activity_field_one"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/restaurant_code_text_view"
+        app:layout_constraintTop_toBottomOf="@id/delete_account_activity_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:inputType="text"
-        android:hint="@string/restaurant_code_hint"/>
+        android:hint="@string/password_hint"/>
 
     <EditText
-        android:id="@+id/restaurant_code_code_two"
+        android:id="@+id/delete_account_activity_field_two"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/restaurant_code_code"
+        app:layout_constraintTop_toBottomOf="@id/delete_account_activity_field_one"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:inputType="text"
-        android:hint="@string/restaurant_code_hint"/>
+        android:hint="@string/password_hint"/>
 
     <Button
-        android:id="@+id/restaurant_code_submit_button"
+        android:id="@+id/delete_account_activity_confirm_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/confirm"
         android:background="@drawable/clear_button"
-        android:text="@string/submit"
-        android:textColor="@color/colorPrimary"/>
+        android:textColor="@drawable/clear_button_primary_text_color"/>
+
 </android.support.constraint.ConstraintLayout>

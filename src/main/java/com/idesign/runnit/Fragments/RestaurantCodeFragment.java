@@ -4,8 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -36,6 +34,7 @@ public class RestaurantCodeFragment extends Fragment
   private final MyAuth mAuth = new MyAuth();
 
   private EditText editRestaurantCode;
+  private EditText editRestaurantCodeTwo;
   private TextView restaurantView;
   private Button submitButton;
 
@@ -43,8 +42,6 @@ public class RestaurantCodeFragment extends Fragment
   private StateViewModel mStateViewModel;
 
   private ListenerRegistration registration;
-  private ConstraintLayout restaurantLayout;
-  private Snackbar snackbar;
 
   public RestaurantCodeFragment() {}
 
@@ -71,8 +68,8 @@ public class RestaurantCodeFragment extends Fragment
 
   public void setViewItems(View view)
   {
-    restaurantLayout = view.findViewById(R.id.restaurant_code_main_layout);
     editRestaurantCode = view.findViewById(R.id.restaurant_code_code);
+    editRestaurantCodeTwo = view.findViewById(R.id.restaurant_code_code_two);
     restaurantView = view.findViewById(R.id.restaurant_code_text_view);
     submitButton = view.findViewById(R.id.restaurant_code_submit_button);
     submitButton.setOnClickListener(l -> submit());
@@ -110,14 +107,21 @@ public class RestaurantCodeFragment extends Fragment
       showToast("you have not created an account...");
       return;
     }
-    if (isEmptyField(editRestaurantCode))
+    if (isEmptyField(editRestaurantCode) || isEmptyField(editRestaurantCodeTwo))
     {
-      showSnackbar("Can not submit empty values");
+      showToast("Can not submit empty values");
       return;
     }
     final String uid = mAuth.user().getUid();
     final String text = trimmedString(editRestaurantCode.getText().toString());
+    final String textTwo = trimmedString(editRestaurantCodeTwo.getText().toString());
     final DocumentReference documentReference = mFirestore.getUsers().document(uid);
+
+    if (!text.equals(textTwo))
+    {
+      showToast("Codes must match to continue");
+      return;
+    }
     mUserViewModel.setOrganizationCode(text);
 
     mFirestore.setOrganizationCodeTask(documentReference, text)
@@ -137,7 +141,14 @@ public class RestaurantCodeFragment extends Fragment
       final String orgPushid = org.getPushId();
       return mFirestore.setUserOrgPushId(orgPushid, uid);
     })
-    .addOnSuccessListener(ignore -> showSnackbar("Success"))
+    .addOnSuccessListener(ignore ->
+    {
+      showToast("Success");
+      mUserViewModel.clear();
+      editRestaurantCode.setText("");
+      editRestaurantCodeTwo.setText("");
+      mStateViewModel.setFragmentState(Constants.STATE_HOME);
+    })
     .addOnFailureListener(e -> showToast("error setting your code: " + e.getMessage()));
   }
 
@@ -192,20 +203,6 @@ public class RestaurantCodeFragment extends Fragment
     super.onSaveInstanceState(outState);
   }
 
-  public void showSnackbar(String message)
-  {
-    snackbar = Snackbar.make(restaurantLayout, message, Snackbar.LENGTH_INDEFINITE).setAction(R.string.submit, l ->
-    {
-      snackbar.dismiss();
-      if (mAuth.user() != null)
-      {
-        mUserViewModel.clear();
-        editRestaurantCode.setText("");
-      }
-      mStateViewModel.setFragmentState(Constants.STATE_HOME);
-    });
-    snackbar.show();
-  }
 
   public String trimmedString(String source)
   {
@@ -216,9 +213,4 @@ public class RestaurantCodeFragment extends Fragment
   {
     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
   }
-
-  /* public void logMessage(String message)
-  {
-    Log.d("RESTAURANT FRAGMENT", "message: " + message);
-  } */
 }

@@ -62,12 +62,15 @@ public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapte
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
     super.onViewCreated(view, savedInstanceState);
-    final List<User> empty = new ArrayList<>();
     mRecyclerView = view.findViewById(R.id.all_users_fragment_recycler_view);
+    setRecyclerView();
+  }
 
+  public void setRecyclerView()
+  {
+    final List<User> empty = new ArrayList<>();
     mAdapter = new AllUsersAdapter(empty, AllUsers.this, orgPushId);
     DividerItemDecoration itemDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
-
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mRecyclerView.addItemDecoration(itemDecoration);
     mRecyclerView.setAdapter(mAdapter);

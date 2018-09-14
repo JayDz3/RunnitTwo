@@ -1,7 +1,9 @@
 package com.idesign.runnit.FirestoreTasks;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -56,5 +58,11 @@ public class MyAuth
   public Task<AuthResult> createUser(String email, String password)
   {
     return mAuth.createUserWithEmailAndPassword(email, password);
+  }
+
+  public Task<Void> reauth(String email, String pw)
+  {
+    AuthCredential credential = EmailAuthProvider.getCredential(email, pw);
+    return user().reauthenticate(credential);
   }
 }

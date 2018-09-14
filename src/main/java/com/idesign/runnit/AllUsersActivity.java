@@ -38,6 +38,7 @@ public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllU
     if (savedInstanceState == null) {
       getValuesFromIntent();
       progressBar.setVisibility(View.VISIBLE);
+
     } else {
       progressBar.setVisibility(View.GONE);
       getValuesFromBundle(savedInstanceState);
@@ -54,12 +55,14 @@ public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllU
   {
     mAllUsersFragment.setEnabled(false);
     mFirestore.getOrganizationUsers(orgPushId)
-    .addOnSuccessListener(usersSnapshot -> {
+    .addOnSuccessListener(usersSnapshot ->
+    {
       progressBar.setVisibility(View.GONE);
       mUsersViewModel.setUsersFromQuerySnapshot(usersSnapshot);
       mAllUsersFragment.setEnabled(true);
     })
-    .addOnFailureListener(e -> {
+    .addOnFailureListener(e ->
+    {
       progressBar.setVisibility(View.GONE);
       showToast(e.getMessage());
       mAllUsersFragment.setEnabled(true);

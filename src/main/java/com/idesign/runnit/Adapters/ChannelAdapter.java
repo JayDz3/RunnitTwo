@@ -1,6 +1,9 @@
 package com.idesign.runnit.Adapters;
 
 import android.app.NotificationManager;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -30,12 +33,21 @@ import com.idesign.runnit.Items.SubscribedUser;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminChannelViewHolder>
 {
@@ -48,6 +60,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private User mUser;
   private String customMessage;
   private boolean enabled = true;
+
+
+  private final PublishSubject<Boolean> doDestroy = PublishSubject.create();
 
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
@@ -99,6 +114,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     }
   }
 
+  public void setDoDestroy()
+  {
+    doDestroy.onNext(true);
+  }
+
   @Override
   @NonNull
   public AdminChannelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
@@ -115,13 +135,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     final String orgPushId = channel.get_orgPushId();
     final Timestamp sentAt = channel.get_lastSent();
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);
-
     if (sentAt != null)
     {
-      Date dateSent = sentAt.toDate();
-      SimpleDateFormat time = new SimpleDateFormat("h:mm a", Locale.getDefault());
-      viewHolder.channelTimeView.setText(time.format(dateSent));
+      final long sentTime = sentAt.toDate().getTime();
+      final String timeString = getMinutes(sentTime);
+      viewHolder.channelTimeView.setText(timeString);
+      // doSubscribe(sentTime, viewHolder);
     }
+
     viewHolder.channelNameView.setText(channel.get_channelId());
     viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(viewHolder, position));
     viewHolder.activeUsersButton.setOnClickListener(l -> showActiveUsers(channelRef, viewHolder));
@@ -137,11 +158,35 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       hideDeleteOptions(viewHolder);
       enableButtons(viewHolder);
     }
-
-    // viewHolder.radioButton.setOnClickListener(l -> toggleChannelStatus(channelRef, channel));
-    // viewHolder.deleteButton.setOnClickListener(l -> deleteChannel(channelRef, channel, position));
   }
 
+  /* public void doSubscribe(final long sentTime, AdminChannelViewHolder viewHolder)
+  {
+    Disposable disposable = Observable.interval(0, 1, TimeUnit.MINUTES)
+    .takeUntil(doDestroy)
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(r -> {
+      final String timeString = getMinutes(sentTime);
+      viewHolder.channelTimeView.setText(timeString);
+    });
+  } */
+
+  public String getMinutes(final long then)
+  {
+    final String ago = " minutes";
+    final String over = "Over an hour";
+    final Date today = new Date();
+    final long now = today.getTime();
+    final long difference = now - then;
+    final long minutes = TimeUnit.MILLISECONDS.toMinutes(difference);
+    final String minutesString = String.valueOf(minutes);
+
+    if (minutes > 59) {
+      return over;
+    } else {
+      return minutesString + ago;
+    }
+  }
   /*
    * Test to add current user to this channel, should trigger notification function
    */
