@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
@@ -84,11 +86,18 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
     {
       return;
     }
+    final WriteBatch batch = mFirestore.batch();
+    final CollectionReference adminChannelsReference = mFirestore.getAdminChannelsReference(orgPushId);
+    final CollectionReference userChannelsReference = mFirestore.getUserChannels(uid);
+
     disableViewHolder(viewHolder);
     setEnabled(false);
     mListener.disable();
 
     mFirestore.setUserOrganizationPushIdEmpty(orgPushId, uid)
+    .onSuccessTask(ignore -> adminChannelsReference.get())
+    .onSuccessTask(adminChannelsSnapshot -> mFirestore.deleteAdminChannelUserReferencesReturnUserChannels(adminChannelsSnapshot, userChannelsReference, batch, uid))
+    .onSuccessTask(userChannelsSnapshot -> mFirestore.deleteUserChannelReferencesCommitBatch(userChannelsSnapshot, batch))
     .onSuccessTask(ignore -> mFirestore.getOrganizationUsers(orgPushId))
     .addOnSuccessListener(snapshot ->
     {

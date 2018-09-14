@@ -11,7 +11,6 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -437,8 +436,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       mHomeFragment = new HomeFragment();
     }
     addDrawerListener();
-    final int transition = FragmentTransaction.TRANSIT_FRAGMENT_FADE;
-    replaceFragment(mHomeFragment, transition);
+    replaceFragment(mHomeFragment);
     setActionBar();
   }
 
@@ -483,13 +481,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     .replace(R.id.main_frame_layout, fragment).commit();
   }
 
-  public void replaceFragment(Fragment fragment, int transition)
-  {
-    getSupportFragmentManager()
-    .beginTransaction()
-    .setTransition(transition)
-    .replace(R.id.main_frame_layout, fragment).commit();
-  }
   public void addAuthListener()
   {
     if (mAuth.doesHaveListener())

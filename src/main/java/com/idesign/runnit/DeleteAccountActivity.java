@@ -38,9 +38,6 @@ public class DeleteAccountActivity extends AppCompatActivity
   private final String EXTRA_FIELD_ONE = "field_one";
   private final String EXTRA_FIELD_TWO = "field_two";
 
-  private final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
-  private final String COLLECTION_SUBSCRIBED_USERS = "SubscribedUsers";
-
   private final String KEY_DELETE_IN_PROGRESS = "in_progress";
   private boolean inProgress = false;
 
@@ -87,7 +84,8 @@ public class DeleteAccountActivity extends AppCompatActivity
     final CollectionReference channelsRef = mFirestore.getUserChannels(uid);
     final WriteBatch batch = mFirestore.batch();
 
-    new Thread(new MyRunnable() {
+    new Thread(new MyRunnable()
+    {
       @Override
       public void run()
       {
@@ -96,19 +94,12 @@ public class DeleteAccountActivity extends AppCompatActivity
         .onSuccessTask(l -> user.delete())
         .onSuccessTask(ignore -> userRef.get())
         .onSuccessTask(snapshot -> getAdminChannelReference(snapshot))
-        .onSuccessTask(channelsSnapshot ->
-        {
-          if (channelsSnapshot != null)
-          {
-            deleteAdminChannelsReferences(channelsSnapshot, uid, batch);
-          }
-          return channelsRef.get();
-        })
+        .onSuccessTask(channelsSnapshot -> mFirestore.deleteAdminChannelUserReferencesReturnUserChannels(channelsSnapshot, channelsRef, batch, uid))
         .onSuccessTask(userChannels ->
         {
           if (userChannels != null)
           {
-            deleteUsersChannelReferences(userChannels, batch);
+            deleteUsersChannelReferencesBatch(userChannels, batch);
           }
           batch.delete(userRef);
           return batch.commit();
@@ -151,18 +142,8 @@ public class DeleteAccountActivity extends AppCompatActivity
     confirmButton.setClickable(true);
   }
 
-  public void deleteAdminChannelsReferences(QuerySnapshot channelsSnapshot, String uid, WriteBatch batch)
-  {
-    for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
-    {
-      final DocumentReference activeUserRef = ds.getReference().collection(COLLECTION_ACTIVE_USERS).document(uid);
-      final DocumentReference subUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
-      batch.delete(activeUserRef);
-      batch.delete(subUserRef);
-    }
-  }
 
-  public void deleteUsersChannelReferences(QuerySnapshot channelsSnapshot, WriteBatch batch)
+  public void deleteUsersChannelReferencesBatch(QuerySnapshot channelsSnapshot, WriteBatch batch)
   {
     for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
     {

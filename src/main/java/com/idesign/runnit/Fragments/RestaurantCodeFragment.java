@@ -143,11 +143,11 @@ public class RestaurantCodeFragment extends Fragment
     })
     .addOnSuccessListener(ignore ->
     {
-      showToast("Success");
       mUserViewModel.clear();
       editRestaurantCode.setText("");
       editRestaurantCodeTwo.setText("");
       mStateViewModel.setFragmentState(Constants.STATE_HOME);
+      showToast("Success");
       enableButton();
     })
     .addOnFailureListener(e -> {

@@ -304,9 +304,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     mListener.setOpen(_open);
 
     activeUsersReference.get()
-    .onSuccessTask(this::deleteActiveUsersFromChannelBatch)
+    .onSuccessTask(activeUsersSnapshot -> mFirestore.deleteActiveUsersFromChannelBatch(activeUsersSnapshot))
     .continueWithTask(ignore -> subscribedUsersReference.get())
-    .onSuccessTask(usersSnapshot -> deleteSubscribedUsersBatch(usersSnapshot, channelId))
+    .onSuccessTask(usersSnapshot -> mFirestore.deleteSubscribedUsersBatch(usersSnapshot, channelId))
     .continueWithTask(ignore -> mFirestore.deleteAdminChannel(channelRef))
     .addOnSuccessListener(l ->
     {
@@ -340,46 +340,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   }
 
   /*
-   *  Delete Channel Document's Collection of Active users
-   */
-  private Task<Void> deleteActiveUsersFromChannelBatch(QuerySnapshot activeUsers)
-  {
-    final WriteBatch batch = mFirestore.batch();
-    if (activeUsers == null)
-    {
-      return batch.commit();
-    }
-    for (DocumentSnapshot ds : activeUsers.getDocuments())
-    {
-      final DocumentReference ref = ds.getReference();
-      batch.delete(ref);
-    }
-    return batch.commit();
-  }
-
-  /*
    *  Delete Subscribed Users returned from query of channel SubscribedUsers Collection Reference
    *  @param subscribedUsers : list of documents returned from query
    */
-  private Task<Void> deleteSubscribedUsersBatch(QuerySnapshot subscribedUsers, String channelId)
-  {
-    final WriteBatch batch = mFirestore.batch();
-    final String COLLECTION_CHANNELS  = "Channels";
-
-    if (subscribedUsers == null)
-    {
-      return batch.commit();
-    }
-    for (DocumentSnapshot ds : subscribedUsers.getDocuments())
-    {
-      final DocumentReference ref = ds.getReference();
-      final DocumentReference userChannelRef = mFirestore.getUsers().document(ds.getId()).collection(COLLECTION_CHANNELS).document(channelId);
-
-      batch.delete(userChannelRef);
-      batch.delete(ref);
-    }
-    return batch.commit();
-  }
 
   private void disableButtons(AdminChannelViewHolder viewHolder)
   {

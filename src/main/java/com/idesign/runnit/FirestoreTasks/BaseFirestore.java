@@ -254,6 +254,7 @@ public class BaseFirestore
 
   /*
    *  Removes user from specific orgs active users collection
+   *  Main Activity : Logging out
    */
   public Task<Void> deleteActiveUserReferences(String uid, DocumentReference userRef, WriteBatch batch, UserChannelsViewModel mUserChannelViewModel)
   {
@@ -273,4 +274,78 @@ public class BaseFirestore
     return batch.commit();
   }
 
+  public Task<Void> deleteActiveUsersFromChannelBatch(QuerySnapshot activeUsers)
+  {
+    final WriteBatch batch = mFirestore.batch();
+    if (activeUsers == null)
+    {
+      return batch.commit();
+    }
+    for (DocumentSnapshot ds : activeUsers.getDocuments())
+    {
+      final DocumentReference ref = ds.getReference();
+      batch.delete(ref);
+    }
+    return batch.commit();
+  }
+
+  public Task<Void> deleteSubscribedUsersBatch(QuerySnapshot subscribedUsers, String channelId)
+  {
+    final WriteBatch batch = mFirestore.batch();
+    final String COLLECTION_CHANNELS  = "Channels";
+
+    if (subscribedUsers == null)
+    {
+      return batch.commit();
+    }
+    for (DocumentSnapshot ds : subscribedUsers.getDocuments())
+    {
+      final DocumentReference ref = ds.getReference();
+      final DocumentReference userChannelRef = getUsers().document(ds.getId()).collection(COLLECTION_CHANNELS).document(channelId);
+
+      batch.delete(userChannelRef);
+      batch.delete(ref);
+    }
+    return batch.commit();
+  }
+
+
+  /*
+   * In Delete Account Activity and All Users Adapter
+   */
+  public Task<QuerySnapshot> deleteAdminChannelUserReferencesReturnUserChannels(QuerySnapshot adminChannelsSnapshot,
+                                                     CollectionReference userChannelsReference,
+                                                     WriteBatch batch,
+                                                     String uid)
+  {
+    {
+      if (adminChannelsSnapshot != null)
+      {
+        for (DocumentSnapshot ds : adminChannelsSnapshot.getDocuments())
+        {
+          final DocumentReference activeUserRef = ds.getReference().collection(COLLECTION_ACTIVE_USERS).document(uid);
+          final DocumentReference subscribedUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
+          batch.delete(activeUserRef);
+          batch.delete(subscribedUserRef);
+        }
+      }
+      return userChannelsReference.get();
+    }
+  }
+
+  /*
+   * In Delete Account Activity and All Users Adapter
+   */
+  public Task<Void> deleteUserChannelReferencesCommitBatch(QuerySnapshot userChannelsSnapshot, WriteBatch batch)
+  {
+    if (userChannelsSnapshot != null)
+    {
+      for (DocumentSnapshot ds : userChannelsSnapshot.getDocuments())
+      {
+        final DocumentReference channelRef = ds.getReference();
+        batch.delete(channelRef);
+      }
+    }
+    return batch.commit();
+  }
 }
