@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements SignupFragment.SignupFragmentListener
 {
   // Classes
   private final MyAuth mAuth = new MyAuth();
@@ -737,6 +737,11 @@ public class MainActivity extends AppCompatActivity
   {
    snackbar = Snackbar.make(mainLayout, message, Snackbar.LENGTH_LONG);
    snackbar.show();
+  }
+
+  public void toast(String message)
+  {
+    showToast(message);
   }
 
   public void logMessage(String message)

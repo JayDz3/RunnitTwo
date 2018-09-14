@@ -2,6 +2,7 @@ package com.idesign.runnit;
 
 import android.app.NotificationManager;
 import android.os.Build;
+import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -64,9 +66,9 @@ public class DeleteAccountActivity extends AppCompatActivity
       showToast("Can not submit empty fields");
       return;
     }
-    final String text = fieldOne.getText().toString();
-    final String textTwo = fieldTwo.getText().toString();
-    if (!text.equals(textTwo))
+    final String password = fieldOne.getText().toString();
+    final String passwordTwo = fieldTwo.getText().toString();
+    if (!password.equals(passwordTwo))
     {
       showToast("Fields do not match");
       return;
@@ -85,22 +87,15 @@ public class DeleteAccountActivity extends AppCompatActivity
     final CollectionReference channelsRef = mFirestore.getUserChannels(uid);
     final WriteBatch batch = mFirestore.batch();
 
-    new Thread(new Runnable()
-    {
+    new Thread(new MyRunnable() {
       @Override
       public void run()
       {
-        mAuth.reauth(email, text)
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        mAuth.reauth(email, password)
         .onSuccessTask(l -> user.delete())
         .onSuccessTask(ignore -> userRef.get())
-        .onSuccessTask(snapshot ->
-        {
-          final User firestoreUser = mFirestore.toFirestoreObject(snapshot, User.class);
-          final String orgPushId = firestoreUser.get_organizationPushId();
-          final CollectionReference adminChannelsRef = mFirestore.getAdminChannelsReference(orgPushId);
-
-          return adminChannelsRef.get();
-        })
+        .onSuccessTask(snapshot -> getAdminChannelReference(snapshot))
         .onSuccessTask(channelsSnapshot ->
         {
           if (channelsSnapshot != null)
@@ -118,23 +113,36 @@ public class DeleteAccountActivity extends AppCompatActivity
           batch.delete(userRef);
           return batch.commit();
         })
-        .addOnSuccessListener(l ->
-        {
-          inProgress = false;
-          progressBar.setVisibility(View.GONE);
-          showToast("Account Deleted");
-          enableButton();
-          finish();
-        })
-        .addOnFailureListener(e ->
-        {
-          inProgress = false;
-          progressBar.setVisibility(View.GONE);
-          showToast(e.getMessage());
-          enableButton();
-        });
+        .addOnSuccessListener(l -> onDeleteSuccess())
+        .addOnFailureListener(e -> onDeleteFailure(e));
       }
     }).start();
+  }
+
+  public void onDeleteSuccess()
+  {
+    inProgress = false;
+    progressBar.setVisibility(View.GONE);
+    showToast("Account Deleted");
+    enableButton();
+    finish();
+  }
+
+  public void onDeleteFailure(Exception e)
+  {
+    inProgress = false;
+    progressBar.setVisibility(View.GONE);
+    showToast(e.getMessage());
+    enableButton();
+  }
+
+  public Task<QuerySnapshot> getAdminChannelReference(DocumentSnapshot snapshot)
+  {
+    final User firestoreUser = mFirestore.toFirestoreObject(snapshot, User.class);
+    final String orgPushId = firestoreUser.get_organizationPushId();
+    final CollectionReference adminChannelsRef = mFirestore.getAdminChannelsReference(orgPushId);
+
+    return adminChannelsRef.get();
   }
 
   public void enableButton()

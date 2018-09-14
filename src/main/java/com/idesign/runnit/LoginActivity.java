@@ -140,6 +140,7 @@ public class LoginActivity extends AppCompatActivity
   public void onBackPressed()
   {
     final int j = mLoginDataViewModel.getNavigationState();
+
     if (j == 0 || j == Constants.LOGIN_FRAGMENT) {
       mLoginDataViewModel.clear();
       super.onBackPressed();

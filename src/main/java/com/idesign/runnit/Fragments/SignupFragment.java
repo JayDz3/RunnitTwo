@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -35,6 +34,8 @@ public class SignupFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+
+  private SignupFragmentListener mListener;
 
   private UserViewModel mUserViewModel;
   private PasswordViewModel mPasswordViewModel;
@@ -264,6 +265,7 @@ public class SignupFragment extends Fragment
     mPasswordViewModel.getPassword().removeObserver(passwordObserver());
   }
 
+
   @Override
   public void onDestroy()
   {
@@ -274,6 +276,11 @@ public class SignupFragment extends Fragment
   public void onAttach(Context context)
   {
     super.onAttach(context);
+    try {
+      mListener = (SignupFragmentListener) context;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(context.toString() + " Must implement listener");
+    }
   }
 
   @Override
@@ -294,7 +301,11 @@ public class SignupFragment extends Fragment
 
   public void showToast(String message)
   {
-    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    mListener.toast(message);
+  }
+
+  public interface SignupFragmentListener {
+    void toast(String message);
   }
 
   /* public void logMessage(String message)
