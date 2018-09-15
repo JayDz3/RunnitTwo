@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,9 +81,24 @@ public class LoginFragment extends Fragment
     };
   }
 
+  public boolean isEmpty(EditText editText)
+  {
+    return TextUtils.isEmpty(editText.getText());
+  }
+
   public void submit()
   {
-    if (emailIsValid() && passwordIsValid())
+    if (!emailIsValid()) {
+      emailView.setError("Not a valid email");
+    }
+    if (!passwordIsValid()) {
+      passwordView.setError("Password is required");
+    }
+    if (passwordIsValid() && !passwordIsLongEnough(passwordView.getText().toString()))
+    {
+      passwordView.setError("Must be at least 6 characters");
+    }
+    if (emailIsValid() && passwordIsValid() && passwordIsLongEnough(passwordView.getText().toString()))
     {
       setLoggingIn(true);
       setEmail(emailView.getText().toString());
@@ -131,6 +147,11 @@ public class LoginFragment extends Fragment
   public boolean emailIsValid()
   {
     return !TextUtils.isEmpty(emailView.getText()) && Patterns.EMAIL_ADDRESS.matcher(emailView.getText()).matches();
+  }
+
+  public boolean passwordIsLongEnough(String pw)
+  {
+    return pw.length() > 5;
   }
 
   public boolean passwordIsValid()
