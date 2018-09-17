@@ -5,10 +5,10 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 
         <item name="cardViewStyle">@style/CardView</item>
-        <item name="android:statusBarColor">@color/colorWhite</item>
     </style>
 
     <style name="AppTheme.ClearStatusBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:statusBarColor">@color/colorLightGray</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 </resources>

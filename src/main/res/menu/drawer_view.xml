@@ -2,14 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_login"
-            android:icon="@drawable/ic_clock_in_primary_24dp"
-            android:title="@string/drawer_login" />
-        <item
-            android:id="@+id/nav_signup"
-            android:icon="@drawable/ic_add_circle_outline_primary_24dp"
-            android:title="@string/drawer_new_account" />
-        <item
             android:id="@+id/nav_edit_info"
             android:icon="@drawable/ic_edit_black_24dp"
             android:title="@string/drawer_edit_info" />

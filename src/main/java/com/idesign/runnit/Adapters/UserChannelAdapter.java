@@ -157,7 +157,7 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     .addOnFailureListener(e -> showToast("e: " + e.getMessage()));
   }
 
-  public void deleteNotificationChannel(String channelId)
+  private void deleteNotificationChannel(String channelId)
   {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
     {
@@ -169,7 +169,7 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     }
   }
 
-  public void createNotificationChannel(String channelId)
+  private void createNotificationChannel(String channelId)
   {
     final long[] v = {1000, 300, 150, 300, 150, 300, 150, 300};
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

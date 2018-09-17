@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".LoginFragments.ResetFragment">
+    tools:context=".Fragments.ResetFragment">
 
     <TextView
         android:id="@+id/reset_fragment_welcome"

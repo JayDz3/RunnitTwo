@@ -78,7 +78,8 @@ public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapte
 
   public Observer<List<User>> usersObserver()
   {
-    return users -> {
+    return users ->
+    {
       if (users != null)
       {
         mAdapter.setItems(users);

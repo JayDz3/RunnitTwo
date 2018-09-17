@@ -27,9 +27,6 @@ public class NavigationViewUtility
 
   public void isLoggedInHasRestaurantCode(NavigationView navigationView)
   {
-    navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
-    navigationView.getMenu().findItem(R.id.nav_signup).setVisible(false);
-
     navigationView.getMenu().findItem(R.id.nav_edit_info).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
@@ -39,9 +36,6 @@ public class NavigationViewUtility
 
   public void isLoggedInNoRestaurantCode(NavigationView navigationView)
   {
-    navigationView.getMenu().findItem(R.id.nav_login).setVisible(false);
-    navigationView.getMenu().findItem(R.id.nav_signup).setVisible(false);
-
     navigationView.getMenu().findItem(R.id.nav_edit_info).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(true);
     navigationView.getMenu().findItem(R.id.nav_channel).setVisible(true);
@@ -51,9 +45,6 @@ public class NavigationViewUtility
 
   public void isNotLoggedIn(NavigationView navigationView)
   {
-    navigationView.getMenu().findItem(R.id.nav_login).setVisible(true);
-    navigationView.getMenu().findItem(R.id.nav_signup).setVisible(true);
-
     navigationView.getMenu().findItem(R.id.nav_edit_info).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_verify_restaurant).setVisible(false);
     navigationView.getMenu().findItem(R.id.nav_admin).setVisible(false);

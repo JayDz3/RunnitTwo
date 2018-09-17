@@ -39,14 +39,17 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Fragments.HomeFragment;
+import com.idesign.runnit.Fragments.MainLoginFragment;
 import com.idesign.runnit.Fragments.RestaurantCodeFragment;
 import com.idesign.runnit.Fragments.SignupFragment;
 
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.StateEmitter;
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.Fragments.ResetFragment;
 import com.idesign.runnit.NavigationHelpers.NavigationViewUtility;
 import com.idesign.runnit.VIewModels.AppUserViewModel;
+import com.idesign.runnit.VIewModels.LoginDataViewModel;
 import com.idesign.runnit.VIewModels.PasswordViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 import com.idesign.runnit.VIewModels.UserChannelsViewModel;
@@ -79,11 +82,14 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   private PasswordViewModel mPasswordViewModel;
   private AppUserViewModel mAppUserViewModel;
   private UserChannelsViewModel mUserChannelViewModel;
+  protected LoginDataViewModel mLoginDataViewModel;
 
   // Fragments
   private HomeFragment mHomeFragment;
   private SignupFragment mSignupFragment;
   private RestaurantCodeFragment mRestaurantFragment;
+  private MainLoginFragment mLoginFragment;
+  private ResetFragment mResetFragment;
 
   // Listeners
   private FirebaseAuth.AuthStateListener authStateListener;
@@ -131,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     mStateViewModel = ViewModelProviders.of(this).get(StateViewModel.class);
     mPasswordViewModel = ViewModelProviders.of(this).get(PasswordViewModel.class);
     mUserChannelViewModel = ViewModelProviders.of(this).get(UserChannelsViewModel.class);
+    mLoginDataViewModel = ViewModelProviders.of(this).get(LoginDataViewModel.class);
   }
 
   /*
@@ -138,10 +145,22 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
    */
   public void toggleViewOnStart()
   {
+    if (mAuth.user() == null)
+    {
+      appState = Constants.STATE_LOGIN;
+    }
     switch (appState)
     {
       case Constants.STATE_HOME:
         buildHomeFrag(Constants.STATE_HOME);
+        break;
+      case Constants.STATE_LOGIN:
+        hideActionBar();
+        buildLoginFragment(Constants.STATE_LOGIN);
+        break;
+      case Constants.STATE_RESET:
+        hideActionBar();
+        buildResetFragment(Constants.STATE_RESET);
         break;
       case Constants.STATE_DETAILS_FRAGMENT:
         buildSignupFrag(Constants.STATE_DETAILS_FRAGMENT);
@@ -183,12 +202,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
         }
         switch (selection)
         {
-          case "Login":
-            goLogin();
-            break;
-          case "New Account":
-            mStateViewModel.setFragmentState(Constants.STATE_DETAILS_FRAGMENT);
-            break;
           case "Logout":
             logout();
             break;
@@ -235,16 +248,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
    *
    *  @ Other nav actions
    */
-  public void goLogin()
-  {
-    if (mAuth.user() != null)
-    {
-      return;
-    }
-    Intent intent = new Intent(this, LoginActivity.class);
-    startActivity(intent);
-  }
-
   public void logout()
   {
     if (mAuth.user() != null)
@@ -264,8 +267,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   {
     mNavUtility.isNotLoggedIn(navigationView);
     progressBar.setVisibility(View.GONE);
-    showToast("Clocked out!");
-    mStateViewModel.setFragmentState(Constants.STATE_LOGGED_OUT);
     disabled = false;
   }
 
@@ -274,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     mNavUtility.isNotLoggedIn(navigationView);
     progressBar.setVisibility(View.GONE);
     showToast("error: " + e.getMessage() + " You are however, signed out");
-    mStateViewModel.setFragmentState(Constants.STATE_LOGGED_OUT);
+    mStateViewModel.setFragmentState(Constants.STATE_LOGIN);
     disabled = false;
   }
 
@@ -376,15 +377,20 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
          break;
        case Constants.STATE_DETAILS_FRAGMENT:
          buildSignupFrag(Constants.STATE_DETAILS_FRAGMENT);
-         mNavUtility.setCheckedToFalse(R.id.nav_signup, navigationView);
          mNavUtility.setCheckedToFalse(R.id.nav_edit_info, navigationView);
          break;
        case Constants.STATE_RESTAURANT_FRAGMENT:
          buildRestaurantFrag(Constants.STATE_RESTAURANT_FRAGMENT);
          mNavUtility.setCheckedToFalse(R.id.nav_verify_restaurant, navigationView);
          break;
+       case Constants.STATE_LOGIN:
+         buildLoginFragment(Constants.STATE_LOGIN);
+         break;
+       case Constants.STATE_RESET:
+         hideActionBar();
+         buildResetFragment(Constants.STATE_RESET);
+         break;
        case Constants.STATE_LOGGED_IN:
-         mNavUtility.setCheckedToFalse(R.id.nav_login, navigationView);
          break;
        case Constants.STATE_LOGGED_OUT:
          mNavUtility.setCheckedToFalse(R.id.nav_logout, navigationView);
@@ -394,12 +400,16 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
      };
   }
 
+  /*
+   *   ACTION BAR
+   */
   public void setActionBar()
   {
     setSupportActionBar(toolbar);
     actionBar = getSupportActionBar();
     if (actionBar != null)
     {
+      actionBar.show();
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_primary_24dp);
     }
@@ -412,6 +422,12 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     actionBar.setDisplayShowHomeEnabled(true);
     actionBar.setHomeAsUpIndicator(R.drawable.ic_home_black_24dp);
   }
+
+  public void hideActionBar()
+  {
+    actionBar.hide();
+  }
+
 
   /*
    *  Set state emitter
@@ -438,6 +454,35 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     addDrawerListener();
     replaceFragment(mHomeFragment);
     setActionBar();
+  }
+
+  public void buildLoginFragment(int state)
+  {
+    appState = state;
+    if (fragmentVisible(mLoginFragment))
+    {
+      return;
+    }
+    if (mLoginFragment == null)
+    {
+      mLoginFragment = new MainLoginFragment();
+    }
+    replaceFragment(mLoginFragment);
+    hideActionBar();
+  }
+
+  public void buildResetFragment(int state)
+  {
+    appState = state;
+    if (fragmentVisible(mResetFragment))
+    {
+      return;
+    }
+    if (mResetFragment == null)
+    {
+      mResetFragment = new ResetFragment();
+    }
+    replaceFragment(mResetFragment);
   }
 
   public void buildRestaurantFrag(int state)
@@ -490,6 +535,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     authStateListener = firebaseAuth ->
     {
       if (mAuth.user() != null) {
+        mLoginDataViewModel.clear();
         enableNotifications();
         final String uid = mAuth.user().getUid();
         final DocumentReference userRef = mFirestore.getUsers().document(uid);
@@ -499,18 +545,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
         FirebaseInstanceId.getInstance().getInstanceId()
         .onSuccessTask(id ->  mFirestore.updateInstanceId(userRef, Objects.requireNonNull(id).getToken()))
         .continueWithTask(ignore -> userRef.get())
-        .onSuccessTask(userSnapshot ->
-        {
-          final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
-          final String orgPushid = user.get_organizationPushId();
-          if (orgPushid.equals(""))
-          {
-            throw new RuntimeException("Please set your organization code");
-          }
-          return mFirestore.getAdminChannelsReference(orgPushid).get();
-        })
-        // channelsSnapshot is all channels belonging to org
-        // if user exists on channel, they are updated as logged in to that channels collectionRef of SubscribedUsers
+        .onSuccessTask(userSnapshot -> doGetAdminChannelReference(userSnapshot))
         .onSuccessTask(channelsSnapshot -> subscribeUserToChannels(channelsSnapshot, channels, uid))
         .addOnSuccessListener(l -> mUserChannelViewModel.setChannels(channels))
         .addOnFailureListener(e -> logMessage(e.getMessage()));
@@ -521,13 +556,25 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
         mNavUtility.isNotLoggedIn(navigationView);
         removeUserListener();
         disableNotifications();
-
+        mStateViewModel.setFragmentState(Constants.STATE_LOGIN);
       }
     };
     mAuth.setAuthListener(authStateListener);
     mAuth.setHasListener(true);
   }
 
+  public Task<QuerySnapshot> doGetAdminChannelReference(DocumentSnapshot userSnapshot)
+  {
+    {
+      final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
+      final String orgPushid = user.get_organizationPushId();
+      if (orgPushid.equals(""))
+      {
+        throw new RuntimeException("Please set your organization code");
+      }
+      return mFirestore.getAdminChannelsReference(orgPushid).get();
+    }
+  }
   /*
    *  Update info on user login / authListener
    *
@@ -703,13 +750,19 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   public void onBackPressed()
   {
     if (appState == Constants.STATE_DETAILS_FRAGMENT) {
-      setState(Constants.STATE_HOME);
+      setState(Constants.STATE_LOGIN);
 
     } else if (appState == Constants.STATE_RESTAURANT_FRAGMENT) {
       setState(Constants.STATE_HOME);
 
     } else if (appState == Constants.STATE_HOME) {
       super.onBackPressed();
+
+    } else if (appState == Constants.STATE_LOGIN) {
+      super.onBackPressed();
+
+    } else if (appState == Constants.STATE_RESET) {
+      setState(Constants.STATE_LOGIN);
 
     } else {
       showToast("uncaught state: " + appState);

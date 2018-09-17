@@ -4,11 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".LoginFragments.LoginFragment">
-
+    tools:context=".Fragments.MainLoginFragment">
 
     <ProgressBar
-        android:id="@+id/login_progress_bar"
+        android:id="@+id/login_fragment_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -17,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"/>
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/login_email_layout"
+        android:id="@+id/login_fragment_email_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
@@ -26,67 +25,79 @@
         app:layout_constraintEnd_toEndOf="parent" >
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/login_email"
+            android:id="@+id/login_fragment_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/email_hint"
             android:textSize="@dimen/sixteenSP"
             android:inputType="textEmailAddress"/>
-
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/login_password_layout"
+        android:id="@+id/login_fragment_password_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
         app:passwordToggleEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/login_email_layout"
+        app:layout_constraintTop_toBottomOf="@id/login_fragment_email_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <android.support.design.widget.TextInputEditText
-            android:id="@+id/login_password"
+            android:id="@+id/login_fragment_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password_hint"
             android:textSize="@dimen/sixteenSP"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"/>
 
     </android.support.design.widget.TextInputLayout>
 
     <Button
-        android:id="@+id/login_submit"
+        android:id="@+id/login_fragment_submit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toBottomOf="@id/login_password_layout"
+        app:layout_constraintTop_toBottomOf="@id/login_fragment_password_layout"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:elevation="@dimen/fourDp"
         android:textColor="@color/colorPrimary"
-        android:text="@string/submit" />
+        android:text="@string/drawer_login" />
 
     <TextView
-        android:id="@+id/login_go_reset_text"
+        android:id="@+id/login_fragment_go_reset_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/sixteenDp"
-        app:layout_constraintTop_toBottomOf="@id/login_submit"
+        app:layout_constraintTop_toBottomOf="@id/login_fragment_submit"
         app:layout_constraintStart_toStartOf="parent"
         android:text="@string/login_forgot_password_text"/>
 
     <TextView
-        android:id="@+id/login_go_reset_clickable"
+        android:id="@+id/login_fragment_go_reset_clickable"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/sixteenDp"
         android:layout_marginStart="@dimen/eightDp"
         android:layout_marginEnd="@dimen/sixteenDp"
         android:layout_marginBottom="@dimen/sixteenDp"
-        app:layout_constraintTop_toBottomOf="@id/login_submit"
-        app:layout_constraintStart_toEndOf="@id/login_go_reset_text"
+        app:layout_constraintTop_toBottomOf="@id/login_fragment_submit"
+        app:layout_constraintStart_toEndOf="@id/login_fragment_go_reset_text"
         android:text="@string/login_forgot_password_text_clickable"
-        android:textColor="@color/colorPrimary"
-        android:clickable="true"/>
+        android:textColor="@drawable/clear_button_primary_text_color"
+        android:clickable="true"
+        android:focusable="true"/>
+
+    <Button
+        android:id="@+id/login_fragment_create_account_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDp"
+        android:background="@drawable/clear_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/login_fragment_create_new_account"
+        android:textColor="@drawable/clear_button_primary_text_color"/>
 
 </android.support.constraint.ConstraintLayout>

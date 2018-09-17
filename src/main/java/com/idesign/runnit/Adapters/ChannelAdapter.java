@@ -1,9 +1,6 @@
 package com.idesign.runnit.Adapters;
 
 import android.app.NotificationManager;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -24,8 +21,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.WriteBatch;
+
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.Items.FirestoreChannel;
 
@@ -39,16 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
-
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminChannelViewHolder>
 {
   private List<FirestoreChannel> mChannels;
@@ -60,9 +46,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private User mUser;
   private String customMessage;
   private boolean enabled = true;
-
-
-  private final PublishSubject<Boolean> doDestroy = PublishSubject.create();
 
   class AdminChannelViewHolder extends RecyclerView.ViewHolder
   {
@@ -112,11 +95,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     {
       mListener = listener;
     }
-  }
-
-  public void setDoDestroy()
-  {
-    doDestroy.onNext(true);
   }
 
   @Override
@@ -171,7 +149,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
     });
   } */
 
-  public String getMinutes(final long then)
+  private String getMinutes(final long then)
   {
     final String ago = " minutes";
     final String over = "Over an hour";

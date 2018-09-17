@@ -101,4 +101,9 @@
 
     <!-- DELETE ACCOUNT ACTIVITY -->
     <string name="delete_account_activity_header">Enter your password in both fields to continue</string>
+
+    <!-- LOGIN FRAGMENT -->
+    <string name="login_fragment_create_new_account">CREATE A NEW ACCOUNT</string>
+
+    <string name="content_description_new_account">Create a new account</string>
 </resources>

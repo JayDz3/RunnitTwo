@@ -1,4 +1,4 @@
-package com.idesign.runnit.LoginFragments;
+package com.idesign.runnit.Fragments;
 
 
 import android.arch.lifecycle.Observer;
@@ -22,11 +22,13 @@ import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.LoginData;
 import com.idesign.runnit.R;
 import com.idesign.runnit.VIewModels.LoginDataViewModel;
+import com.idesign.runnit.VIewModels.StateViewModel;
 
 public class ResetFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
   private LoginDataViewModel mLoginViewModel;
+  private StateViewModel mStateViewModel;
 
   private Button resetFragmentSubmitButton;
   private TextInputEditText emailEditView;
@@ -39,6 +41,7 @@ public class ResetFragment extends Fragment
   {
     super.onCreate(savedInstanceState);
     mLoginViewModel = ViewModelProviders.of(getActivity()).get(LoginDataViewModel.class);
+    mStateViewModel = ViewModelProviders.of(getActivity()).get(StateViewModel.class);
   }
 
   @Override
@@ -86,10 +89,10 @@ public class ResetFragment extends Fragment
       mAuth.sendResetPassword(email)
       .addOnSuccessListener(l ->
       {
-        setViewModelEmail();
-        mLoginViewModel.setNavigationState(Constants.RESET_SUCCESS);
         showToast("An email has been sent to you...");
-        mLoginViewModel.updateLoginData();
+        mLoginViewModel.setResetEmail("");
+        emailEditView.setText("");
+        mStateViewModel.setFragmentState(Constants.STATE_LOGIN);
       })
       .addOnFailureListener(e -> showToast("error sending reset email: " + e.getMessage()));
     }
