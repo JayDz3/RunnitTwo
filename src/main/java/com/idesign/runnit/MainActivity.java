@@ -145,10 +145,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
    */
   public void toggleViewOnStart()
   {
-    if (mAuth.user() == null)
-    {
-      appState = Constants.STATE_LOGIN;
-    }
     switch (appState)
     {
       case Constants.STATE_HOME:
@@ -556,7 +552,8 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
         mNavUtility.isNotLoggedIn(navigationView);
         removeUserListener();
         disableNotifications();
-        mStateViewModel.setFragmentState(Constants.STATE_LOGIN);
+        if (appState != Constants.STATE_RESET)
+          mStateViewModel.setFragmentState(Constants.STATE_LOGIN);
       }
     };
     mAuth.setAuthListener(authStateListener);

@@ -20,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.idesign.runnit.Constants;
-import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.LoginData;
 import com.idesign.runnit.R;
@@ -30,7 +29,6 @@ import com.idesign.runnit.VIewModels.StateViewModel;
 public class MainLoginFragment extends Fragment {
 
   private final MyAuth mAuth = new MyAuth();
-  private final BaseFirestore mFirestore = new BaseFirestore();
 
   private LoginDataViewModel mLoginViewModel;
   private StateViewModel mStateViewModel;
@@ -144,8 +142,8 @@ public class MainLoginFragment extends Fragment {
   {
     mLoginViewModel.setLoggingIn(false);
     progressBar.setVisibility(View.GONE);
-    emailEditText.setText("");
-    passwordEditText.setText("");
+    // emailEditText.setText("");
+    // passwordEditText.setText("");
     mLoginViewModel.setNavigationState(Constants.LOGIN_SUCCESS);
     mStateViewModel.setFragmentState(Constants.STATE_HOME);
     hideKeyBoard();
@@ -205,10 +203,6 @@ public class MainLoginFragment extends Fragment {
   {
     super.onResume();
     mLoginViewModel.getLoginData().observe(this, loginDataObserver());
-    final String email = mLoginViewModel.getLoginData().getValue().getEmail();
-    final String password = mLoginViewModel.getLoginData().getValue().getPassword();
-    emailEditText.setText(email);
-    passwordEditText.setText(password);
   }
 
   @Override
@@ -219,7 +213,6 @@ public class MainLoginFragment extends Fragment {
     final String password = getPassword();
     mLoginViewModel.setLoginEmail(email);
     mLoginViewModel.setPassword(password);
-
     mLoginViewModel.getLoginData().removeObserver(loginDataObserver());
   }
 
