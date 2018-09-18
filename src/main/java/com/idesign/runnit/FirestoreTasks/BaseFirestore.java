@@ -348,4 +348,9 @@ public class BaseFirestore
     }
     return batch.commit();
   }
+
+  public void updateUserDetail(DocumentReference userReference, String key, String value, WriteBatch batch)
+  {
+    batch.update(userReference, key, value);
+  }
 }

@@ -10,6 +10,7 @@ public class Constants {
   public static final int STATE_LOGGED_IN = 5;
   public static final int STATE_LOGGED_OUT = 6;
   public static final int STATE_RESET = 7;
+  public static final int STATE_EDIT_PROFILE = 8;
 
   public static final String LOGIN_IN_PROGRESS = "login_in_progress";
 

@@ -38,6 +38,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
+import com.idesign.runnit.Fragments.EditProfileFragment;
 import com.idesign.runnit.Fragments.HomeFragment;
 import com.idesign.runnit.Fragments.MainLoginFragment;
 import com.idesign.runnit.Fragments.RestaurantCodeFragment;
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   private RestaurantCodeFragment mRestaurantFragment;
   private MainLoginFragment mLoginFragment;
   private ResetFragment mResetFragment;
+  private EditProfileFragment mEditProfileFragment;
 
   // Listeners
   private FirebaseAuth.AuthStateListener authStateListener;
@@ -164,6 +166,9 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       case Constants.STATE_RESTAURANT_FRAGMENT:
         buildRestaurantFrag(Constants.STATE_RESTAURANT_FRAGMENT);
         break;
+      case Constants.STATE_EDIT_PROFILE:
+        buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
+        break;
       default:
         logMessage("nada");
     }
@@ -202,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
             logout();
             break;
           case "Edit Info":
-            mStateViewModel.setFragmentState(Constants.STATE_DETAILS_FRAGMENT);
+            mStateViewModel.setFragmentState(Constants.STATE_EDIT_PROFILE);
             break;
           case "Edit Org Code":
             mStateViewModel.setFragmentState(Constants.STATE_RESTAURANT_FRAGMENT);
@@ -386,6 +391,9 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
          hideActionBar();
          buildResetFragment(Constants.STATE_RESET);
          break;
+       case Constants.STATE_EDIT_PROFILE:
+         buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
+         break;
        case Constants.STATE_LOGGED_IN:
          break;
        case Constants.STATE_LOGGED_OUT:
@@ -423,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   {
     actionBar.hide();
   }
-
+  // END ACTION BAR //
 
   /*
    *  Set state emitter
@@ -434,8 +442,23 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   }
 
   /*
-   *  Fragment Transactions
+   *  BUILD FRAGMENTS
    */
+  public void buildEditProfileFragment(int state)
+  {
+    appState = state;
+    if (fragmentVisible(mEditProfileFragment))
+    {
+      return;
+    }
+    if (mEditProfileFragment == null)
+    {
+      mEditProfileFragment = new EditProfileFragment();
+    }
+    replaceFragment(mEditProfileFragment);
+    setActionBarForFragment();
+  }
+
   public void buildHomeFrag(int state)
   {
     appState = state;
@@ -521,7 +544,11 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     .beginTransaction()
     .replace(R.id.main_frame_layout, fragment).commit();
   }
+  // END BUILD FRAGMENTS //
 
+  /*
+   *  AUTH STATE AND USER LISTENER
+   */
   public void addAuthListener()
   {
     if (mAuth.doesHaveListener())
@@ -560,6 +587,30 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     mAuth.setHasListener(true);
   }
 
+  public void addUserListener(DocumentReference documentReference)
+  {
+
+    if (firestoreUserListener != null)
+    {
+      return;
+    }
+    firestoreUserListener = documentReference.addSnapshotListener(MetadataChanges.INCLUDE, (snapshot, e) ->
+    {
+      if (e != null)
+      {
+        showToast("Error retrieving this user reference: " + e.getMessage());
+        mNavUtility.isNotLoggedIn(navigationView);
+        return;
+      }
+      final User user = mFirestore.toFirestoreObject(snapshot, User.class);
+      mAppUserViewModel.setmUser(user);
+      toggleAdmin(user);
+      toggleAdminOrgSet(user);
+      toggleOrgIsSet(user);
+    });
+  }
+  // END LISTENERS //
+
   public Task<QuerySnapshot> doGetAdminChannelReference(DocumentSnapshot userSnapshot)
   {
     {
@@ -572,6 +623,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       return mFirestore.getAdminChannelsReference(orgPushid).get();
     }
   }
+
   /*
    *  Update info on user login / authListener
    *
@@ -612,29 +664,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       mAuth.removeAuthListener(authStateListener);
       mAuth.setHasListener(false);
     }
-  }
-
-  public void addUserListener(DocumentReference documentReference)
-  {
-
-    if (firestoreUserListener != null)
-    {
-      return;
-    }
-    firestoreUserListener = documentReference.addSnapshotListener(MetadataChanges.INCLUDE, (snapshot, e) ->
-    {
-      if (e != null)
-      {
-        showToast("Error retrieving this user reference: " + e.getMessage());
-        mNavUtility.isNotLoggedIn(navigationView);
-        return;
-      }
-      final User user = mFirestore.toFirestoreObject(snapshot, User.class);
-      mAppUserViewModel.setmUser(user);
-      toggleAdmin(user);
-      toggleAdminOrgSet(user);
-      toggleOrgIsSet(user);
-    });
   }
 
   public void toggleOrgIsSet(User user)
@@ -760,6 +789,9 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
 
     } else if (appState == Constants.STATE_RESET) {
       setState(Constants.STATE_LOGIN);
+
+    } else if (appState == Constants.STATE_EDIT_PROFILE) {
+      setState(Constants.STATE_HOME);
 
     } else {
       showToast("uncaught state: " + appState);

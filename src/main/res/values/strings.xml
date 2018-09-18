@@ -106,4 +106,8 @@
     <string name="login_fragment_create_new_account">CREATE A NEW ACCOUNT</string>
 
     <string name="content_description_new_account">Create a new account</string>
+
+    <!-- EDIT PROFILE FRAGMENT -->
+    <string name="edit_profile_fragment_header">My Details</string>
+    <string name="edit_profile_fragment_go_credentials_text">EDIT CREDENTIALS</string>
 </resources>
