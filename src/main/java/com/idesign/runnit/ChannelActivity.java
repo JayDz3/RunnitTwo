@@ -104,7 +104,7 @@ public class ChannelActivity extends AppCompatActivity implements
   public void setViewItems()
   {
     mRecyclerView = findViewById(R.id.channel_activity_admin_recycler_view);
-    progressBar = findViewById(R.id.channel_activity_admin_progress_bar);
+    progressBar = findViewById(R.id.progress_bar);
     noChannelView = findViewById(R.id.channel_activity_admin_no_channels);
     fab = findViewById(R.id.channel_activity_admin_fab);
     customMessageEditText = findViewById(R.id.channel_activity_admin_custom_message);

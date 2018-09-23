@@ -6,15 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ChannelActivity">
 
-    <ProgressBar
-        android:id="@+id/channel_activity_admin_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="@dimen/eightDp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+    <include layout="@layout/progress_bar" />
 
     <TextView
         android:id="@+id/channel_activity_admin_no_channels"

@@ -10,10 +10,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".MainActivity" >
+        <activity android:name=".MainActivity"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -21,12 +21,10 @@
         <activity
             android:name=".ChannelActivity"
             android:windowSoftInputMode="stateHidden" />
-
         <receiver
             android:name=".NotificationService"
             android:enabled="true"
             android:exported="false" />
-
         <service
             android:name=".NotificationReceiver"
             android:enabled="true"
@@ -35,13 +33,11 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <activity android:name=".UserChannelActivity" />
         <activity
             android:name=".ChannelUsers"
             android:theme="@style/AppTheme.ClearStatusBar"
             android:windowSoftInputMode="stateHidden" />
-
         <activity android:name=".AllUsersActivity" />
         <activity android:name=".DeleteAccountActivity" />
     </application>

@@ -41,6 +41,7 @@
     <string name="home_fragment_reminder">Code</string>
 
     <!-- SIGNUP FRAGMENT -->
+    <string name="signup_header">Create Your Account</string>
     <string name="signup_firstname_hint">First name</string>
     <string name="signup_lastname_hint">Last name</string>
     <string name="signup_submit_button">Submit</string>

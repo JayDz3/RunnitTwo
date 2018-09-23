@@ -52,7 +52,7 @@ public class DeleteAccountActivity extends AppCompatActivity
     fieldTwo = findViewById(R.id.delete_account_activity_field_two);
     confirmButton = findViewById(R.id.delete_account_activity_confirm_button);
     confirmButton.setOnClickListener(l -> submit());
-    progressBar = findViewById(R.id.delete_account_activity_progress_bar);
+    progressBar = findViewById(R.id.progress_bar);
     progressBar.setVisibility(View.GONE);
     getValuesFromBundle(savedInstanceState);
   }
@@ -158,7 +158,6 @@ public class DeleteAccountActivity extends AppCompatActivity
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
     {
       NotificationManager notificationManager = getSystemService(NotificationManager.class);
-
       if (Objects.requireNonNull(notificationManager).getNotificationChannel(chanelId) != null)
         notificationManager.deleteNotificationChannel(chanelId);
     }

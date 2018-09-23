@@ -80,7 +80,7 @@ public class SignupFragment extends Fragment
 
   public void setViewItems(View view)
   {
-    progressBar = view.findViewById(R.id.signup_progress_bar);
+    progressBar = view.findViewById(R.id.progress_bar);
     editFirstName = view.findViewById(R.id.signup_first_name);
     editLastName = view.findViewById(R.id.signup_last_name);
     editEmail = view.findViewById(R.id.signup_email);

@@ -1,7 +1,9 @@
 package com.idesign.runnit;
-
-public abstract class MyRunnable implements Runnable {
-
+/*==================================*
+ *  USED IN DELETE ACCOUNT ACTIVITY *
+ *==================================*/
+public abstract class MyRunnable implements Runnable
+{
   @Override
   public abstract void run();
 }

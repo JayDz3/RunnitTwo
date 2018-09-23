@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Fragments.SignupFragment">
+    tools:context=".Fragments.SignupFragment"
+    android:scrollbars="vertical">
 
-    <ProgressBar
-        android:id="@+id/signup_progress_bar"
-        android:layout_width="wrap_content"
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include layout="@layout/progress_bar" />
+
+    <TextView
+        android:id="@+id/signup_header"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-
+        android:layout_margin="@dimen/eightDp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:text="@string/signup_header"
+        android:textSize="@dimen/sixteenSP"/>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/signup_first_name_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/signup_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -96,7 +104,7 @@
         android:layout_margin="@dimen/eightDp"
         android:background="@drawable/clear_button"
         android:text="@string/clear"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/signup_password_layout"
         app:layout_constraintEnd_toStartOf="@id/signup_submit"/>
 
     <Button
@@ -107,6 +115,8 @@
         android:background="@drawable/clear_button"
         android:textColor="@drawable/clear_button_primary_text_color"
         android:text="@string/submit"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/signup_password_layout"
         app:layout_constraintEnd_toEndOf="parent"/>
-</android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+</ScrollView>

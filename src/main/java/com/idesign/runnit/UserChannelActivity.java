@@ -69,7 +69,7 @@ public class UserChannelActivity extends AppCompatActivity
   {
     mRecyclerView = findViewById(R.id.channel_activity_user_recycler_view);
     noChannelView = findViewById(R.id.channel_activity_user_no_channels);
-    progressBar = findViewById(R.id.channel_activity_user_progress_bar);
+    progressBar = findViewById(R.id.progress_bar);
   }
 
   public void setAdapterAndRecyclerView()

@@ -33,7 +33,7 @@ public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllU
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_all_users);
-    progressBar = findViewById(R.id.all_users_activity_progress_bar);
+    progressBar = findViewById(R.id.progress_bar);
 
     if (savedInstanceState == null) {
       getValuesFromIntent();

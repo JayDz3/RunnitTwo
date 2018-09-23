@@ -6,14 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragments.MainLoginFragment">
 
-    <ProgressBar
-        android:id="@+id/login_fragment_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+    <include layout="@layout/progress_bar" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/login_fragment_email_layout"

@@ -68,7 +68,7 @@ public class MainLoginFragment extends Fragment {
     createAccountButton = rootView.findViewById(R.id.login_fragment_create_account_text);
     createAccountButton.setOnClickListener(l -> goCreateAccount());
 
-    progressBar = rootView.findViewById(R.id.login_fragment_progress_bar);
+    progressBar = rootView.findViewById(R.id.progress_bar);
     progressBar.setVisibility(View.GONE);
     return rootView;
   }
@@ -132,7 +132,6 @@ public class MainLoginFragment extends Fragment {
 
     if (!isEmpty(emailEditText) && isValidEmail(lowercaseEmail) && !isEmpty(passwordEditText))
     {
-
       disableButtons();
       progressBar.setVisibility(View.VISIBLE);
       mLoginViewModel.setLoggingIn(true);
