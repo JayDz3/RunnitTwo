@@ -44,9 +44,7 @@ public class AdminActivity extends AppCompatActivity
     queryButton.setOnClickListener(l -> queryOrg());
 
     if (savedInstanceState != null)
-    {
       getValuesFromBundle(savedInstanceState);
-    }
   }
 
   public void setViewItems()

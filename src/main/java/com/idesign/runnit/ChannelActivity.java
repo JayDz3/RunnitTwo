@@ -42,7 +42,6 @@ import io.reactivex.disposables.Disposable;
 public class ChannelActivity extends AppCompatActivity implements
   ChannelAdapter.AdminChannelAdapterListener,
   NewChannelDialog.ChannelDialogListener
-
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
@@ -162,9 +161,8 @@ public class ChannelActivity extends AppCompatActivity implements
   public void setListener()
   {
     if (channelListener != null)
-    {
       return;
-    }
+
     disableFab();
     final String uid = mAuth.user().getUid();
 
@@ -201,10 +199,8 @@ public class ChannelActivity extends AppCompatActivity implements
   public void observeChannels()
   {
     if (disposable == null || disposable.isDisposed())
-    {
       disposable = io.reactivex.Observable.interval(1, TimeUnit.MINUTES, AndroidSchedulers.mainThread())
       .subscribe(r -> updateChannels());
-    }
   }
 
   public void updateChannels()
@@ -274,18 +270,16 @@ public class ChannelActivity extends AppCompatActivity implements
     .onSuccessTask(orgSnapshot ->
     {
       if (orgSnapshot == null)
-      {
        throw new RuntimeException("org snapshot was null");
-      }
+
       final List<FirestoreChannel> channels = new ArrayList<>();
 
       for (FirestoreChannel c : mAdapter.getItems())
       {
         if (c.get_channelId().equalsIgnoreCase(trimmed))
-        {
           channels.add(c);
-        }
       }
+
       if (channels.size() == 0) {
         return mFirestore.addChannelAdmin(orgSnapshot.getReference(), orgPushid, upperCaseName);
 
@@ -407,10 +401,10 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     super.onPause();
     removeListener();
+
     if (disposable != null && !disposable.isDisposed())
-    {
       disposable.dispose();
-    }
+
     mAdminChannelViewModel.getChannels().removeObserver(observer());
     mAppUserViewModel.getmUser().removeObserver(userObserver());
     mAppUserViewModel.clear();
@@ -439,9 +433,7 @@ public class ChannelActivity extends AppCompatActivity implements
     if (inState != null)
     {
       if (inState.keySet().contains(EXTRA_OPEN))
-      {
         _open = inState.getInt(EXTRA_OPEN);
-      }
 
       if (inState.keySet().contains(EXTRA_MESSAGE)) {
         final String message = inState.getString(EXTRA_MESSAGE);

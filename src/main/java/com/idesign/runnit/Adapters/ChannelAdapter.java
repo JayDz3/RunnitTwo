@@ -92,9 +92,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private void setListener(AdminChannelAdapterListener listener)
   {
     if (mListener == null)
-    {
       mListener = listener;
-    }
   }
 
   @Override
@@ -161,6 +159,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
 
     if (minutes > 59) {
       return over;
+
     } else {
       return minutesString + ago;
     }
@@ -186,9 +185,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
   private void showActiveUsers(DocumentReference channelRef, AdminChannelViewHolder viewHolder)
   {
     if (!enabled)
-    {
       return;
-    }
+
     setEnabled(false);
     disableButtons(viewHolder);
     final String chennelId = channelRef.getId();

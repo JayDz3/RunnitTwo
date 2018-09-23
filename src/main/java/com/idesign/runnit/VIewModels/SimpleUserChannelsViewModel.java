@@ -11,15 +11,14 @@ import com.idesign.runnit.Items.UserChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleUserChannelsViewModel extends ViewModel {
+public class SimpleUserChannelsViewModel extends ViewModel
+{
   private final MutableLiveData<List<UserChannel>> channels = new MutableLiveData<>();
 
   public MutableLiveData<List<UserChannel>> getChannels()
   {
     if (channels.getValue() == null)
-    {
       channels.setValue(new ArrayList<>());
-    }
     return channels;
   }
 

@@ -54,7 +54,7 @@ public class MainLoginFragment extends Fragment {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
   {
     View rootView = inflater.inflate(R.layout.fragment_main_login, container, false);
     emailEditText = rootView.findViewById(R.id.login_fragment_email);
@@ -89,13 +89,14 @@ public class MainLoginFragment extends Fragment {
   {
     return loginData -> {
       if (loginData == null)
-      {
         return;
-      }
+
       if (loginData.getEmail() != null)
         emailEditText.setText(loginData.getEmail());
+
       if (loginData.getPassword() != null)
         passwordEditText.setText(loginData.getPassword());
+
       if (loginData.getLoggingIn())
         progressBar.setVisibility(View.VISIBLE);
     };
@@ -113,28 +114,31 @@ public class MainLoginFragment extends Fragment {
 
   public void submit()
   {
+    final String email = trimmedString(emailEditText.getText().toString());
+    final String password = trimmedString(passwordEditText.getText().toString());
+    final String lowercaseEmail = lowercaseString(email);
+
     if (isEmpty(emailEditText))
       emailEditText.setError("Email required");
+
     if (isEmpty(passwordEditText))
       passwordEditText.setError("Password required");
-    if (!isEmpty(emailEditText) && !isValidEmail(emailEditText.getText().toString()))
+
+    if (!isEmpty(emailEditText) && !isValidEmail(lowercaseEmail))
       emailEditText.setError("Not a valid email");
 
-    final String email = emailEditText.getText().toString();
-    final String password = passwordEditText.getText().toString();
-
-    mLoginViewModel.setLoginEmail(email);
+    mLoginViewModel.setLoginEmail(lowercaseEmail);
     mLoginViewModel.setPassword(password);
 
-    if (isValidEmail(emailEditText.getText().toString()) && !isEmpty(emailEditText) && !isEmpty(passwordEditText))
+    if (!isEmpty(emailEditText) && isValidEmail(lowercaseEmail) && !isEmpty(passwordEditText))
     {
 
       disableButtons();
       progressBar.setVisibility(View.VISIBLE);
       mLoginViewModel.setLoggingIn(true);
-      mAuth.signInWithEmailAndPassword(email, password)
+      mAuth.signInWithEmailAndPassword(lowercaseEmail, password)
       .addOnSuccessListener(l -> onLoginSuccess())
-      .addOnFailureListener(e -> onLogoutFailure(e));
+      .addOnFailureListener(this::onLogoutFailure);
     }
   }
 
@@ -209,11 +213,23 @@ public class MainLoginFragment extends Fragment {
   public void onPause()
   {
     super.onPause();
-    final String email = getEmail();
-    final String password = getPassword();
-    mLoginViewModel.setLoginEmail(email);
+    final String email = trimmedString(getEmail());
+    final String password = trimmedString(getPassword());
+    final String lowercaseEmail = lowercaseString(email);
+
+    mLoginViewModel.setLoginEmail(lowercaseEmail);
     mLoginViewModel.setPassword(password);
     mLoginViewModel.getLoginData().removeObserver(loginDataObserver());
+  }
+
+  public String trimmedString(String source)
+  {
+    return source.trim();
+  }
+
+  public String lowercaseString(String source)
+  {
+    return source.toLowerCase();
   }
 
   @Override

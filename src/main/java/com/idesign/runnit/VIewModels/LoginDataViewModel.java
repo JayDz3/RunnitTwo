@@ -15,9 +15,7 @@ public class LoginDataViewModel extends ViewModel
   public LiveData<LoginData> getLoginData()
   {
     if (loginData.getValue() == null)
-    {
       loginData.setValue(new LoginData());
-    }
     return loginData;
   }
 

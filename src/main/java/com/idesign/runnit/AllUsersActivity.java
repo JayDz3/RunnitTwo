@@ -46,9 +46,7 @@ public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllU
 
     mUsersViewModel = ViewModelProviders.of(this).get(AllUsersViewModel.class);
     if (viewedFragment == -1 || viewedFragment == 0)
-    {
       attachAllUsersFragment();
-    }
   }
 
   public void getUsers()
@@ -72,13 +70,11 @@ public class AllUsersActivity extends AppCompatActivity implements AllUsers.AllU
   public void attachAllUsersFragment()
   {
     if (mAllUsersFragment != null && mAllUsersFragment.isVisible())
-    {
       return;
-    }
+
     if (mAllUsersFragment == null)
-    {
       mAllUsersFragment = new AllUsers();
-    }
+
     Bundle args = new Bundle();
     args.putString(USER_UID, uid);
     args.putString(ORG_PUSHID, orgPushId);

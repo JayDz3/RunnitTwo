@@ -53,9 +53,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private void setListener(SubscribedUserAdapterListener listener)
   {
     if (mListener == null)
-    {
       mListener = listener;
-    }
   }
 
   public void setUsers(List<SubscribedUser> users)
@@ -97,9 +95,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
   private void sendNotification(UserViewHolder viewHolder, final String userId, final String firstname, final String lastname)
   {
     if (!enabled)
-    {
       return;
-    }
 
     final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
     final DocumentReference channelRef = mFirestore.getAdminChannel(orgPushId, channelId);

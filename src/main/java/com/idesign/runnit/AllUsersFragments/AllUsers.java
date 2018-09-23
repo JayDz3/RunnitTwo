@@ -81,9 +81,7 @@ public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapte
     return users ->
     {
       if (users != null)
-      {
         mAdapter.setItems(users);
-      }
     };
   }
 

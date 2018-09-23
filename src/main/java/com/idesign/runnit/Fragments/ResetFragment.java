@@ -69,9 +69,7 @@ public class ResetFragment extends Fragment
     return loginData ->
     {
       if (loginData != null)
-      {
         emailEditView.setText(loginData.getResetEmail());
-      }
     };
   }
 

@@ -15,9 +15,7 @@ public class UserViewModel extends ViewModel
   public LiveData<User> getUser()
   {
     if (mUser.getValue() == null)
-    {
       mUser.setValue(new User());
-    }
     return mUser;
   }
 

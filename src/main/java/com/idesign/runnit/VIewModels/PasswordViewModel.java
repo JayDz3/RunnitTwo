@@ -11,9 +11,7 @@ public class PasswordViewModel extends ViewModel
   public LiveData<String> getPassword()
   {
     if (mPassword.getValue() == null)
-    {
       mPassword.setValue("");
-    }
     return mPassword;
   }
 

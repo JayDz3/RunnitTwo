@@ -5,14 +5,14 @@ import android.arch.lifecycle.ViewModel;
 
 import com.idesign.runnit.Items.User;
 
-public class AppUserViewModel extends ViewModel {
+public class AppUserViewModel extends ViewModel
+{
   private final MutableLiveData<User> mUser = new MutableLiveData<>();
 
-  public MutableLiveData<User> getmUser() {
+  public MutableLiveData<User> getmUser()
+  {
     if (mUser.getValue() == null)
-    {
       mUser.setValue(new User());
-    }
     return mUser;
   }
 

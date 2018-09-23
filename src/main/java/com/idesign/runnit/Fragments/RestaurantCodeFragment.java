@@ -84,10 +84,10 @@ public class RestaurantCodeFragment extends Fragment
         showToast("Error: " + e.getMessage());
         return;
       }
+
       if (documentSnapshot == null)
-      {
         return;
-      }
+
       final User user = mFirestore.toFirestoreObject(documentSnapshot, User.class);
       mUserViewModel.setIsAdmin(user.get_isAdmin());
 
@@ -129,13 +129,11 @@ public class RestaurantCodeFragment extends Fragment
     .onSuccessTask(orgSnapshots ->
     {
       if (orgSnapshots == null)
-      {
         throw new RuntimeException("There was a problem accessing this organization");
-      }
+
       if (orgSnapshots.getDocuments().size() == 0)
-      {
         throw new RuntimeException("The code entered does not belong to any organization...");
-      }
+
       final DocumentSnapshot docSnap = orgSnapshots.getDocuments().get(0);
       final FirestoreOrg org = mFirestore.toFirestoreObject(docSnap, FirestoreOrg.class);
       final String orgPushid = org.getPushId();
@@ -150,7 +148,8 @@ public class RestaurantCodeFragment extends Fragment
       showToast("Success");
       enableButton();
     })
-    .addOnFailureListener(e -> {
+    .addOnFailureListener(e ->
+    {
       showToast("error setting your code: " + e.getMessage());
       enableButton();
     });
@@ -178,9 +177,7 @@ public class RestaurantCodeFragment extends Fragment
   {
     super.onPause();
     if (registration != null)
-    {
       registration.remove();
-    }
   }
 
   @Override

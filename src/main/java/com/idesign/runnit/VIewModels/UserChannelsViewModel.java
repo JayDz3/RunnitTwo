@@ -8,15 +8,14 @@ import com.idesign.runnit.Items.FirestoreChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserChannelsViewModel extends ViewModel {
+public class UserChannelsViewModel extends ViewModel
+{
   private final MutableLiveData<List<FirestoreChannel>> channels = new MutableLiveData<>();
 
   public MutableLiveData<List<FirestoreChannel>> getChannels()
   {
     if (channels.getValue() == null)
-    {
       channels.setValue(new ArrayList<>());
-    }
     return channels;
   }
 

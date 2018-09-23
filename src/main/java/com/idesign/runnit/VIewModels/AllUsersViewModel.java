@@ -20,9 +20,7 @@ public class AllUsersViewModel extends ViewModel
   public MutableLiveData<List<User>> getUsers()
   {
     if (users.getValue() == null)
-    {
       users.setValue(new ArrayList<>());
-    }
     return users;
   }
 

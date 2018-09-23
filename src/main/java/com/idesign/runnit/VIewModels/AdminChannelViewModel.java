@@ -19,9 +19,7 @@ public class AdminChannelViewModel extends ViewModel
   public MutableLiveData<List<FirestoreChannel>> getChannels()
   {
     if (channels.getValue() == null)
-    {
       channels.setValue(new ArrayList<>());
-    }
     return channels;
   }
 

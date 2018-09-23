@@ -60,10 +60,9 @@ public class UserChannelActivity extends AppCompatActivity
 
     progressBar.setVisibility(View.GONE);
     noChannelView.setVisibility(View.GONE);
+
     if (savedInstanceState == null)
-    {
       progressBar.setVisibility(View.VISIBLE);
-    }
   }
 
   public void setViewItems()
@@ -101,9 +100,8 @@ public class UserChannelActivity extends AppCompatActivity
   public void setListener()
   {
     if (channelListener != null || userChannelListener != null)
-    {
       return;
-    }
+
     final String uid = mAuth.user().getUid();
     mFirestore.getUsers().document(uid).get()
     .addOnSuccessListener(userSnapshot ->

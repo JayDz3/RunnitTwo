@@ -243,9 +243,7 @@ public class BaseFirestore
         tasks.add(subscribedUserReference.get().addOnSuccessListener(ref ->
         {
           if (ref.exists())
-          {
             batch.update(ref.getReference(), LOGGED_IN, false);
-          }
         }));
       }
     }
@@ -278,9 +276,8 @@ public class BaseFirestore
   {
     final WriteBatch batch = mFirestore.batch();
     if (activeUsers == null)
-    {
       return batch.commit();
-    }
+
     for (DocumentSnapshot ds : activeUsers.getDocuments())
     {
       final DocumentReference ref = ds.getReference();
@@ -295,9 +292,8 @@ public class BaseFirestore
     final String COLLECTION_CHANNELS  = "Channels";
 
     if (subscribedUsers == null)
-    {
       return batch.commit();
-    }
+
     for (DocumentSnapshot ds : subscribedUsers.getDocuments())
     {
       final DocumentReference ref = ds.getReference();

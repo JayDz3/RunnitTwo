@@ -29,9 +29,7 @@ public class StateViewModel extends ViewModel
   public void setFragmentState(int state)
   {
     if (mStateEmitter.getValue() != null)
-    {
       mStateEmitter.getValue().setFragmentState(state);
-    }
     setEmitter(getStateEmitter().getValue());
   }
 }

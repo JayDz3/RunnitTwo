@@ -97,9 +97,7 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     for (UserChannel c : mUserChannels)
     {
       if (c.get_pushId().equals(compareTo.get_pushId()))
-      {
         exists.add(compareTo);
-      }
     }
 
     if (exists.size() > 0) {
@@ -135,6 +133,7 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     .onSuccessTask(ignore ->
     {
       final boolean checked = viewHolder.radioButton.isChecked();
+
       if (checked) {
         return mFirestore.addUserChannel(uid, channelPushId);
 
@@ -162,10 +161,9 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
     {
       NotificationManager notificationManager = mContext.getSystemService(NotificationManager.class);
+
       if (Objects.requireNonNull(notificationManager).getNotificationChannel(channelId) != null)
-      {
         notificationManager.deleteNotificationChannel(channelId);
-      }
     }
   }
 

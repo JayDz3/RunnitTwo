@@ -44,7 +44,8 @@ public class DeleteAccountActivity extends AppCompatActivity
   private ProgressBar progressBar;
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(Bundle savedInstanceState)
+  {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_delete_account);
     fieldOne = findViewById(R.id.delete_account_activity_field_one);
@@ -98,9 +99,8 @@ public class DeleteAccountActivity extends AppCompatActivity
         .onSuccessTask(userChannels ->
         {
           if (userChannels != null)
-          {
             deleteUsersChannelReferencesBatch(userChannels, batch);
-          }
+
           batch.delete(userRef);
           return batch.commit();
         })
@@ -158,10 +158,9 @@ public class DeleteAccountActivity extends AppCompatActivity
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
     {
       NotificationManager notificationManager = getSystemService(NotificationManager.class);
+
       if (Objects.requireNonNull(notificationManager).getNotificationChannel(chanelId) != null)
-      {
         notificationManager.deleteNotificationChannel(chanelId);
-      }
     }
   }
 

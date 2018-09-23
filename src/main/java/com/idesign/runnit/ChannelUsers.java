@@ -59,10 +59,10 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     mSubscribedUsersViewModel = ViewModelProviders.of(this).get(SubscribedUsersViewModel.class);
     setView(_channelId);
     setRecyclerView();
+
     if (savedInstanceState != null)
-    {
       getValuesFromBundle(savedInstanceState);
-    }
+
     changeIconTint();
   }
 
@@ -87,9 +87,8 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     return users ->
     {
       if (users != null)
-      {
         Collections.sort(users, (a, b) -> a.get_lastName().compareToIgnoreCase(b.get_lastName()));
-      }
+
       mAdapter.setUsers(users);
     };
   }
@@ -138,10 +137,10 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     }
     final DocumentReference channelRef = mFirestore.getAdminChannelsReference(orgPushId).document(channelId);
     final CollectionReference subscribedUsersRef = mFirestore.subscribedUsersReference(channelRef);
+
     if (userListener != null)
-    {
       return;
-    }
+
     userListener = subscribedUsersRef.addSnapshotListener(((querySnapshot, e) ->
     {
       if (e != null)

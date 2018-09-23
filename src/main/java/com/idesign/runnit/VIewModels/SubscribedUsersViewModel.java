@@ -11,16 +11,15 @@ import com.idesign.runnit.Items.SubscribedUser;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubscribedUsersViewModel extends ViewModel {
+public class SubscribedUsersViewModel extends ViewModel
+{
   private final BaseFirestore mFirestore = new BaseFirestore();
   private final MutableLiveData<List<SubscribedUser>> mUsers = new MutableLiveData<>();
 
   public MutableLiveData<List<SubscribedUser>> getUsers()
   {
     if (mUsers.getValue() == null)
-    {
       mUsers.setValue(new ArrayList<>());
-    }
     return mUsers;
   }
 
@@ -37,18 +36,15 @@ public class SubscribedUsersViewModel extends ViewModel {
     {
       final SubscribedUser subscribedUser = mFirestore.toFirestoreObject(ds, SubscribedUser.class);
       if (subscribedUser.get_loggedIn())
-      {
         users.add(subscribedUser);
-      }
     }
     setUsers(users);
   }
 
   public int size()
   {
-    if (mUsers.getValue() == null) {
+    if (mUsers.getValue() == null)
       return 0;
-    }
     return mUsers.getValue().size();
   }
 

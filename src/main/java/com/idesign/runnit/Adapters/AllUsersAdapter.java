@@ -52,9 +52,7 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
   private void setListener(AllUsersAdapterListener listener)
   {
     if (mListener == null)
-    {
       mListener = listener;
-    }
   }
 
   public void setItems(List<User> mUsers)
@@ -83,9 +81,8 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
   public void delete(String uid, AllUsersViewHolder viewHolder)
   {
     if (!enabled)
-    {
       return;
-    }
+
     final WriteBatch batch = mFirestore.batch();
     final CollectionReference adminChannelsReference = mFirestore.getAdminChannelsReference(orgPushId);
     final CollectionReference userChannelsReference = mFirestore.getUserChannels(uid);

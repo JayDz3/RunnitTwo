@@ -12,6 +12,8 @@
     <string name="disable">Disable</string>
     <string name="confirm">Confirm</string>
     <string name="send">SEND</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
     <string name="leave_blank_for_basic_message">Leave empty to send a basic message</string>
 
     <string name="reply_label">reply</string>
@@ -89,6 +91,9 @@
     <string name="channel_dialog_title">Enter the name of your channel</string>
     <string name="channel_dialog_hint">Servers</string>
 
+    <!-- CANCEL CHANGES DIALOG -->
+    <string name="cancel_changes_dialog_title">Continue without saving?</string>
+
     <!-- USER CHANNEL ACTIVITY -->
     <string name="channel_activity_user_no_channels">No channels are available</string>
 
@@ -110,4 +115,14 @@
     <!-- EDIT PROFILE FRAGMENT -->
     <string name="edit_profile_fragment_header">My Details</string>
     <string name="edit_profile_fragment_go_credentials_text">EDIT CREDENTIALS</string>
+
+    <!-- EDIT CREDENTIALS FRAGMENT -->
+    <string name="edit_credentials_fragment_header">My Credentials</string>
+    <string name="edit_credentials_fragment_enter_current_email_header">Enter your current email</string>
+    <string name="edit_credentials_fragment_enter_new_email_header">Enter your new email</string>
+    <string name="edit_credentials_fragment_go_profile_text">EDIT PROFILE</string>
+    <string name="edit_credentials_fragment_enter_password_header">Enter your password</string>
+    <string name="hint_current_email">current email</string>
+    <string name="hint_new_email">new email</string>
+    <string name="hint_password">your password</string>
 </resources>

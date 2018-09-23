@@ -3,12 +3,11 @@ package com.idesign.runnit;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -17,6 +16,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,8 +36,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import com.idesign.runnit.Dialogs.CancelChangesDialog;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
+import com.idesign.runnit.Fragments.EditCredentialsFragment;
 import com.idesign.runnit.Fragments.EditProfileFragment;
 import com.idesign.runnit.Fragments.HomeFragment;
 import com.idesign.runnit.Fragments.MainLoginFragment;
@@ -50,6 +52,7 @@ import com.idesign.runnit.Items.User;
 import com.idesign.runnit.Fragments.ResetFragment;
 import com.idesign.runnit.NavigationHelpers.NavigationViewUtility;
 import com.idesign.runnit.VIewModels.AppUserViewModel;
+import com.idesign.runnit.VIewModels.EditProfileViewModel;
 import com.idesign.runnit.VIewModels.LoginDataViewModel;
 import com.idesign.runnit.VIewModels.PasswordViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
@@ -61,7 +64,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements SignupFragment.SignupFragmentListener
+public class MainActivity extends AppCompatActivity implements
+SignupFragment.SignupFragmentListener,
+CancelChangesDialog.CancelChangesListener
 {
   // Classes
   private final MyAuth mAuth = new MyAuth();
@@ -69,21 +74,24 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   private final NavigationViewUtility mNavUtility = new NavigationViewUtility();
 
   // Layouts
-  private ConstraintLayout mainLayout;
+ // private ConstraintLayout mainLayout;
   private NavigationView navigationView;
   private DrawerLayout mDrawerLayout;
 
-  private Snackbar snackbar;
+  // private Snackbar snackbar;
   private Toolbar toolbar;
   private ActionBar actionBar;
 
   // View models
   private StateViewModel mStateViewModel;
-  private UserViewModel mUserViewModel;
   private PasswordViewModel mPasswordViewModel;
+
+  private UserViewModel mUserViewModel;
   private AppUserViewModel mAppUserViewModel;
+  private EditProfileViewModel mEditProfileViewModel;
+
   private UserChannelsViewModel mUserChannelViewModel;
-  protected LoginDataViewModel mLoginDataViewModel;
+  private LoginDataViewModel mLoginDataViewModel;
 
   // Fragments
   private HomeFragment mHomeFragment;
@@ -92,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   private MainLoginFragment mLoginFragment;
   private ResetFragment mResetFragment;
   private EditProfileFragment mEditProfileFragment;
+  private EditCredentialsFragment mEditCredentialsFragment;
 
   // Listeners
   private FirebaseAuth.AuthStateListener authStateListener;
@@ -99,7 +108,9 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
 
   private String selection;
   private int appState = 0;
+
   private boolean disabled = false;
+  private boolean dialogOpen = false;
 
   private ProgressBar progressBar;
 
@@ -107,6 +118,9 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
 
   private final String ORG_PUSHID = "org_pushid";
   private final String USER_UID = "user_uid";
+
+  private int destination = -1;
+  private final String EXTRA_DESTINATION = "destination";
 
   @Override
   protected void onCreate(Bundle savedInstanceState)
@@ -119,12 +133,14 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     setActionBar();
     addDrawerListener();
     addNavListener();
-    toggleViewOnStart();
+
+    if (savedInstanceState == null) {
+      toggleViewOnStart();
+    }
   }
 
   public void setViewItems()
   {
-    mainLayout = findViewById(R.id.main_constraint_layout);
     mDrawerLayout = findViewById(R.id.drawer_layout);
     navigationView = findViewById(R.id.nav_view);
     toolbar = findViewById(R.id.toolbar);
@@ -140,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     mPasswordViewModel = ViewModelProviders.of(this).get(PasswordViewModel.class);
     mUserChannelViewModel = ViewModelProviders.of(this).get(UserChannelsViewModel.class);
     mLoginDataViewModel = ViewModelProviders.of(this).get(LoginDataViewModel.class);
+    mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
   }
 
   /*
@@ -167,13 +184,40 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
         buildRestaurantFrag(Constants.STATE_RESTAURANT_FRAGMENT);
         break;
       case Constants.STATE_EDIT_PROFILE:
+        setProfileUser();
         buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
+        break;
+      case Constants.STATE_EDIT_CREDENTIALS:
+        setProfileUser();
+        buildEditCredentialsFragment(Constants.STATE_EDIT_CREDENTIALS);
         break;
       default:
         logMessage("nada");
     }
   }
 
+  public void setProfileUser()
+  {
+    final String firstname = Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName();
+    final String lastname = mAppUserViewModel.getmUser().getValue().get_lastName();
+
+    final String editFirstName = Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_firstName();
+    final String editLastName = mEditProfileViewModel.getEditProfileUser().getValue().get_lastName();
+
+    if (!editFirstName.equals("")) {
+      mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(editFirstName);
+    } else {
+      mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(firstname);
+    }
+
+    if (!editLastName.equals("")) {
+      mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(editLastName);
+    } else {
+      mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(lastname);
+    }
+
+    mEditProfileViewModel.update();
+  }
   @Override
   public boolean onOptionsItemSelected(MenuItem item)
   {
@@ -311,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       showToast("Must log in to continue");
       return;
     }
-    final boolean mIsAdmin = mAppUserViewModel.getmUser().getValue().get_isAdmin();
+    final boolean mIsAdmin = Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_isAdmin();
 
     if (mIsAdmin) {
       Intent intent = new Intent(this, ChannelActivity.class);
@@ -330,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       showToast("Must log in to continue");
       return;
     }
-    final boolean mIsAdmin = mAppUserViewModel.getmUser().getValue().get_isAdmin();
+    final boolean mIsAdmin = Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_isAdmin();
     final String uid = mAppUserViewModel.getmUser().getValue().get_pushId();
     final String orgPushId = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
 
@@ -374,28 +418,61 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
      switch (stateEmitter.getFragmentState())
      {
        case Constants.STATE_HOME:
+         if (destination == 0 || fragmentVisible(mHomeFragment))
+         {
+           return;
+         }
          buildHomeFrag(Constants.STATE_HOME);
          break;
+
        case Constants.STATE_DETAILS_FRAGMENT:
          buildSignupFrag(Constants.STATE_DETAILS_FRAGMENT);
          mNavUtility.setCheckedToFalse(R.id.nav_edit_info, navigationView);
          break;
+
        case Constants.STATE_RESTAURANT_FRAGMENT:
          buildRestaurantFrag(Constants.STATE_RESTAURANT_FRAGMENT);
          mNavUtility.setCheckedToFalse(R.id.nav_verify_restaurant, navigationView);
          break;
+
        case Constants.STATE_LOGIN:
          buildLoginFragment(Constants.STATE_LOGIN);
          break;
+
        case Constants.STATE_RESET:
          hideActionBar();
          buildResetFragment(Constants.STATE_RESET);
          break;
+
        case Constants.STATE_EDIT_PROFILE:
+         if (destination == 1 || fragmentVisible(mEditProfileFragment)) {
+           return;
+         }
+         if (fragmentVisible(mEditCredentialsFragment) && credentialsChanged()) {
+           destination = 1;
+           showCancelChangesDialog(1);
+           return;
+         }
+         setProfileUser();
          buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
          break;
+
+       case Constants.STATE_EDIT_CREDENTIALS:
+         if (destination == 2 || fragmentVisible(mEditCredentialsFragment)) {
+           return;
+         }
+         if (fragmentVisible(mEditProfileFragment) && profileChangedOnGoCredentials()) {
+           destination = 2;
+           showCancelChangesDialog(2);
+           return;
+         }
+         setProfileUser();
+         buildEditCredentialsFragment(Constants.STATE_EDIT_CREDENTIALS);
+         break;
+
        case Constants.STATE_LOGGED_IN:
          break;
+
        case Constants.STATE_LOGGED_OUT:
          mNavUtility.setCheckedToFalse(R.id.nav_logout, navigationView);
          break;
@@ -427,6 +504,122 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     actionBar.setHomeAsUpIndicator(R.drawable.ic_home_black_24dp);
   }
 
+  public void setActionBarForEditProfile()
+  {
+    toolbar.setNavigationOnClickListener(l ->
+    {
+      if (profileChangedOnToolbarClick()) {
+        destination = 0;
+        showCancelChangesDialog(0);
+
+      } else {
+        destination = -1;
+        setState(Constants.STATE_HOME);
+        clearProfile();
+      }
+    });
+    actionBar.setDisplayShowTitleEnabled(false);
+    actionBar.setDisplayShowHomeEnabled(true);
+    actionBar.setHomeAsUpIndicator(R.drawable.ic_home_black_24dp);
+  }
+
+  public void setActionBarForEditCredentials()
+  {
+    toolbar.setNavigationOnClickListener(l ->
+    {
+      if (credentialsChangedOnToolbarClick()) {
+        destination = 0;
+        showCancelChangesDialog(0);
+
+      } else {
+        setState(Constants.STATE_HOME);
+        clearProfile();
+      }
+    });
+    actionBar.setDisplayShowTitleEnabled(false);
+    actionBar.setDisplayShowHomeEnabled(true);
+    actionBar.setHomeAsUpIndicator(R.drawable.ic_home_black_24dp);
+  }
+
+  /*
+   *  Check For Profile and Credential Changes
+   */
+  public boolean profileChangedOnGoCredentials()
+  {
+    {
+      final String editedFirst = trimmedString(mEditProfileFragment.getFirstName());
+      final String editedLast = trimmedString(mEditProfileFragment.getLastName());
+      final String editedEmail = trimmedString(Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_email());
+      final String currentFirstName = trimmedString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName());
+      final String currentLastName = trimmedString(mAppUserViewModel.getmUser().getValue().get_lastName());
+      final String currentEmail = trimmedString(mAppUserViewModel.getmUser().getValue().get_email());
+
+      return !editedFirst.equals(currentFirstName) && !TextUtils.isEmpty(editedFirst)
+          || !editedLast.equals(currentLastName) && !TextUtils.isEmpty(editedLast)
+          || !editedEmail.equals(currentEmail) && !TextUtils.isEmpty(editedEmail);
+    }
+  }
+
+  public boolean profileChangedOnToolbarClick()
+  {
+    {
+      final String editedFirst = trimmedString(mEditProfileFragment.getFirstName());
+      final String editedLast = trimmedString(mEditProfileFragment.getLastName());
+      final String editedEmail = trimmedString(Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_email());
+      final String currentFirstName = trimmedString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName());
+      final String currentLastName = trimmedString(mAppUserViewModel.getmUser().getValue().get_lastName());
+      final String currentEmail = trimmedString(mAppUserViewModel.getmUser().getValue().get_email());
+
+      return !editedFirst.equals(currentFirstName)
+          || !editedLast.equals(currentLastName)
+          || !editedEmail.equals(currentEmail) && !TextUtils.isEmpty(editedEmail);
+    }
+  }
+
+  public boolean userProfileChanged()
+  {
+    {
+      final String editFirst = trimmedString(mEditProfileFragment.getFirstName());
+      final String editLast = trimmedString(mEditProfileFragment.getLastName());
+      final String editEmail = trimmedString(Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_email());
+      final String firstName = trimmedString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName());
+      final String lastName = trimmedString(mAppUserViewModel.getmUser().getValue().get_lastName());
+      final String email = trimmedString(mAppUserViewModel.getmUser().getValue().get_email());
+
+      return !editFirst.equals(firstName)
+          || !editLast.equals(lastName)
+          || !editEmail.equals(email) && !TextUtils.isEmpty(editEmail);
+    }
+  }
+
+  public boolean credentialsChanged()
+  {
+    final String editEmail = trimmedString(mEditCredentialsFragment.getNewEmail());
+    final String email = trimmedString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_email());
+    final String currentEmail = trimmedString(mEditCredentialsFragment.getCurrentEmail());
+    final String password = mEditCredentialsFragment.getPassword();
+
+    return !editEmail.equals("") && !editEmail.equalsIgnoreCase(email)
+        || !TextUtils.isEmpty(currentEmail)
+        || !TextUtils.isEmpty(password);
+  }
+
+  public boolean credentialsChangedOnToolbarClick()
+  {
+    final String editCurrentEmail = trimmedString(mEditCredentialsFragment.getCurrentEmail());
+    final String editEmail = trimmedString(mEditCredentialsFragment.getNewEmail());
+
+    final String pw = mEditCredentialsFragment.getPassword().trim();
+    final String email = trimmedString(mAppUserViewModel.getmUser().getValue().get_email());
+
+    return !TextUtils.isEmpty(editCurrentEmail)
+        || !TextUtils.isEmpty(editEmail)
+        || !TextUtils.isEmpty(pw) && !TextUtils.isEmpty(pw)
+        || !TextUtils.isEmpty(editCurrentEmail) && !editCurrentEmail.equalsIgnoreCase(email)
+        || !TextUtils.isEmpty(editEmail) && !editEmail.equals(email);
+  }
+  // END CHECK PROFILE AND CREDENTIAL CHANGES
+
   public void hideActionBar()
   {
     actionBar.hide();
@@ -444,6 +637,21 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   /*
    *  BUILD FRAGMENTS
    */
+  public void buildEditCredentialsFragment(int state)
+  {
+    appState = state;
+    if (fragmentVisible(mEditCredentialsFragment))
+    {
+      return;
+    }
+    if (mEditCredentialsFragment == null)
+    {
+      mEditCredentialsFragment = new EditCredentialsFragment();
+    }
+    replaceFragment(mEditCredentialsFragment);
+    setActionBarForEditCredentials();
+  }
+
   public void buildEditProfileFragment(int state)
   {
     appState = state;
@@ -456,7 +664,86 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       mEditProfileFragment = new EditProfileFragment();
     }
     replaceFragment(mEditProfileFragment);
-    setActionBarForFragment();
+    setActionBarForEditProfile();
+  }
+
+  public void clearProfile()
+  {
+    Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).set_firstName("");
+    mEditProfileViewModel.getEditProfileUser().getValue().set_lastName("");
+    mEditProfileViewModel.getEditProfileUser().getValue().set_email("");
+    mEditProfileViewModel.getEditProfileUser().getValue().set_newEmail("");
+    mEditProfileViewModel.getEditProfileUser().getValue().set_password("");
+    mEditProfileViewModel.update();
+  }
+
+  public void clearCredentials()
+  {
+    mEditProfileViewModel.getEditProfileUser().getValue().set_email("");
+    mEditProfileViewModel.getEditProfileUser().getValue().set_newEmail("");
+    mEditProfileViewModel.getEditProfileUser().getValue().set_password("");
+    mEditProfileViewModel.update();
+  }
+
+  public void resetProfileName()
+  {
+    final String firstname = mAppUserViewModel.getmUser().getValue().get_firstName();
+    final String lastname = mAppUserViewModel.getmUser().getValue().get_lastName();
+    mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(firstname);
+    mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(lastname);
+    mEditProfileViewModel.update();
+  }
+
+  @Override
+  public void onDialogDismiss()
+  {
+    dialogOpen = false;
+    destination = -1;
+  }
+
+  @Override
+  public void confirmNoChanges()
+  {
+    switch (destination)
+    {
+      case 0:
+        clearProfile();
+        buildHomeFrag(Constants.STATE_HOME);
+        setState(Constants.STATE_HOME);
+        destination = -1;
+        break;
+
+      case 1:
+        clearCredentials();
+        buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
+        setState(Constants.STATE_EDIT_PROFILE);
+        destination = -1;
+        break;
+
+      case 2:
+        resetProfileName();
+        buildEditCredentialsFragment(Constants.STATE_EDIT_CREDENTIALS);
+        setState(Constants.STATE_EDIT_CREDENTIALS);
+        destination = -1;
+        break;
+    }
+  }
+
+  @Override
+  public void cancelNoChanges()
+  {
+    dialogOpen = false;
+    destination = -1;
+  }
+
+  public void showCancelChangesDialog(int destination)
+  {
+    if (dialogOpen)
+      return;
+    CancelChangesDialog dialog = new CancelChangesDialog();
+    dialog.show(getSupportFragmentManager(), "cancelChangesDialog");
+    dialogOpen = true;
+    this.destination = destination;
   }
 
   public void buildHomeFrag(int state)
@@ -526,7 +813,8 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     {
       return;
     }
-    if (mSignupFragment == null) {
+    if (mSignupFragment == null)
+    {
       mSignupFragment = new SignupFragment();
     }
     replaceFragment(mSignupFragment);
@@ -560,11 +848,12 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       if (mAuth.user() != null) {
         mLoginDataViewModel.clear();
         enableNotifications();
+
         final String uid = mAuth.user().getUid();
         final DocumentReference userRef = mFirestore.getUsers().document(uid);
         final List<FirestoreChannel> channels = new ArrayList<>();
-
         addUserListener(userRef);
+
         FirebaseInstanceId.getInstance().getInstanceId()
         .onSuccessTask(id ->  mFirestore.updateInstanceId(userRef, Objects.requireNonNull(id).getToken()))
         .continueWithTask(ignore -> userRef.get())
@@ -579,8 +868,11 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
         mNavUtility.isNotLoggedIn(navigationView);
         removeUserListener();
         disableNotifications();
+
         if (appState != Constants.STATE_RESET)
+        {
           mStateViewModel.setFragmentState(Constants.STATE_LOGIN);
+        }
       }
     };
     mAuth.setAuthListener(authStateListener);
@@ -589,7 +881,6 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
 
   public void addUserListener(DocumentReference documentReference)
   {
-
     if (firestoreUserListener != null)
     {
       return;
@@ -756,6 +1047,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     if (inState.keySet().contains(Constants.EXTRA_APP_STATE))
     {
       appState = inState.getInt(Constants.EXTRA_APP_STATE);
+      destination = inState.getInt(EXTRA_DESTINATION);
     }
   }
 
@@ -764,6 +1056,7 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   {
     super.onSaveInstanceState(outState);
     outState.putInt(Constants.EXTRA_APP_STATE, appState);
+    outState.putInt(EXTRA_DESTINATION, destination);
   }
 
   @Override
@@ -791,7 +1084,24 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
       setState(Constants.STATE_LOGIN);
 
     } else if (appState == Constants.STATE_EDIT_PROFILE) {
-      setState(Constants.STATE_HOME);
+      if (userProfileChanged()) {
+        destination = 0;
+        showCancelChangesDialog(0);
+
+      } else {
+        destination = -1;
+        setState(Constants.STATE_HOME);
+        clearProfile();
+      }
+    } else if (appState == Constants.STATE_EDIT_CREDENTIALS) {
+
+      if (credentialsChanged()) {
+        destination = 1;
+        showCancelChangesDialog(1);
+
+      } else {
+        setState(Constants.STATE_EDIT_PROFILE);
+      }
 
     } else {
       showToast("uncaught state: " + appState);
@@ -806,11 +1116,11 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
     Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
   }
 
-  void showSnackbar(CharSequence message)
+  /* void showSnackbar(CharSequence message)
   {
    snackbar = Snackbar.make(mainLayout, message, Snackbar.LENGTH_LONG);
    snackbar.show();
-  }
+  } */
 
   public void toast(String message)
   {
@@ -820,5 +1130,10 @@ public class MainActivity extends AppCompatActivity implements SignupFragment.Si
   public void logMessage(String message)
   {
     Log.d("MAIN ACTIVITY: ", "message: " + message);
+  }
+
+  public String trimmedString(String source)
+  {
+    return source.trim();
   }
 }
