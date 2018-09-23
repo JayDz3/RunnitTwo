@@ -13,4 +13,6 @@
 
     <color name="colorInputBlue">#479FFF</color>
     <color name="colorDeleteRed">#FF1518</color>
+
+    <color name="colorSecondaryText">#AAAAAA</color>
 </resources>

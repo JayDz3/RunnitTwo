@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.idesign.runnit.Items.User;
 import com.idesign.runnit.Items.UserChannel;
 
 import java.util.ArrayList;

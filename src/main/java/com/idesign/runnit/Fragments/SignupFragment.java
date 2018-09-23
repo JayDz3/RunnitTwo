@@ -54,7 +54,6 @@ public class SignupFragment extends Fragment
 
   public SignupFragment() { }
 
-
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
@@ -286,6 +285,7 @@ public class SignupFragment extends Fragment
   public void onDetach()
   {
     super.onDetach();
+    mListener = null;
   }
 
   public String trimmedString(String source)

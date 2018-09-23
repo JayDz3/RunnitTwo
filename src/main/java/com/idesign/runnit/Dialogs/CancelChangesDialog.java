@@ -50,6 +50,7 @@ public class CancelChangesDialog extends DialogFragment
   {
     super.onDetach();
     mListener.onDialogDismiss();
+    mListener = null;
   }
 
   public interface CancelChangesListener {

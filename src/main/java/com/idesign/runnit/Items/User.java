@@ -120,7 +120,6 @@ public class User {
     return _isAdmin;
   }
 
-
   public String get_instanceId()
   {
     return _instanceId;

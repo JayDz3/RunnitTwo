@@ -92,7 +92,9 @@
         app:layout_constraintTop_toBottomOf="@id/restaurant_code_code_two_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/all_fields_are_case_sensitive"/>
+        android:text="@string/all_fields_are_case_sensitive"
+        android:textColor="@color/colorSecondaryText"
+        android:textStyle="italic"/>
 
 
     <Button

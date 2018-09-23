@@ -133,7 +133,6 @@ public class HomeFragment extends Fragment
           reminderButton.setVisibility(View.GONE);
         }
       };
-
       mAuth.setHasListener(true);
       mAuth.setAuthListener(authStateListener);
     }

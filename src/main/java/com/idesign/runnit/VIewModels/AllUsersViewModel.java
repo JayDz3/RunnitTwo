@@ -35,7 +35,6 @@ public class AllUsersViewModel extends ViewModel
     for (DocumentSnapshot ds : snapshot)
     {
       final User user = mFirestore.toFirestoreObject(ds, User.class);
-      Log.d("ALL USERS", "User uid: " + user.get_pushId());
       allUsers.add(user);
     }
     setUsers(allUsers);

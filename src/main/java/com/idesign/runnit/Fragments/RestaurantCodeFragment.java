@@ -24,8 +24,10 @@ import com.idesign.runnit.Constants;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.FirestoreOrg;
+import com.idesign.runnit.Items.OrganizationObject;
 import com.idesign.runnit.R;
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.VIewModels.OrganizationObjectViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 import com.idesign.runnit.VIewModels.UserViewModel;
 
@@ -42,6 +44,7 @@ public class RestaurantCodeFragment extends Fragment
 
   private UserViewModel mUserViewModel;
   private StateViewModel mStateViewModel;
+  private OrganizationObjectViewModel mOrganizationObjectViewModel;
 
   private ListenerRegistration registration;
 
@@ -53,6 +56,7 @@ public class RestaurantCodeFragment extends Fragment
     super.onCreate(savedInstanceState);
     mUserViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
     mStateViewModel = ViewModelProviders.of(getActivity()).get(StateViewModel.class);
+    mOrganizationObjectViewModel = ViewModelProviders.of(getActivity()).get(OrganizationObjectViewModel.class);
   }
 
   @Override
@@ -67,6 +71,7 @@ public class RestaurantCodeFragment extends Fragment
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
   }
+
 
   public void setViewItems(View view)
   {
@@ -91,6 +96,24 @@ public class RestaurantCodeFragment extends Fragment
       editTextOrganizationName.setText(orgName);
     };
   } */
+
+  private Observer<OrganizationObject> organizationObjectObserver()
+  {
+    return organizationObject ->
+    {
+      if (organizationObject == null)
+        return;
+
+      final String codeOne = organizationObject.get_orgCodeOne();
+      final String codeTwo = organizationObject.get_orgCodeTwo();
+      final String orgName = organizationObject.get_orgName();
+
+      showToast(codeOne);
+      editRestaurantCode.setText(codeOne);
+      editRestaurantCodeTwo.setText(codeTwo);
+      editTextOrganizationName.setText(orgName);
+    };
+  }
 
   public void observeUser(DocumentReference userRef)
   {
@@ -148,7 +171,6 @@ public class RestaurantCodeFragment extends Fragment
 
     if (!text.equals(textTwo))
     {
-      showToast("Codes must match to continue");
       editRestaurantCode.setError("Codes do not match");
       editRestaurantCodeTwo.setError("Codes do not match");
       return;
@@ -179,6 +201,8 @@ public class RestaurantCodeFragment extends Fragment
       editRestaurantCode.setText("");
       editRestaurantCodeTwo.setText("");
       editTextOrganizationName.setText("");
+      mOrganizationObjectViewModel.clear();
+      clearErrors();
       mStateViewModel.setFragmentState(Constants.STATE_HOME);
       showToast("Success");
       enableButton();
@@ -188,6 +212,13 @@ public class RestaurantCodeFragment extends Fragment
       showToast("error setting your code: " + e.getMessage());
       enableButton();
     });
+  }
+
+  public void clearErrors()
+  {
+    editRestaurantCode.setError(null);
+    editRestaurantCodeTwo.setError(null);
+    editTextOrganizationName.setError(null);
   }
 
   public String getCodeOne()
@@ -223,23 +254,32 @@ public class RestaurantCodeFragment extends Fragment
   }
 
   @Override
-  public void onPause()
-  {
-    super.onPause();
-    if (registration != null)
-      registration.remove();
-  }
-
-  @Override
   public void onResume()
   {
     super.onResume();
+    mOrganizationObjectViewModel.getOrganizationObject().observe(this, organizationObjectObserver());
     final String userPushId = mUserViewModel.getPushId();
     if (userPushId != null)
     {
       final DocumentReference userRef = mFirestore.getUsers().document(userPushId);
       observeUser(userRef);
     }
+  }
+
+  @Override
+  public void onPause()
+  {
+    super.onPause();
+    final String codeOne = getCodeOne();
+    final String codeTwo = getCodeTwo();
+    final String name = getOrganizationName();
+    mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgCodeOne(codeOne);
+    mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgCodeTwo(codeTwo);
+    mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgName(name);
+
+    mOrganizationObjectViewModel.getOrganizationObject().removeObserver(organizationObjectObserver());
+    if (registration != null)
+      registration.remove();
   }
 
   @Override

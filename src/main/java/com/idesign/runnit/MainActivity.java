@@ -54,6 +54,7 @@ import com.idesign.runnit.NavigationHelpers.NavigationViewUtility;
 import com.idesign.runnit.VIewModels.AppUserViewModel;
 import com.idesign.runnit.VIewModels.EditProfileViewModel;
 import com.idesign.runnit.VIewModels.LoginDataViewModel;
+import com.idesign.runnit.VIewModels.OrganizationObjectViewModel;
 import com.idesign.runnit.VIewModels.PasswordViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 import com.idesign.runnit.VIewModels.UserChannelsViewModel;
@@ -89,6 +90,7 @@ CancelChangesDialog.CancelChangesListener
   private UserViewModel mUserViewModel;
   private AppUserViewModel mAppUserViewModel;
   private EditProfileViewModel mEditProfileViewModel;
+  private OrganizationObjectViewModel mOrgViewModel;
 
   private UserChannelsViewModel mUserChannelViewModel;
   private LoginDataViewModel mLoginDataViewModel;
@@ -156,6 +158,7 @@ CancelChangesDialog.CancelChangesListener
     mUserChannelViewModel = ViewModelProviders.of(this).get(UserChannelsViewModel.class);
     mLoginDataViewModel = ViewModelProviders.of(this).get(LoginDataViewModel.class);
     mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
+    mOrgViewModel = ViewModelProviders.of(this).get(OrganizationObjectViewModel.class);
   }
 
   /*
@@ -191,6 +194,47 @@ CancelChangesDialog.CancelChangesListener
       default:
         logMessage("nada");
     }
+  }
+
+  /* public void endFragment()
+  {
+    switch (appState)
+    {
+      case Constants.STATE_HOME:
+        removeFragment(mHomeFragment);
+        break;
+      case Constants.STATE_LOGIN:
+        removeFragment(mLoginFragment);
+        break;
+      case Constants.STATE_RESET:
+        removeFragment(mResetFragment);
+        break;
+      case Constants.STATE_DETAILS_FRAGMENT:
+        removeFragment(mSignupFragment);
+        break;
+      case Constants.STATE_RESTAURANT_FRAGMENT:
+        removeFragment(mRestaurantFragment);
+        break;
+      case Constants.STATE_EDIT_PROFILE:
+        removeFragment(mEditProfileFragment);
+        break;
+      case Constants.STATE_EDIT_CREDENTIALS:
+        removeFragment(mEditCredentialsFragment);
+        break;
+      default:
+        logMessage("nada");
+    }
+  } */
+
+  public void removeFragment(Fragment fragment)
+  {
+    if (fragment == null)
+      return;
+
+    getSupportFragmentManager()
+    .beginTransaction()
+    .detach(fragment)
+    .commit();
   }
 
   public void setProfileUser()
@@ -453,9 +497,16 @@ CancelChangesDialog.CancelChangesListener
     if (destination == 1 || fragmentVisible(mEditProfileFragment))
       return;
 
+    if (dialogOpen)
+    {
+      showToast("dialog open on edit profile. return.");
+      return;
+    }
+
     if (fragmentVisible(mEditCredentialsFragment) && credentialsChangedOnGoProfile())
     {
       showCancelChangesDialog(1);
+      setState(Constants.STATE_EDIT_CREDENTIALS);
       return;
     }
     setProfileUser();
@@ -467,9 +518,16 @@ CancelChangesDialog.CancelChangesListener
     if (destination == 2 || fragmentVisible(mEditCredentialsFragment))
       return;
 
+    if (dialogOpen)
+    {
+      showToast("dialog open on edit credentials. return.");
+      return;
+    }
+
     if (fragmentVisible(mEditProfileFragment) && profileChangedOnGoCredentials())
     {
       showCancelChangesDialog(2);
+      setState(Constants.STATE_EDIT_PROFILE);
       return;
     }
     setProfileUser();
@@ -498,7 +556,12 @@ CancelChangesDialog.CancelChangesListener
 
   public void setActionBarForFragment()
   {
-    toolbar.setNavigationOnClickListener(l -> setState(Constants.STATE_HOME));
+    toolbar.setNavigationOnClickListener(l -> {
+      if (appState == Constants.STATE_RESTAURANT_FRAGMENT)
+        mOrgViewModel.clear();
+
+      setState(Constants.STATE_HOME);
+    });
     actionBar.setDisplayShowTitleEnabled(false);
     actionBar.setDisplayShowHomeEnabled(true);
     actionBar.setHomeAsUpIndicator(R.drawable.ic_home_black_24dp);
@@ -708,7 +771,6 @@ CancelChangesDialog.CancelChangesListener
     if (mHomeFragment == null)
       mHomeFragment = new HomeFragment();
 
-    addDrawerListener();
     replaceFragment(mHomeFragment);
     setActionBar();
   }
@@ -750,7 +812,6 @@ CancelChangesDialog.CancelChangesListener
 
     if (mRestaurantFragment == null)
       mRestaurantFragment = new RestaurantCodeFragment();
-
     replaceFragment(mRestaurantFragment);
     setActionBarForFragment();
   }
@@ -979,6 +1040,7 @@ CancelChangesDialog.CancelChangesListener
     removeAuthListener();
     removeUserListener();
     mStateViewModel.getStateEmitter().removeObserver(getEmitterObserver());
+    // endFragment();
   }
 
 
@@ -1021,6 +1083,7 @@ CancelChangesDialog.CancelChangesListener
       super.onBackPressed();
 
     } else if (appState == Constants.STATE_RESTAURANT_FRAGMENT) {
+      mOrgViewModel.clear();
       setState(Constants.STATE_HOME);
 
     } else if (appState == Constants.STATE_RESET) {

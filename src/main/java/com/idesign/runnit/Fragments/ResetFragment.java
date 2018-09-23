@@ -35,7 +35,6 @@ public class ResetFragment extends Fragment
 
   public ResetFragment() {}
 
-
   @Override
   public void onCreate(Bundle savedInstanceState)
   {

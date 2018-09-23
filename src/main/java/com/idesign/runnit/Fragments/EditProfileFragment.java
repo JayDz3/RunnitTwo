@@ -2,6 +2,7 @@ package com.idesign.runnit.Fragments;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -238,7 +239,6 @@ public class EditProfileFragment extends Fragment
     mEditProfileViewModel.setEditProfileUser(user);
     mEditProfileViewModel.getEditProfileUser().removeObserver(userObserver());
   }
-
 
   @Override
   public void onResume()
