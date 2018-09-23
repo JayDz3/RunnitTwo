@@ -68,7 +68,8 @@ public class HomeFragment extends Fragment
   {
     final String uid = mAuth.user().getUid();
     mFirestore.getUsers().document(uid).get()
-    .addOnSuccessListener(snapshot -> {
+    .addOnSuccessListener(snapshot ->
+    {
       final User user = mFirestore.toFirestoreObject(snapshot, User.class);
       final String orgCode = user.get_organizationCode();
 

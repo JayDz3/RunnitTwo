@@ -15,6 +15,8 @@
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="leave_blank_for_basic_message">Leave empty to send a basic message</string>
+    <string name="field_is_case_sensitive">Field is case sensitive</string>
+    <string name="all_fields_are_case_sensitive">All fields are case sensitive</string>
 
     <string name="reply_label">reply</string>
 
@@ -54,9 +56,11 @@
     <string name="phone_number_resend_sms_text">Need another verification code?</string>
     <string name="phone_number_resend_sms_clickable">click here</string>
 
+    <string name="organization_code_org_name_header">Please enter the name of your organization</string>
     <string name="restaurant_code_text_view">Please enter the code provided to you in each field</string>
     <string name="restaurant_code_text_view_admin">Please submit your organization code</string>
     <string name="restaurant_code_hint">123abc</string>
+    <string name="organization_code_org_name_hint">Organization name</string>
 
     <!-- LOGIN FRAGMENT -->
     <string name="login_forgot_password_text">Forgot your password?</string>
@@ -71,7 +75,7 @@
     <string name="admin_activity_cannot_be_changed">This code can not be changed in the future</string>
     <string name="admin_activity_channel_text">Your org code and channel ID will be identical</string>
 
-    <string name="admin_activity_org_name_hint">Org name</string>
+    <string name="admin_activity_org_name_hint">Name of Organization</string>
     <string name="admin_activity_text_hint">A123B45</string>
     <string name="admin_activity_query_code">Reminder</string>
 

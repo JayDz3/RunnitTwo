@@ -92,6 +92,8 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
     mListener.disable();
 
     mFirestore.setUserOrganizationPushIdEmpty(orgPushId, uid)
+    .onSuccessTask(ignore -> mFirestore.setUserOrganizationNameEmpty(uid))
+    .onSuccessTask(ignore -> mFirestore.setUserOrganizationCodeEmpty(uid))
     .onSuccessTask(ignore -> adminChannelsReference.get())
     .onSuccessTask(adminChannelsSnapshot -> mFirestore.deleteAdminChannelUserReferencesReturnUserChannels(adminChannelsSnapshot, userChannelsReference, batch, uid))
     .onSuccessTask(userChannelsSnapshot -> mFirestore.deleteUserChannelReferencesCommitBatch(userChannelsSnapshot, batch))

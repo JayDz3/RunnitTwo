@@ -174,7 +174,6 @@ public class SignupFragment extends Fragment
     mUserViewModel.setPushId(pushid);
     mUserViewModel.setIsAdmin(false);
     mUserViewModel.setOrganizationCode("");
-    mUserViewModel.setSendNotification(false);
     mUserViewModel.setInstanceId("");
     mUserViewModel.setLoggedIn(false);
 

@@ -30,6 +30,8 @@ public class BaseFirestore
   private final String LOGGED_IN = "_loggedIn";
   private final String LAST_SENT = "_lastSent";
   private final String INSTANCE_ID = "_instanceId";
+  private final String ORG_NAME_USER = "_orgName";
+  private final String ORG_NAME_ORG = "orgName";
 
   private final String COLLECTION_CHANNELS = "Channels";
   private final String COLLECTION_ACTIVE_USERS = "ActiveUsers";
@@ -157,9 +159,9 @@ public class BaseFirestore
     return mFirestore.collection(Constants.COLLECTION_ORGS).whereEqualTo(ORG_CODE, orgCode).get();
   }
 
-  public Task<QuerySnapshot> queryOrgByCodeTask(String orgCode)
+  public Task<QuerySnapshot> queryOrgByCodeTask(String orgCode, String orgName)
   {
-    return mFirestore.collection(Constants.COLLECTION_ORGS).whereEqualTo(ORG_CODE, orgCode).limit(1).get();
+    return mFirestore.collection(Constants.COLLECTION_ORGS).whereEqualTo(ORG_CODE, orgCode).whereEqualTo(ORG_NAME_ORG, orgName).limit(1).get();
   }
 
   public Task<DocumentSnapshot> getOrgSnapshotTask(String pushId)
@@ -203,9 +205,24 @@ public class BaseFirestore
     return getUsers().document(uid).update(ORG__PUSHID, _organizationPushId);
   }
 
+  public Task<Void> setUserOrgName(String _orgName, String uid)
+  {
+    return getUsers().document(uid).update(ORG_NAME_USER, _orgName);
+  }
+
   public Task<Void> setUserOrganizationPushIdEmpty(String _organizationPushId, String uid)
   {
     return getUsers().document(uid).update(ORG__PUSHID, "");
+  }
+
+  public Task<Void> setUserOrganizationNameEmpty(String uid)
+  {
+    return getUsers().document(uid).update(ORG_NAME_USER, "");
+  }
+
+  public Task<Void> setUserOrganizationCodeEmpty(String uid)
+  {
+    return getUsers().document(uid).update(ORG_CODE, "");
   }
 
   public Task<Void> updateInstanceId(DocumentReference docRef, String _instanceId)
@@ -275,6 +292,7 @@ public class BaseFirestore
   public Task<Void> deleteActiveUsersFromChannelBatch(QuerySnapshot activeUsers)
   {
     final WriteBatch batch = mFirestore.batch();
+
     if (activeUsers == null)
       return batch.commit();
 

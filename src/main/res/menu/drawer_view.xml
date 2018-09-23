@@ -29,6 +29,5 @@
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_account_box_primary_24dp"
             android:title="@string/drawer_logout" />
-
     </group>
 </menu>

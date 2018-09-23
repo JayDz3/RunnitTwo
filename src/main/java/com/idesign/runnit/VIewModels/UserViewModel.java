@@ -19,6 +19,12 @@ public class UserViewModel extends ViewModel
     return mUser;
   }
 
+  public void update()
+  {
+    final User user = getUser().getValue();
+    mUser.setValue(user);
+  }
+
 
   public void clear()
   {
@@ -84,6 +90,11 @@ public class UserViewModel extends ViewModel
     return Objects.requireNonNull(getUser().getValue()).get_organizationPushId();
   }
 
+  public String getOrganizationName()
+  {
+    return Objects.requireNonNull(getUser().getValue()).get_organizationName();
+  }
+
   /*
    * SETTERS
    */
@@ -122,9 +133,9 @@ public class UserViewModel extends ViewModel
     Objects.requireNonNull(mUser.getValue()).set_organizationPushId(_organizationPushId);
   }
 
-  public void setSendNotification(boolean _sendNotification)
+  public void setOrganizationName(String _organizationName)
   {
-    Objects.requireNonNull(mUser.getValue()).set_sendNotification(_sendNotification);
+    Objects.requireNonNull(mUser.getValue()).set_organizationName(_organizationName);
   }
 
   public void setInstanceId(String id)

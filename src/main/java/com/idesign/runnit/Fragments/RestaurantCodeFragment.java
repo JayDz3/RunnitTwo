@@ -1,5 +1,6 @@
 package com.idesign.runnit.Fragments;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ public class RestaurantCodeFragment extends Fragment
 
   private EditText editRestaurantCode;
   private EditText editRestaurantCodeTwo;
+  private EditText editTextOrganizationName;
   private TextView restaurantView;
   private Button submitButton;
 
@@ -71,12 +73,30 @@ public class RestaurantCodeFragment extends Fragment
     editRestaurantCode = view.findViewById(R.id.restaurant_code_code);
     editRestaurantCodeTwo = view.findViewById(R.id.restaurant_code_code_two);
     restaurantView = view.findViewById(R.id.restaurant_code_text_view);
+    editTextOrganizationName = view.findViewById(R.id.organization_code_org_name);
     submitButton = view.findViewById(R.id.restaurant_code_submit_button);
     submitButton.setOnClickListener(l -> submit());
   }
 
+  /* private Observer<User> userObserver()
+  {
+    return user ->
+    {
+      if (user == null)
+        return;
+
+      final String code = user.get_organizationCode();
+      final String orgName = user.get_organizationName();
+      editRestaurantCode.setText(code);
+      editTextOrganizationName.setText(orgName);
+    };
+  } */
+
   public void observeUser(DocumentReference userRef)
   {
+    if (registration != null)
+      return;
+
     registration = userRef.addSnapshotListener(MetadataChanges.INCLUDE, (documentSnapshot, e) ->
     {
       if (e != null)
@@ -89,7 +109,6 @@ public class RestaurantCodeFragment extends Fragment
         return;
 
       final User user = mFirestore.toFirestoreObject(documentSnapshot, User.class);
-      mUserViewModel.setIsAdmin(user.get_isAdmin());
 
       if (user.get_isAdmin()) {
         restaurantView.setText(getResources().getString(R.string.restaurant_code_text_view_admin));
@@ -107,43 +126,59 @@ public class RestaurantCodeFragment extends Fragment
       showToast("you have not created an account...");
       return;
     }
-    if (isEmptyField(editRestaurantCode) || isEmptyField(editRestaurantCodeTwo))
+    if (isEmptyField(editRestaurantCode))
+      editRestaurantCode.setError("Field is required");
+
+    if (isEmptyField(editRestaurantCodeTwo))
+      editRestaurantCodeTwo.setError("Field is required");
+
+    if (isEmptyField(editTextOrganizationName))
+      editTextOrganizationName.setError("Field is required");
+
+    if (isEmptyField(editRestaurantCode) || isEmptyField(editRestaurantCodeTwo) || isEmptyField(editTextOrganizationName))
     {
       showToast("Can not submit empty values");
       return;
     }
     final String uid = mAuth.user().getUid();
-    final String text = trimmedString(editRestaurantCode.getText().toString());
-    final String textTwo = trimmedString(editRestaurantCodeTwo.getText().toString());
+    final String text = trimmedString(getCodeOne());
+    final String textTwo = trimmedString(getCodeTwo());
+    final String name = trimmedString(getOrganizationName());
     final DocumentReference documentReference = mFirestore.getUsers().document(uid);
 
     if (!text.equals(textTwo))
     {
       showToast("Codes must match to continue");
+      editRestaurantCode.setError("Codes do not match");
+      editRestaurantCodeTwo.setError("Codes do not match");
       return;
     }
     disableButton();
     mUserViewModel.setOrganizationCode(text);
+    mUserViewModel.setOrganizationName(name);
+
     mFirestore.setOrganizationCodeTask(documentReference, text)
-    .onSuccessTask(ignore -> mFirestore.queryOrgByCodeTask(text))
+    .onSuccessTask(ignore -> mFirestore.queryOrgByCodeTask(text, name))
     .onSuccessTask(orgSnapshots ->
     {
       if (orgSnapshots == null)
         throw new RuntimeException("There was a problem accessing this organization");
 
       if (orgSnapshots.getDocuments().size() == 0)
-        throw new RuntimeException("The code entered does not belong to any organization...");
+        throw new RuntimeException("No organizations match the information entered...");
 
       final DocumentSnapshot docSnap = orgSnapshots.getDocuments().get(0);
       final FirestoreOrg org = mFirestore.toFirestoreObject(docSnap, FirestoreOrg.class);
       final String orgPushid = org.getPushId();
       return mFirestore.setUserOrgPushId(orgPushid, uid);
     })
+    .onSuccessTask(ignore -> mFirestore.setUserOrgName(name, uid))
     .addOnSuccessListener(ignore ->
     {
       mUserViewModel.clear();
       editRestaurantCode.setText("");
       editRestaurantCodeTwo.setText("");
+      editTextOrganizationName.setText("");
       mStateViewModel.setFragmentState(Constants.STATE_HOME);
       showToast("Success");
       enableButton();
@@ -153,6 +188,21 @@ public class RestaurantCodeFragment extends Fragment
       showToast("error setting your code: " + e.getMessage());
       enableButton();
     });
+  }
+
+  public String getCodeOne()
+  {
+    return editRestaurantCode.getText().toString();
+  }
+
+  public String getCodeTwo()
+  {
+    return editRestaurantCodeTwo.getText().toString();
+  }
+
+  public String getOrganizationName()
+  {
+    return editTextOrganizationName.getText().toString();
   }
 
   public void enableButton()
