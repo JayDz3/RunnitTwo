@@ -156,8 +156,8 @@ public class AdminActivity extends AppCompatActivity
     super.onSaveInstanceState(outState);
     final String trimmedName = mUtility.trimString(orgName.getText().toString());
     final String trimmedCode = mUtility.trimString(orgCode.getText().toString());
-    outState.putString(EXTRA_ORG_NAME, trimmedCode);
     outState.putString(EXTRA_ORG_NAME, trimmedName);
+    outState.putString(EXTRA_ORG_CODE, trimmedCode);
   }
 
   public void getValuesFromBundle(Bundle inState)
