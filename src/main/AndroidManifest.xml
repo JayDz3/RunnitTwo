@@ -17,23 +17,31 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".AdminActivity" />
+
         <activity
             android:name=".ChannelActivity"
             android:windowSoftInputMode="stateHidden" />
+
         <receiver
             android:name=".NotificationService"
-            android:enabled="true"
+            android:enabled="false"
             android:exported="false" />
+
         <service
             android:name=".NotificationReceiver"
-            android:enabled="true"
+            android:enabled="false"
             android:exported="false">
+
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
+
         </service>
+
         <activity android:name=".UserChannelActivity" />
+
         <activity
             android:name=".ChannelUsers"
             android:theme="@style/AppTheme.ClearStatusBar"

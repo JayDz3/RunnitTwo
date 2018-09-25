@@ -98,7 +98,6 @@ public class RestaurantCodeFragment extends Fragment
       final String codeTwo = organizationObject.get_orgCodeTwo();
       final String orgName = organizationObject.get_orgName();
 
-      showToast(codeOne);
       editRestaurantCode.setText(codeOne);
       editRestaurantCodeTwo.setText(codeTwo);
       editTextOrganizationName.setText(orgName);
