@@ -1,11 +1,12 @@
 package com.idesign.runnit.Fragments;
 
+import com.idesign.runnit.R;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
+
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +18,13 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.WriteBatch;
+
 import com.idesign.runnit.Constants;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.EditProfileUser;
-import com.idesign.runnit.R;
+
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.EditProfileViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 
@@ -31,6 +34,7 @@ public class EditCredentialsFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private EditProfileViewModel mEditProfileViewModel;
   private StateViewModel mStateViewModel;
@@ -72,6 +76,10 @@ public class EditCredentialsFragment extends Fragment
 
     progressBar = rootView.findViewById(R.id.progress_bar);
     progressBar.setVisibility(View.GONE);
+
+    if (savedInstanceState == null)
+      mUtility.observeViewModel(this, mEditProfileViewModel.getEditProfileUser(), userObserver());
+
     return rootView;
   }
 
@@ -101,28 +109,28 @@ public class EditCredentialsFragment extends Fragment
   public void submit()
   {
     final String uid = mAuth.user().getUid();
-    final String fbUserEmail = lowercaseString(mAuth.user().getEmail());
+    final String fbUserEmail = mUtility.lowercaseString(mAuth.user().getEmail());
     final String currentEmail = getCurrentEmail().toLowerCase();
     final String newEmail = getNewEmail().toLowerCase();
     final String password =  getPassword();
 
-    if (isEmpty(currentEmail))
+    if (mUtility.isEmpty(currentEmail))
       editCurrentEmail.setError("Required field");
 
-    if (isEmpty(newEmail))
+    if (mUtility.isEmpty(newEmail))
       editNewEmail.setError("Required field");
 
-    if (!isEmpty(currentEmail) && !fbUserEmail.equals(currentEmail))
+    if (!mUtility.isEmpty(currentEmail) && !fbUserEmail.equals(currentEmail))
       editCurrentEmail.setError("Email does not match");
 
-    if (!isEmpty(currentEmail) && !isEmpty(newEmail) && !isEmpty(password) && fbUserEmail.equals(lowercaseString(currentEmail)) && isValidEmail(currentEmail) && isValidEmail(newEmail))
+    if (!mUtility.isEmpty(currentEmail) && !mUtility.isEmpty(newEmail) && !mUtility.isEmpty(password) && fbUserEmail.equals(mUtility.lowercaseString(currentEmail)) && isValidEmail(currentEmail) && isValidEmail(newEmail))
     {
       disableButtons();
       final DocumentReference userRef = mFirestore.getUsers().document(uid);
       final WriteBatch batch = mFirestore.batch();
       final String firstname = Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_firstName();
       final String lastname = mEditProfileViewModel.getEditProfileUser().getValue().get_lastName();
-      final String updateEmail = lowercaseString(newEmail);
+      final String updateEmail = mUtility.lowercaseString(newEmail);
 
       showToast(password);
       mAuth.signInWithEmailAndPassword(updateEmail, password)
@@ -145,11 +153,6 @@ public class EditCredentialsFragment extends Fragment
         enableButtons();
       });
     }
-  }
-
-  public boolean isEmpty(String source)
-  {
-    return TextUtils.isEmpty(source);
   }
 
   public void showToast(String message)
@@ -204,21 +207,24 @@ public class EditCredentialsFragment extends Fragment
 
   public void updateProfile()
   {
-    final String firstname = mEditProfileViewModel.getEditProfileUser().getValue().get_firstName();
-    final String lastname = mEditProfileViewModel.getEditProfileUser().getValue().get_lastName();
-    final String oldEmail = getCurrentEmail();
-    final String newEmail = getNewEmail();
-    final String password = getPassword();
-    final EditProfileUser user = new EditProfileUser(firstname, lastname, oldEmail, newEmail, password);
-    mEditProfileViewModel.setEditProfileUser(user);
+    final String firstname = mUtility.trimString(mEditProfileViewModel.getEditProfileUser().getValue().get_firstName());
+    final String lastname = mUtility.trimString(mEditProfileViewModel.getEditProfileUser().getValue().get_lastName());
+    final String oldEmail = mUtility.trimString(getCurrentEmail());
+    final String newEmail = mUtility.trimString(getNewEmail());
+    final String password = mUtility.trimString(getPassword());
+    mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(firstname);
+    mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(lastname);
+    mEditProfileViewModel.getEditProfileUser().getValue().set_email(oldEmail);
+    mEditProfileViewModel.getEditProfileUser().getValue().set_newEmail(newEmail);
+    mEditProfileViewModel.getEditProfileUser().getValue().set_password(password);
   }
 
   @Override
   public void onPause()
   {
     super.onPause();
+    mEditProfileViewModel.getEditProfileUser().removeObservers(this);
     updateProfile();
-    mEditProfileViewModel.getEditProfileUser().removeObserver(userObserver());
 
     editCurrentEmail.setError(null);
     editNewEmail.setError(null);
@@ -229,14 +235,8 @@ public class EditCredentialsFragment extends Fragment
   public void onResume()
   {
     super.onResume();
-    mEditProfileViewModel.getEditProfileUser().observe(this, userObserver());
     final boolean inProgress = Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_updateInProgress();
     if (inProgress)
       progressBar.setVisibility(View.VISIBLE);
-  }
-
-  public String lowercaseString(String source)
-  {
-    return source.toLowerCase();
   }
 }

@@ -2,7 +2,6 @@ package com.idesign.runnit.Fragments;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -25,6 +24,7 @@ import com.idesign.runnit.Items.EditProfileUser;
 
 import com.idesign.runnit.R;
 
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.EditProfileViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 
@@ -32,6 +32,7 @@ public class EditProfileFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private EditProfileViewModel mEditProfileViewModel;
   private StateViewModel mStateViewModel;
@@ -49,6 +50,9 @@ public class EditProfileFragment extends Fragment
 
   private final String KEY_FIRSTNAME = "_firstName";
   private final String KEY_LASTNAME = "_lastName";
+
+  private String firstname;
+  private String lastname;
 
   public EditProfileFragment() { }
 
@@ -71,6 +75,9 @@ public class EditProfileFragment extends Fragment
     goCredentialsButton.setOnClickListener(l -> goEditCredentials());
     progressBar = rootView.findViewById(R.id.progress_bar);
     progressBar.setVisibility(View.GONE);
+
+    if (savedInstanceState == null)
+      mUtility.observeViewModel(this, mEditProfileViewModel.getEditProfileUser(), userObserver());
 
     return rootView;
   }
@@ -95,15 +102,15 @@ public class EditProfileFragment extends Fragment
 
   public void goEditCredentials()
   {
-    final String firstName = trimmedString(getFirstName());
-    final String lastName = trimmedString(getLastName());
+    firstname = mUtility.trimString(getFirstName());
+    lastname = mUtility.trimString(getLastName());
     final EditProfileUser user = mEditProfileViewModel.getEditProfileUser().getValue();
 
-    if (!firstName.equals("") && user != null)
-      user.set_firstName(upperCaseFirstLetter(firstName));
+    if (!firstname.equals("") && user != null)
+      user.set_firstName(mUtility.upperCaseFirstLetter(firstname));
 
-    if (!lastName.equals("") && user != null)
-      user.set_lastName(upperCaseFirstLetter(lastName));
+    if (!lastname.equals("") && user != null)
+      user.set_lastName(mUtility.upperCaseFirstLetter(lastname));
 
     mEditProfileViewModel.setEditProfileUser(user);
     mStateViewModel.setFragmentState(Constants.STATE_EDIT_CREDENTIALS);
@@ -115,32 +122,27 @@ public class EditProfileFragment extends Fragment
     {
       if (user != null)
       {
-        final String firstname = trimmedString(user.get_firstName());
-        final String lastname = trimmedString(user.get_lastName());
-        final String upperCaseFirstname = upperCaseFirstLetter(firstname);
-        final String upperCaseLastname = upperCaseFirstLetter(lastname);
+        firstname = mUtility.trimString(user.get_firstName());
+        lastname = mUtility.trimString(user.get_lastName());
+        final String upperCaseFirstname = mUtility.upperCaseFirstLetter(firstname);
+        final String upperCaseLastname = mUtility.upperCaseFirstLetter(lastname);
         firstNameEditText.setText(upperCaseFirstname);
         lastNameEditText.setText(upperCaseLastname);
       }
     };
   }
 
-  public boolean isEmpty(EditText editText)
-  {
-    return TextUtils.isEmpty(editText.getText());
-  }
-
   public void submit()
   {
-    final String currentFirstName = trimmedString(mEditProfileViewModel.getEditProfileUser().getValue().get_firstName());
-    final String currentLastName = trimmedString(mEditProfileViewModel.getEditProfileUser().getValue().get_lastName());
-    final String newFirstName = trimmedString(getFirstName());
-    final String newLastName = trimmedString(getLastName());
+    final String currentFirstName = mUtility.trimString(mEditProfileViewModel.getEditProfileUser().getValue().get_firstName());
+    final String currentLastName = mUtility.trimString(mEditProfileViewModel.getEditProfileUser().getValue().get_lastName());
+    final String newFirstName = mUtility.trimString(getFirstName());
+    final String newLastName = mUtility.trimString(getLastName());
 
     if (!TextUtils.isEmpty(newFirstName) && !TextUtils.isEmpty(newLastName) && newFirstName.equalsIgnoreCase(currentFirstName) && newLastName.equalsIgnoreCase(currentLastName))
     {
-      firstNameEditText.setText(upperCaseFirstLetter(newFirstName));
-      lastNameEditText.setText(upperCaseFirstLetter(newLastName));
+      firstNameEditText.setText(mUtility.upperCaseFirstLetter(newFirstName));
+      lastNameEditText.setText(mUtility.upperCaseFirstLetter(newLastName));
       return;
     }
 
@@ -148,24 +150,24 @@ public class EditProfileFragment extends Fragment
     final String uid = mAuth.user().getUid();
     final DocumentReference userRef = mFirestore.getUsers().document(uid);
 
-    if (isEmpty(firstNameEditText))
+    if (mUtility.isEmpty(firstNameEditText))
       firstNameEditText.setError("No empty fields");
 
-    if (isEmpty(lastNameEditText))
+    if (mUtility.isEmpty(lastNameEditText))
       lastNameEditText.setError("No empty fields");
 
-    if (isEmpty(firstNameEditText) || isEmpty(lastNameEditText))
+    if (mUtility.isEmpty(firstNameEditText) || mUtility.isEmpty(lastNameEditText))
       return;
 
     if (!newFirstName.equals(currentFirstName))
     {
-      final String uppercaseFirstname = upperCaseFirstLetter(newFirstName);
+      final String uppercaseFirstname = mUtility.upperCaseFirstLetter(newFirstName);
       mFirestore.updateUserDetail(userRef, KEY_FIRSTNAME, uppercaseFirstname, batch);
     }
 
     if (!newLastName.equals(currentLastName))
     {
-      final String uppercaseLastname = upperCaseFirstLetter(newLastName);
+      final String uppercaseLastname = mUtility.upperCaseFirstLetter(newLastName);
       mFirestore.updateUserDetail(userRef, KEY_LASTNAME, uppercaseLastname, batch);
     }
 
@@ -176,8 +178,8 @@ public class EditProfileFragment extends Fragment
     {
       progressBar.setVisibility(View.GONE);
 
-      final String upperFirst = upperCaseFirstLetter(newFirstName);
-      final String upperlast = upperCaseFirstLetter(newLastName);
+      final String upperFirst = mUtility.upperCaseFirstLetter(newFirstName);
+      final String upperlast = mUtility.upperCaseFirstLetter(newLastName);
       final String email = mEditProfileViewModel.getEditProfileUser().getValue().get_email();
       final String newEmail = mEditProfileViewModel.getEditProfileUser().getValue().get_newEmail();
       final String password = mEditProfileViewModel.getEditProfileUser().getValue().get_password();
@@ -214,37 +216,37 @@ public class EditProfileFragment extends Fragment
 
   public String getFirstName()
   {
-    return firstNameEditText.getText().toString();
+    firstname = mUtility.trimString(firstNameEditText.getText().toString());
+    return firstname;
   }
 
   public String getLastName()
   {
-    return lastNameEditText.getText().toString();
-  }
-
-  @Override
-  public void onPause()
-  {
-    super.onPause();
-    final String firstName = trimmedString(getFirstName());
-    final String lastName = trimmedString(getLastName());
-    final EditProfileUser user = mEditProfileViewModel.getEditProfileUser().getValue();
-
-    if (!firstName.equals("") && user != null)
-      user.set_firstName(upperCaseFirstLetter(firstName));
-
-    if (!lastName.equals("") && user != null)
-      user.set_lastName(upperCaseFirstLetter(lastName));
-
-    mEditProfileViewModel.setEditProfileUser(user);
-    mEditProfileViewModel.getEditProfileUser().removeObserver(userObserver());
+    lastname = mUtility.trimString(lastNameEditText.getText().toString());
+    return lastname;
   }
 
   @Override
   public void onResume()
   {
     super.onResume();
-    mEditProfileViewModel.getEditProfileUser().observe(this, userObserver());
+  }
+
+
+  @Override
+  public void onPause()
+  {
+    super.onPause();
+    mEditProfileViewModel.getEditProfileUser().removeObservers(this);
+    firstname = mUtility.trimString(getFirstName());
+    lastname = mUtility.trimString(getLastName());
+    // final EditProfileUser user = mEditProfileViewModel.getEditProfileUser().getValue();
+
+    if (!firstname.equals(""))
+      mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(mUtility.upperCaseFirstLetter(firstname));
+
+    if (!lastname.equals(""))
+      mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(mUtility.upperCaseFirstLetter(lastname));
   }
 
   @Override
@@ -254,25 +256,11 @@ public class EditProfileFragment extends Fragment
     outState.putBoolean(KEY_IN_PROGRESS, inProgress);
   }
 
+  /*============*
+   *   Utility  *
+   *============*/
   public void showToast(String message)
   {
     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
   }
-
-  public String trimmedString(String source)
-  {
-    return source.trim();
-  }
-
-  public String upperCaseFirstLetter(String source)
-  {
-    if (source == null || source.equals(""))
-      return "";
-
-    if (source.length() == 1)
-      return source.toUpperCase();
-
-    return source.substring(0, 1).toUpperCase() + source.substring(1);
-  }
-
 }

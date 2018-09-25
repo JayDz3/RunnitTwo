@@ -21,8 +21,8 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 
-import com.idesign.runnit.R;
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.R;
 
 public class HomeFragment extends Fragment
 {

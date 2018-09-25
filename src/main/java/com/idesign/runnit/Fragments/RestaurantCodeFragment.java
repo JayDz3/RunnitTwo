@@ -25,8 +25,9 @@ import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.FirestoreOrg;
 import com.idesign.runnit.Items.OrganizationObject;
-import com.idesign.runnit.R;
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.R;
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.OrganizationObjectViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 import com.idesign.runnit.VIewModels.UserViewModel;
@@ -35,6 +36,7 @@ public class RestaurantCodeFragment extends Fragment
 {
   private final BaseFirestore mFirestore = new BaseFirestore();
   private final MyAuth mAuth = new MyAuth();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private EditText editRestaurantCode;
   private EditText editRestaurantCodeTwo;
@@ -70,6 +72,8 @@ public class RestaurantCodeFragment extends Fragment
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
+    if (savedInstanceState == null)
+      mUtility.observeViewModel(this, mOrganizationObjectViewModel.getOrganizationObject(), organizationObjectObserver());
   }
 
 
@@ -82,20 +86,6 @@ public class RestaurantCodeFragment extends Fragment
     submitButton = view.findViewById(R.id.restaurant_code_submit_button);
     submitButton.setOnClickListener(l -> submit());
   }
-
-  /* private Observer<User> userObserver()
-  {
-    return user ->
-    {
-      if (user == null)
-        return;
-
-      final String code = user.get_organizationCode();
-      final String orgName = user.get_organizationName();
-      editRestaurantCode.setText(code);
-      editTextOrganizationName.setText(orgName);
-    };
-  } */
 
   private Observer<OrganizationObject> organizationObjectObserver()
   {
@@ -149,24 +139,24 @@ public class RestaurantCodeFragment extends Fragment
       showToast("you have not created an account...");
       return;
     }
-    if (isEmptyField(editRestaurantCode))
+    if (mUtility.isEmpty(editRestaurantCode))
       editRestaurantCode.setError("Field is required");
 
-    if (isEmptyField(editRestaurantCodeTwo))
+    if (mUtility.isEmpty(editRestaurantCodeTwo))
       editRestaurantCodeTwo.setError("Field is required");
 
-    if (isEmptyField(editTextOrganizationName))
+    if (mUtility.isEmpty(editTextOrganizationName))
       editTextOrganizationName.setError("Field is required");
 
-    if (isEmptyField(editRestaurantCode) || isEmptyField(editRestaurantCodeTwo) || isEmptyField(editTextOrganizationName))
+    if (mUtility.isEmpty(editRestaurantCode) || mUtility.isEmpty(editRestaurantCodeTwo) || mUtility.isEmpty(editTextOrganizationName))
     {
       showToast("Can not submit empty values");
       return;
     }
     final String uid = mAuth.user().getUid();
-    final String text = trimmedString(getCodeOne());
-    final String textTwo = trimmedString(getCodeTwo());
-    final String name = trimmedString(getOrganizationName());
+    final String text = mUtility.trimString(getCodeOne());
+    final String textTwo = mUtility.trimString(getCodeTwo());
+    final String name = mUtility.trimString(getOrganizationName());
     final DocumentReference documentReference = mFirestore.getUsers().document(uid);
 
     if (!text.equals(textTwo))
@@ -248,16 +238,10 @@ public class RestaurantCodeFragment extends Fragment
     submitButton.setEnabled(false);
   }
 
-  public boolean isEmptyField(EditText editText)
-  {
-    return TextUtils.isEmpty(editText.getText().toString());
-  }
-
   @Override
   public void onResume()
   {
     super.onResume();
-    mOrganizationObjectViewModel.getOrganizationObject().observe(this, organizationObjectObserver());
     final String userPushId = mUserViewModel.getPushId();
     if (userPushId != null)
     {
@@ -277,7 +261,7 @@ public class RestaurantCodeFragment extends Fragment
     mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgCodeTwo(codeTwo);
     mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgName(name);
 
-    mOrganizationObjectViewModel.getOrganizationObject().removeObserver(organizationObjectObserver());
+    mOrganizationObjectViewModel.getOrganizationObject().removeObservers(this);
     if (registration != null)
       registration.remove();
   }
@@ -304,12 +288,6 @@ public class RestaurantCodeFragment extends Fragment
   public void onSaveInstanceState(@NonNull Bundle outState)
   {
     super.onSaveInstanceState(outState);
-  }
-
-
-  public String trimmedString(String source)
-  {
-    return source.trim();
   }
 
   public void showToast(String message)

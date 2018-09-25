@@ -18,6 +18,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.idesign.runnit.Adapters.AllUsersAdapter;
 import com.idesign.runnit.Items.User;
 import com.idesign.runnit.R;
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.AllUsersViewModel;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ import java.util.List;
 public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapterListener
 {
   private AllUsersViewModel mUsersViewModel;
+  private final UtilityClass mUtility = new UtilityClass();
+
   private AllUsersFragmentListener mListener;
 
   private RecyclerView mRecyclerView;
@@ -64,6 +67,8 @@ public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapte
     super.onViewCreated(view, savedInstanceState);
     mRecyclerView = view.findViewById(R.id.all_users_fragment_recycler_view);
     setRecyclerView();
+    if (savedInstanceState == null)
+      mUtility.observeViewModel(this, mUsersViewModel.getUsers(), usersObserver());
   }
 
   public void setRecyclerView()
@@ -118,7 +123,6 @@ public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapte
   public void onResume()
   {
     super.onResume();
-    mUsersViewModel.getUsers().observe(this, usersObserver());
   }
 
   @Override

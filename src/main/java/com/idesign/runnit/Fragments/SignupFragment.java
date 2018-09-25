@@ -22,8 +22,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.idesign.runnit.Constants;
 import com.idesign.runnit.FirestoreTasks.BaseFirestore;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
-import com.idesign.runnit.R;
+
 import com.idesign.runnit.Items.User;
+import com.idesign.runnit.R;
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.PasswordViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 import com.idesign.runnit.VIewModels.UserViewModel;
@@ -34,6 +36,7 @@ public class SignupFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private SignupFragmentListener mListener;
 
@@ -75,6 +78,11 @@ public class SignupFragment extends Fragment
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
     progressBar.setVisibility(View.GONE);
+    if (savedInstanceState == null)
+    {
+      mUtility.observeViewModel(this, mPasswordViewModel.getPassword(), passwordObserver());
+      mUtility.observeViewModel(this, mUserViewModel.getUser(), getUserObserver());
+    }
   }
 
   public void setViewItems(View view)
@@ -120,10 +128,10 @@ public class SignupFragment extends Fragment
       && Patterns.EMAIL_ADDRESS.matcher(editEmail.getText()).matches()
       && fieldNotEmpty(editPassword))
     {
-      final String trimmedFirstname = trimmedString(editFirstName.getText().toString());
-      final String trimmedLastname = trimmedString(editLastName.getText().toString());
-      final String trimmedEmail = trimmedString(editEmail.getText().toString());
-      final String trimmedPassword = trimmedString(editPassword.getText().toString());
+      final String trimmedFirstname = mUtility.trimString(editFirstName.getText().toString());
+      final String trimmedLastname = mUtility.trimString(editLastName.getText().toString());
+      final String trimmedEmail = mUtility.trimString(editEmail.getText().toString());
+      final String trimmedPassword = mUtility.trimString(editPassword.getText().toString());
 
       setUserViewModelFirstName(trimmedFirstname);
       setUserViewModelLastName(trimmedLastname);
@@ -144,7 +152,7 @@ public class SignupFragment extends Fragment
     final String pw = mPasswordViewModel.getPassword().getValue();
     final String firstname = mUserViewModel.getFirstName();
     final String lastname = mUserViewModel.getLastName();
-    final String lowercaseEmail = lowercaseString(email);
+    final String lowercaseEmail = mUtility.lowercaseString(email);
 
     mAuth.createUser(lowercaseEmail, pw)
     .onSuccessTask(firebaseUser ->  setFirestoreUser(firstname, lastname))
@@ -242,25 +250,23 @@ public class SignupFragment extends Fragment
   public void onResume()
   {
     super.onResume();
-    mPasswordViewModel.getPassword().observe(this, passwordObserver());
-    mUserViewModel.getUser().observe(this, getUserObserver());
   }
 
   @Override
   public void onPause()
   {
     super.onPause();
-    final String trimmedFirstname = trimmedString(editFirstName.getText().toString());
-    final String trimmedLastname = trimmedString(editLastName.getText().toString());
-    final String trimmedEmail = trimmedString(editEmail.getText().toString());
-    final String trimmedPassword = trimmedString(editPassword.getText().toString());
+    final String trimmedFirstname = mUtility.trimString(editFirstName.getText().toString());
+    final String trimmedLastname = mUtility.trimString(editLastName.getText().toString());
+    final String trimmedEmail = mUtility.trimString(editEmail.getText().toString());
+    final String trimmedPassword = mUtility.trimString(editPassword.getText().toString());
 
     setUserViewModelFirstName(trimmedFirstname);
     setUserViewModelLastName(trimmedLastname);
     setUserViewModelEmail(trimmedEmail);
     setPasswordViewModelValue(trimmedPassword);
-    mUserViewModel.getUser().removeObserver(getUserObserver());
-    mPasswordViewModel.getPassword().removeObserver(passwordObserver());
+    mUserViewModel.getUser().removeObservers(this);
+    mPasswordViewModel.getPassword().removeObservers(this);
   }
 
 
@@ -286,16 +292,6 @@ public class SignupFragment extends Fragment
   {
     super.onDetach();
     mListener = null;
-  }
-
-  public String trimmedString(String source)
-  {
-    return source.trim();
-  }
-
-  public String lowercaseString(String source)
-  {
-    return source.toLowerCase();
   }
 
   public void showToast(String message)

@@ -20,6 +20,7 @@ public class AdminActivity extends AppCompatActivity
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private final String EXTRA_ORG_NAME = "org.name";
   private final String EXTRA_ORG_CODE = "org.code";
@@ -67,8 +68,8 @@ public class AdminActivity extends AppCompatActivity
     final String _orgName = orgName.getText().toString();
     final String _orgCode = orgCode.getText().toString();
 
-    final String trimmedName = trimmedString(_orgName);
-    final String trimmedCode = trimmedString(_orgCode);
+    final String trimmedName = mUtility.trimString(_orgName);
+    final String trimmedCode = mUtility.trimString(_orgCode);
 
     final FirestoreOrg org = new FirestoreOrg(_pushid, trimmedName, trimmedCode);
 
@@ -117,12 +118,12 @@ public class AdminActivity extends AppCompatActivity
 
   public boolean isValidName()
   {
-    return !TextUtils.isEmpty(orgName.getText());
+    return !mUtility.isEmpty(orgName);
   }
 
   public boolean isValidCode()
   {
-    return !TextUtils.isEmpty(orgCode.getText().toString()) && orgCode.getText().toString().length() > 5;
+    return !mUtility.isEmpty(orgCode) && orgCode.getText().toString().length() > 5;
   }
 
   @Override
@@ -153,8 +154,8 @@ public class AdminActivity extends AppCompatActivity
   public void onSaveInstanceState(Bundle outState)
   {
     super.onSaveInstanceState(outState);
-    final String trimmedName = trimmedString(orgName.getText().toString());
-    final String trimmedCode = trimmedString(orgCode.getText().toString());
+    final String trimmedName = mUtility.trimString(orgName.getText().toString());
+    final String trimmedCode = mUtility.trimString(orgCode.getText().toString());
     outState.putString(EXTRA_ORG_NAME, trimmedCode);
     outState.putString(EXTRA_ORG_NAME, trimmedName);
   }
@@ -166,11 +167,6 @@ public class AdminActivity extends AppCompatActivity
       orgName.setText(EXTRA_ORG_NAME);
       orgCode.setText(EXTRA_ORG_CODE);
     }
-  }
-
-  public String trimmedString(String source)
-  {
-    return source.trim();
   }
 
   void showToast(CharSequence message)

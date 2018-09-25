@@ -45,6 +45,7 @@ public class ChannelActivity extends AppCompatActivity implements
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private RecyclerView mRecyclerView;
   private EditText customMessageEditText;
@@ -123,7 +124,7 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public String getMessage()
   {
-    if (TextUtils.isEmpty(customMessageEditText.getText())) {
+    if (mUtility.isEmpty(customMessageEditText)) {
       return "";
 
     } else {
@@ -133,7 +134,7 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void setMessage()
   {
-    final String message = getMessage();
+    final String message = mUtility.trimString(getMessage());
     mAdapter.setMessage(message);
   }
 
@@ -263,8 +264,8 @@ public class ChannelActivity extends AppCompatActivity implements
      */
     disableButton();
     final String orgPushid = mAppUserViewModel.getmUser().getValue().get_organizationPushId();
-    final String upperCaseName = upperCaseFirstLetter(name);
-    final String trimmed = upperCaseName.trim();
+    final String trimmed = mUtility.trimString(name);
+    final String upperCaseName = mUtility.upperCaseFirstLetter(trimmed);
 
     mFirestore.getOrgSnapshotTask(orgPushid)
     .onSuccessTask(orgSnapshot ->
@@ -375,8 +376,8 @@ public class ChannelActivity extends AppCompatActivity implements
   @Override
   public void onConfirm(int which, String name)
   {
-    if (name != null && !TextUtils.isEmpty(name)) {
-      final String trimmed = trimmedString(name);
+    if (name != null && !mUtility.isEmpty(name)) {
+      final String trimmed = mUtility.trimString(name);
       addNewChannel(trimmed);
 
     } else {
@@ -414,8 +415,8 @@ public class ChannelActivity extends AppCompatActivity implements
   public void onResume()
   {
     super.onResume();
-    mAdminChannelViewModel.getChannels().observe(this, observer());
-    mAppUserViewModel.getmUser().observe(this, userObserver());
+    mUtility.observeViewModel(this, mAdminChannelViewModel.getChannels(), observer());
+    mUtility.observeViewModel(this, mAppUserViewModel.getmUser(), userObserver());
     setListener();
     observeChannels();
   }
@@ -443,16 +444,6 @@ public class ChannelActivity extends AppCompatActivity implements
         customMessageEditText.setText("");
       }
     }
-  }
-
-  public String trimmedString(String source)
-  {
-    return source.trim();
-  }
-
-  public String upperCaseFirstLetter(String source)
-  {
-    return source.substring(0, 1).toUpperCase() + source.substring(1);
   }
 
   public void showToast(CharSequence message)

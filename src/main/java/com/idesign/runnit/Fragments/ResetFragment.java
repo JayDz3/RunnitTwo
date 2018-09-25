@@ -21,12 +21,15 @@ import com.idesign.runnit.Constants;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.LoginData;
 import com.idesign.runnit.R;
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.LoginDataViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 
 public class ResetFragment extends Fragment
 {
   private final MyAuth mAuth = new MyAuth();
+  private final UtilityClass mUtility = new UtilityClass();
+
   private LoginDataViewModel mLoginViewModel;
   private StateViewModel mStateViewModel;
 
@@ -54,6 +57,8 @@ public class ResetFragment extends Fragment
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
+    if (savedInstanceState == null)
+      mUtility.observeViewModel(this, mLoginViewModel.getLoginData(), loginDataObserver());
   }
 
   public void setViewItems(View view)
@@ -74,7 +79,8 @@ public class ResetFragment extends Fragment
 
   public void setViewModelEmail()
   {
-    mLoginViewModel.setResetEmail(emailEditView.getText().toString());
+    final String trimmed = mUtility.trimString(emailEditView.getText().toString());
+    mLoginViewModel.setResetEmail(trimmed);
   }
 
   public void submit()
@@ -82,7 +88,7 @@ public class ResetFragment extends Fragment
     setViewModelEmail();
     if (isValidEmail())
     {
-      final String email = emailEditView.getText().toString();
+      final String email = mUtility.trimString(emailEditView.getText().toString());
       mAuth.sendResetPassword(email)
       .addOnSuccessListener(l ->
       {
@@ -97,7 +103,7 @@ public class ResetFragment extends Fragment
 
   public boolean isValidEmail()
   {
-    return !TextUtils.isEmpty(emailEditView.getText()) && Patterns.EMAIL_ADDRESS.matcher(emailEditView.getText()).matches();
+    return !mUtility.isEmpty(emailEditView) && Patterns.EMAIL_ADDRESS.matcher(emailEditView.getText()).matches();
   }
 
   @Override
@@ -110,15 +116,14 @@ public class ResetFragment extends Fragment
   public void onPause()
   {
     super.onPause();
-    mLoginViewModel.setResetEmail(emailEditView.getText().toString());
-    mLoginViewModel.getLoginData().removeObserver(loginDataObserver());
+    setViewModelEmail();
+    mLoginViewModel.getLoginData().removeObservers(this);
   }
 
   @Override
   public void onResume()
   {
     super.onResume();
-    mLoginViewModel.getLoginData().observe(this, loginDataObserver());
   }
 
   @Override

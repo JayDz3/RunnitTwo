@@ -44,6 +44,7 @@ public class UserChannelActivity extends AppCompatActivity
   private ProgressBar progressBar;
 
   private TextView noChannelView;
+  private final UtilityClass mUtilityClass = new UtilityClass();
 
 
   @Override
@@ -182,7 +183,6 @@ public class UserChannelActivity extends AppCompatActivity
     }
   }
 
-
   @Override
   public void onStart()
   {
@@ -193,9 +193,10 @@ public class UserChannelActivity extends AppCompatActivity
   public void onResume()
   {
     super.onResume();
-    mAdminChannelViewModel.getChannels().observe(this, observer());
-    mUserChannelsViewModel.getChannels().observe(this, userChannelObserver());
-    mAppUserViewModel.getmUser().observe(this, userObserver());
+    mUtilityClass.observeViewModel(this, mAppUserViewModel.getmUser(), userObserver());
+    mUtilityClass.observeViewModel(this, mAdminChannelViewModel.getChannels(), observer());
+    mUtilityClass.observeViewModel(this, mUserChannelsViewModel.getChannels(), userChannelObserver());
+
     setListener();
   }
 

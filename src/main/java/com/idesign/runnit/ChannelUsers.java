@@ -32,6 +32,7 @@ import java.util.List;
 public class ChannelUsers extends AppCompatActivity implements SubscribedUserAdapter.SubscribedUserAdapterListener
 {
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private TextView groupName;
   private TextView noUsers;
@@ -195,7 +196,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   public String getMessage()
   {
-    if (TextUtils.isEmpty(customMessageUsers.getText())) {
+    if (mUtility.isEmpty(customMessageUsers)) {
       return "";
 
     } else {
@@ -210,7 +211,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   public void setMessage()
   {
-    final String message = getMessage();
+    final String message = mUtility.trimString(getMessage());
     mAdapter.setUserMessage(message);
   }
 
@@ -244,7 +245,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
   public void onResume()
   {
     super.onResume();
-    mSubscribedUsersViewModel.getUsers().observe(this, usersObserver());
+    mUtility.observeViewModel(this, mSubscribedUsersViewModel.getUsers(), usersObserver());
     setUsersListener(_orgPushId, _channelId);
   }
 

@@ -1,7 +1,5 @@
 package com.idesign.runnit.Items;
 
-import android.widget.ProgressBar;
-
 public class EditProfileUser {
   private String _firstName;
   private String _lastName;

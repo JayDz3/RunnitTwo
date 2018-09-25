@@ -30,7 +30,7 @@ public class BaseFirestore
   private final String LOGGED_IN = "_loggedIn";
   private final String LAST_SENT = "_lastSent";
   private final String INSTANCE_ID = "_instanceId";
-  private final String ORG_NAME_USER = "_orgName";
+  private final String ORG_NAME_USER = "_organizationName";
   private final String ORG_NAME_ORG = "orgName";
 
   private final String COLLECTION_CHANNELS = "Channels";

@@ -23,12 +23,14 @@ import com.idesign.runnit.Constants;
 import com.idesign.runnit.FirestoreTasks.MyAuth;
 import com.idesign.runnit.Items.LoginData;
 import com.idesign.runnit.R;
+import com.idesign.runnit.UtilityClass;
 import com.idesign.runnit.VIewModels.LoginDataViewModel;
 import com.idesign.runnit.VIewModels.StateViewModel;
 
 public class MainLoginFragment extends Fragment {
 
   private final MyAuth mAuth = new MyAuth();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private LoginDataViewModel mLoginViewModel;
   private StateViewModel mStateViewModel;
@@ -73,16 +75,18 @@ public class MainLoginFragment extends Fragment {
     return rootView;
   }
 
-  public void hideKeyBoard()
-  {
-    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-    inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
-  }
-
   @Override
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
   {
     super.onViewCreated(view, savedInstanceState);
+    if (savedInstanceState == null)
+      mUtility.observeViewModel(this, mLoginViewModel.getLoginData(), loginDataObserver());
+  }
+
+  public void hideKeyBoard()
+  {
+    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+    inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
   }
 
   private Observer<LoginData> loginDataObserver()
@@ -114,9 +118,9 @@ public class MainLoginFragment extends Fragment {
 
   public void submit()
   {
-    final String email = trimmedString(emailEditText.getText().toString());
-    final String password = trimmedString(passwordEditText.getText().toString());
-    final String lowercaseEmail = lowercaseString(email);
+    final String email = mUtility.trimString(emailEditText.getText().toString());
+    final String password = mUtility.trimString(passwordEditText.getText().toString());
+    final String lowercaseEmail = mUtility.lowercaseString(email);
 
     if (isEmpty(emailEditText))
       emailEditText.setError("Email required");
@@ -205,30 +209,19 @@ public class MainLoginFragment extends Fragment {
   public void onResume()
   {
     super.onResume();
-    mLoginViewModel.getLoginData().observe(this, loginDataObserver());
   }
 
   @Override
   public void onPause()
   {
     super.onPause();
-    final String email = trimmedString(getEmail());
-    final String password = trimmedString(getPassword());
-    final String lowercaseEmail = lowercaseString(email);
+    final String email = mUtility.trimString(getEmail());
+    final String password = mUtility.trimString(getPassword());
+    final String lowercaseEmail = mUtility.lowercaseString(email);
 
     mLoginViewModel.setLoginEmail(lowercaseEmail);
     mLoginViewModel.setPassword(password);
-    mLoginViewModel.getLoginData().removeObserver(loginDataObserver());
-  }
-
-  public String trimmedString(String source)
-  {
-    return source.trim();
-  }
-
-  public String lowercaseString(String source)
-  {
-    return source.toLowerCase();
+    mLoginViewModel.getLoginData().removeObservers(this);
   }
 
   @Override

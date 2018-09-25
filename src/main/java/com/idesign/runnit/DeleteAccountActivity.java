@@ -5,7 +5,7 @@ import android.os.Build;
 import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +29,7 @@ public class DeleteAccountActivity extends AppCompatActivity
 {
   private final MyAuth mAuth = new MyAuth();
   private final BaseFirestore mFirestore = new BaseFirestore();
+  private final UtilityClass mUtility = new UtilityClass();
 
   private EditText fieldOne;
   private EditText fieldTwo;
@@ -59,7 +60,7 @@ public class DeleteAccountActivity extends AppCompatActivity
 
   public void submit()
   {
-    if (isEmptyField(fieldOne) || isEmptyField(fieldTwo))
+    if (mUtility.isEmpty(fieldOne) || mUtility.isEmpty(fieldTwo))
     {
       showToast("Can not submit empty fields");
       return;
@@ -171,11 +172,6 @@ public class DeleteAccountActivity extends AppCompatActivity
   public String getFieldTwo()
   {
     return fieldTwo.getText().toString();
-  }
-
-  public boolean isEmptyField(EditText editText)
-  {
-    return TextUtils.isEmpty(editText.getText());
   }
 
   @Override

@@ -116,7 +116,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       final long sentTime = sentAt.toDate().getTime();
       final String timeString = getMinutes(sentTime);
       viewHolder.channelTimeView.setText(timeString);
-      // doSubscribe(sentTime, viewHolder);
     }
 
     viewHolder.channelNameView.setText(channel.get_channelId());
@@ -135,17 +134,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.AdminCha
       enableButtons(viewHolder);
     }
   }
-
-  /* public void doSubscribe(final long sentTime, AdminChannelViewHolder viewHolder)
-  {
-    Disposable disposable = Observable.interval(0, 1, TimeUnit.MINUTES)
-    .takeUntil(doDestroy)
-    .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(r -> {
-      final String timeString = getMinutes(sentTime);
-      viewHolder.channelTimeView.setText(timeString);
-    });
-  } */
 
   private String getMinutes(final long then)
   {
