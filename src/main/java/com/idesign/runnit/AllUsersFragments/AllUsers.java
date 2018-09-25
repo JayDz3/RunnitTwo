@@ -26,13 +26,11 @@ import java.util.List;
 
 public class AllUsers extends Fragment implements AllUsersAdapter.AllUsersAdapterListener
 {
-  private AllUsersViewModel mUsersViewModel;
   private final UtilityClass mUtility = new UtilityClass();
 
   private AllUsersFragmentListener mListener;
-
+  private AllUsersViewModel mUsersViewModel;
   private RecyclerView mRecyclerView;
-
   private AllUsersAdapter mAdapter;
 
   private final String ORG_PUSHID = "org_pushid";

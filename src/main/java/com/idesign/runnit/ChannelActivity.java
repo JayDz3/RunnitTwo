@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 
 import android.view.View;
 import android.widget.EditText;
@@ -111,7 +110,6 @@ public class ChannelActivity extends AppCompatActivity implements
     customMessageEditText = findViewById(R.id.channel_activity_admin_custom_message);
     leaveBlankText = findViewById(R.id.channel_activity_admin_leave_blank);
     leaveBlankText.setOnClickListener(l -> clearMessage());
-
     customMessageEditText.setVisibility(View.GONE);
     leaveBlankText.setVisibility(View.GONE);
   }
@@ -134,7 +132,7 @@ public class ChannelActivity extends AppCompatActivity implements
 
   public void setMessage()
   {
-    final String message = mUtility.trimString(getMessage());
+    final String message = getMessage();
     mAdapter.setMessage(message);
   }
 
@@ -402,7 +400,6 @@ public class ChannelActivity extends AppCompatActivity implements
   {
     super.onPause();
     removeListener();
-
     if (disposable != null && !disposable.isDisposed())
       disposable.dispose();
 

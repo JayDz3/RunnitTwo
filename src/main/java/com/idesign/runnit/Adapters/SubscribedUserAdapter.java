@@ -69,7 +69,7 @@ public class SubscribedUserAdapter extends RecyclerView.Adapter<SubscribedUserAd
 
   public void setUserMessage(String message)
   {
-    this.message = message;
+    this.message = message.trim();
   }
 
   @Override

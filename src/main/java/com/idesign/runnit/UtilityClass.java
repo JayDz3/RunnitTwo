@@ -14,7 +14,8 @@ import com.idesign.runnit.VIewModels.EditProfileViewModel;
 
 import java.util.Objects;
 
-public class UtilityClass {
+public class UtilityClass
+{
 
   public UtilityClass() {}
 

@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -211,7 +211,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
 
   public void setMessage()
   {
-    final String message = mUtility.trimString(getMessage());
+    final String message = getMessage();
     mAdapter.setUserMessage(message);
   }
 
@@ -226,6 +226,7 @@ public class ChannelUsers extends AppCompatActivity implements SubscribedUserAda
     {
       final String message = savedInstanceState.getString(EXTRA_MESSAGE);
       customMessageUsers.setText(message);
+
     }
   }
 
