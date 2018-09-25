@@ -144,6 +144,7 @@ public class UserChannelAdapter extends RecyclerView.Adapter<UserChannelAdapter.
     .addOnSuccessListener(t ->
     {
       final boolean isChecked = viewHolder.radioButton.isChecked();
+
       if (isChecked) {
         showToast("Subscribed to channel");
 

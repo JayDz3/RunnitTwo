@@ -160,9 +160,9 @@ CancelChangesDialog.CancelChangesListener
     mOrgViewModel = ViewModelProviders.of(this).get(OrganizationObjectViewModel.class);
   }
 
-  /*
-   *  Only occurs onCreate
-   */
+  /*========================*
+   *  Only occurs onCreate  *
+   *========================*/
   public void toggleViewOnStart()
   {
     switch (appState)
@@ -192,7 +192,11 @@ CancelChangesDialog.CancelChangesListener
         mUtility.logMessage("nada");
     }
   }
+  // End on Create //
 
+  /*========================*
+   *  NAVIGATION LISTENERS  *
+   *========================*/
   @Override
   public boolean onOptionsItemSelected(MenuItem item)
   {
@@ -205,6 +209,18 @@ CancelChangesDialog.CancelChangesListener
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
     return super.onOptionsItemSelected(item);
+  }
+
+  // Listener for navigation drawer on item selected //
+  public void addNavListener()
+  {
+    navigationView.setNavigationItemSelectedListener(item ->
+    {
+      item.setChecked(true);
+      selection = item.toString();
+      mDrawerLayout.closeDrawers();
+      return true;
+    });
   }
 
   public void addDrawerListener()
@@ -254,18 +270,11 @@ CancelChangesDialog.CancelChangesListener
       public void onDrawerStateChanged(int newState) { }
     });
   }
+  // End Navigation Listeners //
 
-  public void goDeleteAccount()
-  {
-    Intent intent = new Intent(this, DeleteAccountActivity.class);
-    startActivity(intent);
-  }
-
-  /*
-   *  LOGIN / LOGOUT
-   *
-   *  @ Other nav actions
-   */
+  /*==================*
+   *  LOGIN / LOGOUT  *
+   *==================*/
   public void logout()
   {
     if (mAuth.user() != null)
@@ -314,6 +323,15 @@ CancelChangesDialog.CancelChangesListener
     PackageManager packageManager = this.getPackageManager();
     packageManager.setComponentEnabledSetting(notificationService, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     packageManager.setComponentEnabledSetting(notificationReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+  }
+
+  /*==========================*
+   *  Go To Other Activities  *
+   *==========================*/
+  public void goDeleteAccount()
+  {
+    Intent intent = new Intent(this, DeleteAccountActivity.class);
+    startActivity(intent);
   }
 
   public void goCreateAdmin()
@@ -366,24 +384,11 @@ CancelChangesDialog.CancelChangesListener
       startActivity(intent);
     }
   }
-
   // END NAV ACTIONS //
 
-  // Listener for navigation drawer on item selected
-  public void addNavListener()
-  {
-    navigationView.setNavigationItemSelectedListener(item ->
-    {
-      item.setChecked(true);
-      selection = item.toString();
-      mDrawerLayout.closeDrawers();
-      return true;
-    });
-  }
-
-  /*
-   *   ACTION BAR
-   */
+  /*===============*
+   *   ACTION BAR  *
+   *===============*/
   public void setActionBar()
   {
     setSupportActionBar(toolbar);
@@ -578,12 +583,11 @@ CancelChangesDialog.CancelChangesListener
     dialogOpen = true;
     this.destination = destination;
   }
-
   // End Override Cancel Changes Dialog //
 
-  /*
-   *  Set state emitter
-   */
+  /*=====================*
+   *  Set state emitter  *
+   *=====================*/
   public void setState(int state)
   {
     mStateViewModel.setFragmentState(state);
@@ -810,17 +814,8 @@ CancelChangesDialog.CancelChangesListener
       toggleOrgIsSet(user);
     });
   }
-  // END LISTENERS //
 
-  public void removeAuthListener()
-  {
-    if (mAuth.doesHaveListener())
-    {
-      mAuth.removeAuthListener(authStateListener);
-      mAuth.setHasListener(false);
-    }
-  }
-
+   // Check User Info on UserListener //
   public void toggleOrgIsSet(User user)
   {
     if (user.get_organizationPushId() == null || user.get_organizationPushId().equals("")) {
@@ -871,6 +866,19 @@ CancelChangesDialog.CancelChangesListener
     }
   }
 
+  public void removeAuthListener()
+  {
+    if (mAuth.doesHaveListener())
+    {
+      mAuth.removeAuthListener(authStateListener);
+      mAuth.setHasListener(false);
+    }
+  }
+  // END LISTENERS //
+
+  /*=======================*
+   *  TOP LEVEL LISTENERS  *
+   *=======================*/
   @Override
   public void onStart()
   {
@@ -971,6 +979,7 @@ CancelChangesDialog.CancelChangesListener
       showToast("uncaught state: " + appState);
     }
   }
+  // End Top Level Overrides //
 
   /*==============*
    *    Utility   *

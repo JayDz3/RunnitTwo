@@ -152,6 +152,7 @@ public class RestaurantCodeFragment extends Fragment
       showToast("Can not submit empty values");
       return;
     }
+
     final String uid = mAuth.user().getUid();
     final String text = mUtility.trimString(getCodeOne());
     final String textTwo = mUtility.trimString(getCodeTwo());

@@ -207,7 +207,7 @@ public class EditCredentialsFragment extends Fragment
 
   public void updateProfile()
   {
-    final String firstname = mUtility.trimString(mEditProfileViewModel.getEditProfileUser().getValue().get_firstName());
+    final String firstname = mUtility.trimString(Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_firstName());
     final String lastname = mUtility.trimString(mEditProfileViewModel.getEditProfileUser().getValue().get_lastName());
     final String oldEmail = mUtility.trimString(getCurrentEmail());
     final String newEmail = mUtility.trimString(getNewEmail());

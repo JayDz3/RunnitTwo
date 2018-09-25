@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 
-import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -113,26 +112,15 @@ public class SignupFragment extends Fragment
     };
   }
 
-  public boolean fieldNotEmpty(EditText editText)
-  {
-    return !TextUtils.isEmpty(editText.getText());
-  }
-
   public void submit()
   {
     disableButtons();
 
-    if (fieldNotEmpty(editFirstName)
-      && fieldNotEmpty(editLastName)
-      && fieldNotEmpty(editEmail)
-      && Patterns.EMAIL_ADDRESS.matcher(editEmail.getText()).matches()
-      && fieldNotEmpty(editPassword))
-    {
+    if (fieldsAreValid()) {
       final String trimmedFirstname = mUtility.trimString(editFirstName.getText().toString());
       final String trimmedLastname = mUtility.trimString(editLastName.getText().toString());
       final String trimmedEmail = mUtility.trimString(editEmail.getText().toString());
       final String trimmedPassword = mUtility.trimString(editPassword.getText().toString());
-
       setUserViewModelFirstName(trimmedFirstname);
       setUserViewModelLastName(trimmedLastname);
       setUserViewModelEmail(trimmedEmail);
@@ -142,6 +130,13 @@ public class SignupFragment extends Fragment
     } else {
       enableButtons();
     }
+  }
+
+  public boolean fieldsAreValid()
+  {
+    return !mUtility.isEmpty(editFirstName) && !mUtility.isEmpty(editLastName)
+    && !mUtility.isEmpty(editEmail) && Patterns.EMAIL_ADDRESS.matcher(editEmail.getText()).matches()
+    && !mUtility.isEmpty(editPassword);
   }
 
   public void createUser()
@@ -169,10 +164,10 @@ public class SignupFragment extends Fragment
       enableButtons();
     });
   }
-  /*
-   Set user in Cloud Firestore
-   */
-  // follow up task 4
+
+  /*===============================*
+   *  Set user in Cloud Firestore  *
+   *===============================*/
   private Task<Void> setFirestoreUser(String firstname, String lastname)
   {
     final String pushid = mAuth.user().getUid();

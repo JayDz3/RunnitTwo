@@ -91,7 +91,8 @@ public class MainLoginFragment extends Fragment {
 
   private Observer<LoginData> loginDataObserver()
   {
-    return loginData -> {
+    return loginData ->
+    {
       if (loginData == null)
         return;
 

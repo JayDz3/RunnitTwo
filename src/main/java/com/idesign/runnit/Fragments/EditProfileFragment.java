@@ -240,7 +240,6 @@ public class EditProfileFragment extends Fragment
     mEditProfileViewModel.getEditProfileUser().removeObservers(this);
     firstname = mUtility.trimString(getFirstName());
     lastname = mUtility.trimString(getLastName());
-    // final EditProfileUser user = mEditProfileViewModel.getEditProfileUser().getValue();
 
     if (!firstname.equals(""))
       mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(mUtility.upperCaseFirstLetter(firstname));

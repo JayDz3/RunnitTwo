@@ -3,19 +3,12 @@ package com.idesign.runnit;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.EditText;
 
 import com.idesign.runnit.Fragments.EditCredentialsFragment;
 import com.idesign.runnit.Fragments.EditProfileFragment;
-import com.idesign.runnit.Fragments.HomeFragment;
-import com.idesign.runnit.Fragments.MainLoginFragment;
-import com.idesign.runnit.Fragments.ResetFragment;
-import com.idesign.runnit.Fragments.RestaurantCodeFragment;
-import com.idesign.runnit.Fragments.SignupFragment;
 import com.idesign.runnit.VIewModels.AppUserViewModel;
 import com.idesign.runnit.VIewModels.EditProfileViewModel;
 
