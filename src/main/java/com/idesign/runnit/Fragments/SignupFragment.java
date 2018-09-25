@@ -256,6 +256,9 @@ public class SignupFragment extends Fragment
   public void onPause()
   {
     super.onPause();
+    mUserViewModel.getUser().removeObservers(this);
+    mPasswordViewModel.getPassword().removeObservers(this);
+
     final String trimmedFirstname = mUtility.trimString(editFirstName.getText().toString());
     final String trimmedLastname = mUtility.trimString(editLastName.getText().toString());
     final String trimmedEmail = mUtility.trimString(editEmail.getText().toString());
@@ -265,8 +268,6 @@ public class SignupFragment extends Fragment
     setUserViewModelLastName(trimmedLastname);
     setUserViewModelEmail(trimmedEmail);
     setPasswordViewModelValue(trimmedPassword);
-    mUserViewModel.getUser().removeObservers(this);
-    mPasswordViewModel.getPassword().removeObservers(this);
   }
 
 
@@ -302,9 +303,4 @@ public class SignupFragment extends Fragment
   public interface SignupFragmentListener {
     void toast(String message);
   }
-
-  /* public void logMessage(String message)
-  {
-    Log.d("SIGNUP FRAGMENT", "MESSAGE: " + message);
-  } */
 }

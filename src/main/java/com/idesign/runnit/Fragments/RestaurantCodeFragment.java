@@ -6,7 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -254,6 +254,7 @@ public class RestaurantCodeFragment extends Fragment
   public void onPause()
   {
     super.onPause();
+    mOrganizationObjectViewModel.getOrganizationObject().removeObservers(this);
     final String codeOne = getCodeOne();
     final String codeTwo = getCodeTwo();
     final String name = getOrganizationName();
@@ -261,7 +262,6 @@ public class RestaurantCodeFragment extends Fragment
     mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgCodeTwo(codeTwo);
     mOrganizationObjectViewModel.getOrganizationObject().getValue().set_orgName(name);
 
-    mOrganizationObjectViewModel.getOrganizationObject().removeObservers(this);
     if (registration != null)
       registration.remove();
   }

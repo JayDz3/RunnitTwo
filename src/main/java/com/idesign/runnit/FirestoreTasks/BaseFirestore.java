@@ -15,6 +15,7 @@ import com.idesign.runnit.Items.ActiveUser;
 import com.idesign.runnit.Items.FirestoreChannel;
 import com.idesign.runnit.Items.FirestoreOrg;
 import com.idesign.runnit.Items.SubscribedUser;
+import com.idesign.runnit.Items.User;
 import com.idesign.runnit.Items.UserChannel;
 import com.idesign.runnit.VIewModels.UserChannelsViewModel;
 
@@ -346,6 +347,51 @@ public class BaseFirestore
       return userChannelsReference.get();
     }
   }
+
+  public Task<QuerySnapshot> doGetAdminChannelReference(DocumentSnapshot userSnapshot)
+  {
+    final User user = toFirestoreObject(userSnapshot, User.class);
+    final String orgPushid = user.get_organizationPushId();
+
+    if (orgPushid.equals(""))
+      throw new RuntimeException("Please set your organization code");
+
+    return getAdminChannelsReference(orgPushid).get();
+  }
+
+  /*  MAIN ACTIVITY AUTHSTATE LISTENER TASKS
+   *
+   *  Update info on user login / authListener
+   *
+   *  @param channelsSnapshot : All channels belonging to organization
+   *
+   *  @param channels : Empty list of channels populated here. Then added to userChannelsViewModel
+   *
+   *  @param uid : user uid
+   */
+  public Task<DocumentSnapshot> subscribeUserToChannels(QuerySnapshot channelsSnapshot, List<FirestoreChannel> channels, String uid)
+  {
+    if (channelsSnapshot == null)
+      throw new RuntimeException("no channels");
+
+
+    Task<DocumentSnapshot> task = Tasks.forResult(null);
+    for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
+    {
+      final DocumentReference subscribedUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
+      task = task.continueWithTask(ignore -> subscribedUserRef.get().addOnSuccessListener(documentSnapshot ->
+      {
+        if (documentSnapshot.exists())
+        {
+          final FirestoreChannel channel = toFirestoreObject(ds, FirestoreChannel.class);
+          channels.add(channel);
+          updateSubscribedUserTask(subscribedUserRef, true);
+        }
+      }));
+    }
+    return task;
+  }
+  // End Main Activity Auth State Listener Actions //
 
   /*
    * In Delete Account Activity and All Users Adapter

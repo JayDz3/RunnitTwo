@@ -15,24 +15,20 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
 
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -76,7 +72,6 @@ CancelChangesDialog.CancelChangesListener
   private final UtilityClass mUtility = new UtilityClass();
 
   // Layouts
- // private ConstraintLayout mainLayout;
   private NavigationView navigationView;
   private DrawerLayout mDrawerLayout;
 
@@ -118,12 +113,14 @@ CancelChangesDialog.CancelChangesListener
 
   private ProgressBar progressBar;
 
-  private final String COLLECTION_SUBSCRIBED_USERS = "SubscribedUsers";
-
   private final String ORG_PUSHID = "org_pushid";
   private final String USER_UID = "user_uid";
 
   private int destination = -1;
+  private final int GO_HOME_FRAGMENT = 0;
+  private final int GO_EDITPROFILE_FRAGMENT = 1;
+  private final int GO_EDITCREDENTIALS_FRAGMENT = 2;
+
   private final String EXTRA_DESTINATION = "destination";
 
   @Override
@@ -192,31 +189,8 @@ CancelChangesDialog.CancelChangesListener
         goEditCredentials();
         break;
       default:
-        logMessage("nada");
+        mUtility.logMessage("nada");
     }
-  }
-
-  public void setProfileUser()
-  {
-    final String firstname = Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName();
-    final String lastname = mAppUserViewModel.getmUser().getValue().get_lastName();
-
-    final String editFirstName = Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).get_firstName();
-    final String editLastName = mEditProfileViewModel.getEditProfileUser().getValue().get_lastName();
-
-    if (!editFirstName.equals("")) {
-      mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(editFirstName);
-    } else {
-      mEditProfileViewModel.getEditProfileUser().getValue().set_firstName(firstname);
-    }
-
-    if (!editLastName.equals("")) {
-      mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(editLastName);
-    } else {
-      mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(lastname);
-    }
-
-    mEditProfileViewModel.update();
   }
 
   @Override
@@ -481,7 +455,7 @@ CancelChangesDialog.CancelChangesListener
    *==============================================*/
   public void goEditProfile()
   {
-    if (destination == 1 || fragmentVisible(mEditProfileFragment) || dialogOpen)
+    if (destination == GO_EDITPROFILE_FRAGMENT || fragmentVisible(mEditProfileFragment) || dialogOpen)
       return;
 
     if (fragmentVisible(mEditCredentialsFragment) && credentialsChangedOnGoProfile())
@@ -489,13 +463,13 @@ CancelChangesDialog.CancelChangesListener
       showCancelChangesDialog(1);
       return;
     }
-    setProfileUser();
+    mUtility.updateUserProfileViewModel(mEditProfileViewModel, mAppUserViewModel);
     buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
   }
 
   public void goEditCredentials()
   {
-    if (destination == 2 || fragmentVisible(mEditCredentialsFragment) || dialogOpen)
+    if (destination == GO_EDITCREDENTIALS_FRAGMENT || fragmentVisible(mEditCredentialsFragment) || dialogOpen)
       return;
 
     if (fragmentVisible(mEditProfileFragment) && profileChangedOnGoCredentials())
@@ -504,7 +478,7 @@ CancelChangesDialog.CancelChangesListener
       showCancelChangesDialog(2);
       return;
     }
-    setProfileUser();
+    mUtility.updateUserProfileViewModel(mEditProfileViewModel, mAppUserViewModel);
     buildEditCredentialsFragment(Constants.STATE_EDIT_CREDENTIALS);
   }
 
@@ -513,66 +487,41 @@ CancelChangesDialog.CancelChangesListener
    *=============================================*/
   public boolean profileChangedOnGoCredentials()
   {
-    final String editedFirst = mUtility.trimString(mEditProfileFragment.getFirstName());
-    final String editedLast = mUtility.trimString(mEditProfileFragment.getLastName());
-    final String currentFirstName = mUtility.trimString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName());
-    final String currentLastName = mUtility.trimString(mAppUserViewModel.getmUser().getValue().get_lastName());
-    return !editedFirst.equals(currentFirstName) && !mUtility.isEmpty(editedFirst) || !editedLast.equals(currentLastName) && !mUtility.isEmpty(editedLast);
+    return mUtility.profileChangedOnGoCredentials(mEditProfileFragment, mAppUserViewModel);
   }
 
   public boolean profileChangedOnClick()
   {
-    final String editedFirst = mUtility.trimString(mEditProfileFragment.getFirstName());
-    final String editedLast = mUtility.trimString(mEditProfileFragment.getLastName());
-    final String currentFirstName = mUtility.trimString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName());
-    final String currentLastName = mUtility.trimString(mAppUserViewModel.getmUser().getValue().get_lastName());
-    return !editedFirst.equals(currentFirstName) || !editedLast.equals(currentLastName);
+    return mUtility.profileChangedOnClick(mEditProfileFragment, mAppUserViewModel);
   }
 
   public boolean credentialsChangedOnGoProfile()
   {
-    final String editEmail = mUtility.trimString(mEditCredentialsFragment.getNewEmail());
-    final String email = mUtility.trimString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_email());
-    final String currentEmail = mUtility.trimString(mEditCredentialsFragment.getCurrentEmail());
-    final String password = mEditCredentialsFragment.getPassword();
-    return !editEmail.equals("") && !editEmail.equalsIgnoreCase(email) || !mUtility.isEmpty(currentEmail) || !mUtility.isEmpty(password);
+    return mUtility.credentialsChangedOnGoProfile(mEditCredentialsFragment, mAppUserViewModel);
   }
 
   public boolean credentialsChangedOnToolbarClick()
   {
-    final String editCurrentEmail = mUtility.trimString(mEditCredentialsFragment.getCurrentEmail());
-    final String editEmail = mUtility.trimString(mEditCredentialsFragment.getNewEmail());
-    final String email = mUtility.trimString(Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_email());
-    final String password = mEditCredentialsFragment.getPassword().trim();
-    return !mUtility.isEmpty(editCurrentEmail) || !mUtility.isEmpty(editEmail) || !mUtility.isEmpty(password) || !mUtility.isEmpty(editCurrentEmail) && !editCurrentEmail.equalsIgnoreCase(email) || !mUtility.isEmpty(editEmail) && !editEmail.equals(email);
+    return mUtility.credentialsChangedOnToolbarClick(mEditCredentialsFragment, mAppUserViewModel);
   }
   // END CHECK PROFILE AND CREDENTIAL CHANGES
 
+  /*===============================================================*
+   *  Used when leaving EditProfile and EditCredentials Fragments  *
+   *===============================================================*/
   public void clearProfile()
   {
-    Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).set_firstName("");
-    mEditProfileViewModel.getEditProfileUser().getValue().set_lastName("");
-    mEditProfileViewModel.getEditProfileUser().getValue().set_email("");
-    mEditProfileViewModel.getEditProfileUser().getValue().set_newEmail("");
-    mEditProfileViewModel.getEditProfileUser().getValue().set_password("");
-    mEditProfileViewModel.update();
+    mUtility.clearProfile(mEditProfileViewModel);
   }
 
   public void clearCredentials()
   {
-    Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).set_email("");
-    mEditProfileViewModel.getEditProfileUser().getValue().set_newEmail("");
-    mEditProfileViewModel.getEditProfileUser().getValue().set_password("");
-    mEditProfileViewModel.update();
+    mUtility.clearCredentials(mEditProfileViewModel);
   }
 
   public void resetProfileName()
   {
-    final String firstname = Objects.requireNonNull(mAppUserViewModel.getmUser().getValue()).get_firstName();
-    final String lastname = mAppUserViewModel.getmUser().getValue().get_lastName();
-    Objects.requireNonNull(mEditProfileViewModel.getEditProfileUser().getValue()).set_firstName(firstname);
-    mEditProfileViewModel.getEditProfileUser().getValue().set_lastName(lastname);
-    mEditProfileViewModel.update();
+    mUtility.resetProfileName(mEditProfileViewModel, mAppUserViewModel);
   }
 
   /*=================================*
@@ -591,19 +540,19 @@ CancelChangesDialog.CancelChangesListener
   {
     switch (destination)
     {
-      case 0:
+      case GO_HOME_FRAGMENT:
         clearProfile();
         buildHomeFrag(Constants.STATE_HOME);
         setState(Constants.STATE_HOME);
         destination = -1;
         break;
-      case 1:
+      case GO_EDITPROFILE_FRAGMENT:
         clearCredentials();
         buildEditProfileFragment(Constants.STATE_EDIT_PROFILE);
         setState(Constants.STATE_EDIT_PROFILE);
         destination = -1;
         break;
-      case 2:
+      case GO_EDITCREDENTIALS_FRAGMENT:
         resetProfileName();
         buildEditCredentialsFragment(Constants.STATE_EDIT_CREDENTIALS);
         setState(Constants.STATE_EDIT_CREDENTIALS);
@@ -653,7 +602,7 @@ CancelChangesDialog.CancelChangesListener
       switch (stateEmitter.getFragmentState())
       {
         case Constants.STATE_HOME:
-          if (destination == 0 || fragmentVisible(mHomeFragment))
+          if (destination == GO_HOME_FRAGMENT || fragmentVisible(mHomeFragment))
             return;
           buildHomeFrag(Constants.STATE_HOME);
           break;
@@ -820,10 +769,10 @@ CancelChangesDialog.CancelChangesListener
         FirebaseInstanceId.getInstance().getInstanceId()
         .onSuccessTask(id ->  mFirestore.updateInstanceId(userRef, Objects.requireNonNull(id).getToken()))
         .continueWithTask(ignore -> userRef.get())
-        .onSuccessTask(snapshot -> doGetAdminChannelReference(snapshot))
-        .onSuccessTask(channelsSnapshot -> subscribeUserToChannels(channelsSnapshot, channels, uid))
+        .onSuccessTask(snapshot -> mFirestore.doGetAdminChannelReference(snapshot))
+        .onSuccessTask(channelsSnapshot -> mFirestore.subscribeUserToChannels(channelsSnapshot, channels, uid))
         .addOnSuccessListener(l -> mUserChannelViewModel.setChannels(channels))
-        .addOnFailureListener(e -> logMessage(e.getMessage()));
+        .addOnFailureListener(e -> mUtility.logMessage(e.getMessage()));
 
         mUserViewModel.clear();
         mPasswordViewModel.setPassword("");
@@ -862,50 +811,6 @@ CancelChangesDialog.CancelChangesListener
     });
   }
   // END LISTENERS //
-
-
-  public Task<QuerySnapshot> doGetAdminChannelReference(DocumentSnapshot userSnapshot)
-  {
-    final User user = mFirestore.toFirestoreObject(userSnapshot, User.class);
-    final String orgPushid = user.get_organizationPushId();
-
-    if (orgPushid.equals(""))
-      throw new RuntimeException("Please set your organization code");
-
-    return mFirestore.getAdminChannelsReference(orgPushid).get();
-  }
-
-  /*
-   *  Update info on user login / authListener
-   *
-   *  @param channelsSnapshot : All channels belonging to organization
-   *
-   *  @param channels : Empty list of channels populated here. Then added to userChannelsViewModel
-   *
-   *  @param uid : user uid
-   */
-  public Task<DocumentSnapshot> subscribeUserToChannels(QuerySnapshot channelsSnapshot, List<FirestoreChannel> channels, String uid)
-  {
-    if (channelsSnapshot == null)
-      throw new RuntimeException("no channels");
-
-
-    Task<DocumentSnapshot> task = Tasks.forResult(null);
-    for (DocumentSnapshot ds : channelsSnapshot.getDocuments())
-    {
-      final DocumentReference subscribedUserRef = ds.getReference().collection(COLLECTION_SUBSCRIBED_USERS).document(uid);
-      task = task.continueWithTask(ignore -> subscribedUserRef.get().addOnSuccessListener(documentSnapshot ->
-      {
-        if (documentSnapshot.exists())
-        {
-          final FirestoreChannel channel = mFirestore.toFirestoreObject(ds, FirestoreChannel.class);
-          channels.add(channel);
-          mFirestore.updateSubscribedUserTask(subscribedUserRef, true);
-        }
-      }));
-    }
-    return task;
-  }
 
   public void removeAuthListener()
   {
@@ -1078,10 +983,5 @@ CancelChangesDialog.CancelChangesListener
   public void toast(String message)
   {
     showToast(message);
-  }
-
-  public void logMessage(String message)
-  {
-    Log.d("MAIN ACTIVITY: ", "message: " + message);
   }
 }

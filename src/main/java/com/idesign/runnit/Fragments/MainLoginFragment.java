@@ -215,13 +215,13 @@ public class MainLoginFragment extends Fragment {
   public void onPause()
   {
     super.onPause();
+    mLoginViewModel.getLoginData().removeObservers(this);
     final String email = mUtility.trimString(getEmail());
     final String password = mUtility.trimString(getPassword());
     final String lowercaseEmail = mUtility.lowercaseString(email);
 
     mLoginViewModel.setLoginEmail(lowercaseEmail);
     mLoginViewModel.setPassword(password);
-    mLoginViewModel.getLoginData().removeObservers(this);
   }
 
   @Override

@@ -8,8 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
-import android.util.Log;
+
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -116,8 +115,8 @@ public class ResetFragment extends Fragment
   public void onPause()
   {
     super.onPause();
-    setViewModelEmail();
     mLoginViewModel.getLoginData().removeObservers(this);
+    setViewModelEmail();
   }
 
   @Override
@@ -141,10 +140,5 @@ public class ResetFragment extends Fragment
   public void showToast(String message)
   {
     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-  }
-
-  public void logMessage(String message)
-  {
-    Log.d("LOGIN ACTIVITY:", "login fragment:: " + message);
   }
 }
